@@ -16,6 +16,6 @@ public class Book {
     private String location;
     private BigDecimal price;
     @ManyToMany
-    @JoinTable(name = "book_category_rel",joinColumns = {@JoinColumn(name = "isbn")},inverseJoinColumns = {@JoinColumn(name = "category_id")})
+    @JoinTable(name = "book_category_rel",joinColumns = {@JoinColumn(name = "isbn",referencedColumnName = "isbn")},inverseJoinColumns = {@JoinColumn(name = "category_id")})
     private List<Category> categories;
 }

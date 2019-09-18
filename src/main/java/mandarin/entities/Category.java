@@ -13,7 +13,8 @@ public class Category {
     private Integer id;
     private String name;
 
-    @JoinColumn(name = "parent_category_id")
+    @ManyToOne
+    @JoinColumn(name = "parent_category_id",table = "categories")
     private Category parentCategory;
 
     @ManyToMany(mappedBy = "categories")
