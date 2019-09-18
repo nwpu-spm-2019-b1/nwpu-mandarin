@@ -1,0 +1,41 @@
+plugins {
+    id 'java'
+    id 'war'
+}
+
+group 'mandarin'
+version '1.0-SNAPSHOT'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+    jcenter()
+}
+
+configurations.all {
+    exclude group: 'commons-logging', module: 'commons-logging'
+}
+
+dependencies {
+    compile group: 'org.thymeleaf', name: 'thymeleaf', version: '3.0.11.RELEASE'
+    compile group: 'org.thymeleaf', name: 'thymeleaf-spring5', version: '3.0.11.RELEASE'
+    compile group: 'org.springframework', name: 'spring-web', version: '5.1.9.RELEASE'
+    compile group: 'org.springframework', name: 'spring-core', version: '5.1.9.RELEASE'
+    compile group: 'org.springframework', name: 'spring-webmvc', version: '5.1.9.RELEASE'
+    compile group: 'org.springframework', name: 'spring-context', version: '5.1.9.RELEASE'
+    compile group: 'javax.servlet', name: 'javax.servlet-api', version: '4.0.1'
+    compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.7'
+    compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.7'
+    compile group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: '2.7'
+    compile group: 'org.springframework.data', name: 'spring-data-jpa', version: '2.1.10.RELEASE'
+    implementation group: 'org.hibernate', name: 'hibernate-core', version: '5.4.4.Final'
+    implementation group: 'org.hibernate', name: 'hibernate-hikaricp', version: '5.4.4.Final'
+    implementation 'net.java.dev.jna:jna:5.4.0'
+    implementation 'org.hibernate.javax.persistence:hibernate-jpa-2.2-api:1.0.0.Beta2'
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.10.0.pr2'
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.10.0.pr2'
+    implementation group: 'com.h2database', name: 'h2', version: '1.4.199'
+    implementation 'org.postgresql:postgresql:42.2.8'
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+}

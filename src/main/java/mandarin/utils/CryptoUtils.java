@@ -1,0 +1,66 @@
+package mandarin.utils;
+
+import com.sun.jna.Library;
+import com.sun.jna.Native;
+import com.sun.jna.NativeLong;
+
+import java.nio.charset.StandardCharsets;
+
+public class CryptoUtils {
+    public interface SodiumLibrary extends Library {
+        public static SodiumLibrary INSTANCE = Native.load("sodium", SodiumLibrary.class);
+
+        int crypto_pwhash_str(byte[] hashedPassword,
+                              byte[] password,
+                              long passwordLen,
+                              long opslimit,
+                              NativeLong memlimit);
+
+        int crypto_pwhash_str_verify(byte[] hashedPassword,
+                                     byte[] password,
+                                     long passwordLen);
+
+        int sodium_init();
+
+        int crypto_pwhash_strbytes();
+
+        long crypto_pwhash_opslimit_interactive();
+
+        NativeLong crypto_pwhash_memlimit_interactive();
+
+        long crypto_pwhash_opslimit_moderate();
+
+        NativeLong crypto_pwhash_memlimit_moderate();
+
+        long crypto_pwhash_opslimit_sensitive();
+
+        NativeLong crypto_pwhash_memlimit_sensitive();
+    }
+
+    static {
+        if (SodiumLibrary.INSTANCE.sodium_init() != 0) {
+            throw new RuntimeException("Error initializing libsodium");
+        }
+    }
+
+    public static boolean verifyPassword(String password, String hash) {
+        byte[] hashBytes = hash.getBytes(StandardCharsets.US_ASCII);
+        byte[] passwordBytes = password.getBytes(StandardCharsets.UTF_8);
+        int retcode = SodiumLibrary.INSTANCE.crypto_pwhash_str_verify(hashBytes, passwordBytes, passwordBytes.length);
+        return retcode == 0;
+    }
+
+    public static String hashPassword(String password) {
+        byte[] out = new byte[SodiumLibrary.INSTANCE.crypto_pwhash_strbytes()];
+        byte[] passwordBytes = password.getBytes(StandardCharsets.UTF_8);
+        int retcode = SodiumLibrary.INSTANCE.crypto_pwhash_str(out,
+                passwordBytes, passwordBytes.length,
+                SodiumLibrary.INSTANCE.crypto_pwhash_opslimit_interactive(),
+                SodiumLibrary.INSTANCE.crypto_pwhash_memlimit_interactive());
+        if (retcode != 0) {
+            throw new RuntimeException("libsodium crypto_pwhash_str failed, returned " + retcode + ", expected 0");
+        }
+        String outString = new String(out, StandardCharsets.UTF_8);
+        return outString.substring(0, outString.indexOf(0));
+    }
+}
