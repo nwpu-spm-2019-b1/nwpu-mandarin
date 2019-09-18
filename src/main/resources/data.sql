@@ -45,7 +45,7 @@ CREATE TABLE categories
 DROP TABLE IF EXISTS book_category_rel;
 CREATE TABLE book_category_rel
 (
-    isbn TEXT NOT NULL,
+    isbn TEXT NOT NULL REFERENCES books(isbn),
     category_id INTEGER REFERENCES categories(id),
     PRIMARY KEY (isbn,category_id)
 );
