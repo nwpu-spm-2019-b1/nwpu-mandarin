@@ -6,14 +6,16 @@ import javax.persistence.*;
 import java.time.Instant;
 
 @Entity
-@Table(name = "Users")
+@Table(name = "users")
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     private String username;
+    @Column(name="password_hash")
     private String passwordHash;
     private String type = "READER";
+    @Column(name = "signup_time")
     private Instant signupTime = Instant.now();
 
     public Integer getId() {
