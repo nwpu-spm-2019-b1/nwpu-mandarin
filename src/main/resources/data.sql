@@ -35,10 +35,17 @@ CREATE TABLE action_log
     info    JSONB,
     time    TIMESTAMP NOT NULL
 );
-DROP TABLE IF EXISTS categories;
+DROP TABLE IF EXISTS categories CASCADE;
 CREATE TABLE categories
 (
     id SERIAL PRIMARY KEY,
     name TEXT NOT NULL,
     parent_category_id INTEGER REFERENCES categories(id)
+);
+DROP TABLE IF EXISTS book_category_rel;
+CREATE TABLE book_category_rel
+(
+    isbn TEXT NOT NULL,
+    category_id INTEGER REFERENCES categories(id),
+    PRIMARY KEY (isbn,category_id)
 );
