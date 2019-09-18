@@ -20,6 +20,7 @@ import java.util.Collections;
 public class AppConfig {
     @Autowired
     private Environment env;
+
     @Bean
     public DataSource dataSource() {
         HikariDataSource dataSource = new HikariDataSource();
@@ -34,8 +35,8 @@ public class AppConfig {
     public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
 
         HibernateJpaVendorAdapter hibernateJpa = new HibernateJpaVendorAdapter();
-        hibernateJpa.setDatabasePlatform(env.getProperty("hibernate.dialect",String.class,""));
-        hibernateJpa.setShowSql(env.getProperty("hibernate.show_sql", Boolean.class,true));
+        hibernateJpa.setDatabasePlatform(env.getProperty("hibernate.dialect", String.class, ""));
+        hibernateJpa.setShowSql(env.getProperty("hibernate.show_sql", Boolean.class, true));
 
         LocalContainerEntityManagerFactoryBean emf = new LocalContainerEntityManagerFactoryBean();
         emf.setDataSource(dataSource());

@@ -18,6 +18,8 @@ public class User {
     @Column(name = "signup_time")
     private Instant signupTime = Instant.now();
 
+    public User(){}
+
     public Integer getId() {
         return id;
     }

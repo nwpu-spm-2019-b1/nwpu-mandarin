@@ -19,4 +19,6 @@ public class Category {
 
     @ManyToMany(mappedBy = "categories")
     private List<Book> books;
+
+    public Category(){}
 }
