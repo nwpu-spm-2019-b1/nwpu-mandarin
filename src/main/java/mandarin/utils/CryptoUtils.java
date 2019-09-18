@@ -41,7 +41,7 @@ public class CryptoUtils {
         if (SodiumLibrary.INSTANCE.sodium_init() != 0) {
             throw new RuntimeException("Error initializing libsodium");
         }
-        System.out.println(String.format("%v-%v",System.getProperty("os.name"),System.getProperty("os.arch")));
+        System.out.println(String.format("%s-%s",System.getProperty("os.name"),System.getProperty("os.arch")));
     }
 
     public static boolean verifyPassword(String password, String hash) {

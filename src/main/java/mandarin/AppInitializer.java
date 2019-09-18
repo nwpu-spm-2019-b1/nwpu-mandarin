@@ -26,5 +26,10 @@ public class AppInitializer implements WebApplicationInitializer {
         ServletRegistration.Dynamic registration = servletCtx.addServlet("DispatcherServlet", servlet);
         registration.setLoadOnStartup(1);
         registration.addMapping("/");
+        try {
+            Class.forName("mandarin.utils.CryptoUtils");
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
     }
 }
