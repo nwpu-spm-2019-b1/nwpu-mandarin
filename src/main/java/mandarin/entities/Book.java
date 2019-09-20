@@ -1,7 +1,9 @@
 package mandarin.entities;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -15,11 +17,12 @@ public class Book {
     private String author;
     private String location;
     private BigDecimal price;
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "book_category_rel",joinColumns = {@JoinColumn(name = "isbn",referencedColumnName = "isbn")},inverseJoinColumns = {@JoinColumn(name = "category_id")})
     private List<Category> categories;
 
     public Book() {
+        this.categories=new ArrayList<>();
     }
 
     public Book(String isbn, String title, String author, String location, BigDecimal price, List<Category> categories) {
@@ -35,11 +38,11 @@ public class Book {
         return id;
     }
 
-    public String getIsbn() {
+    public String getISBN() {
         return isbn;
     }
 
-    public void setIsbn(String isbn) {
+    public void setISBN(String isbn) {
         this.isbn = isbn;
     }
 
@@ -77,9 +80,5 @@ public class Book {
 
     public List<Category> getCategories() {
         return categories;
-    }
-
-    public void setCategories(List<Category> categories) {
-        this.categories = categories;
     }
 }

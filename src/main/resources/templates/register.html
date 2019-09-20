@@ -8,6 +8,11 @@
 <form action="/register" method="post">
     <input type="text" name="username" required>
     <input type="password" name="password" required>
+    <select name="type">
+        <option value="Admin">Admin</option>
+        <option value="Reader">Reader</option>
+        <option value="Librarian">Librarian</option>
+    </select>
     <button type="submit">Register</button>
 </form>
 </body>

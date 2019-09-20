@@ -11,14 +11,14 @@ public class LendingLog {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     @ManyToOne
-    @JoinColumn(name = "book_id")
+    @JoinColumn(name = "book_id",nullable = false)
     private Book book;
     @ManyToOne
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id",nullable = false)
     private User user;
-    @Column(name = "start_time")
+    @Column(name = "start_time",nullable = false)
     private Instant startTime = Instant.now();
-    @Column(name = "end_time", nullable = true)
+    @Column(name = "end_time")
     private Instant endTime = null;
 
     public LendingLog() {

@@ -1,7 +1,6 @@
 package mandarin;
 
 import com.zaxxer.hikari.HikariDataSource;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
@@ -18,8 +17,11 @@ import java.util.Collections;
 @EnableJpaRepositories(basePackages = "mandarin.dao")
 @PropertySource("classpath:/application.properties")
 public class AppConfig {
-    @Autowired
-    private Environment env;
+    private final Environment env;
+
+    public AppConfig(Environment env) {
+        this.env = env;
+    }
 
     @Bean
     public DataSource dataSource() {
@@ -33,11 +35,9 @@ public class AppConfig {
 
     @Bean
     public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
-
         HibernateJpaVendorAdapter hibernateJpa = new HibernateJpaVendorAdapter();
         hibernateJpa.setDatabasePlatform(env.getProperty("hibernate.dialect", String.class, ""));
         hibernateJpa.setShowSql(env.getProperty("hibernate.show_sql", Boolean.class, true));
-
         LocalContainerEntityManagerFactoryBean emf = new LocalContainerEntityManagerFactoryBean();
         emf.setDataSource(dataSource());
         emf.setPackagesToScan("mandarin.entities");

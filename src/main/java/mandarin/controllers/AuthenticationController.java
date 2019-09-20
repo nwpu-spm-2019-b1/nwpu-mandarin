@@ -1,7 +1,7 @@
 package mandarin.controllers;
 
-import com.fasterxml.jackson.annotation.JacksonAnnotation;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import mandarin.auth.UserType;
 import mandarin.dao.UserRepository;
 import mandarin.entities.User;
 import mandarin.utils.CryptoUtils;
@@ -23,13 +23,13 @@ public class AuthenticationController {
     @Resource
     UserRepository userRepository;
 
-    class SimpleResponse {
+    class Response {
         @JsonProperty
         boolean success;
         @JsonProperty
         String message;
 
-        public SimpleResponse(boolean success, String message) {
+        public Response(boolean success, String message) {
             this.success = success;
             this.message = message;
         }
@@ -43,12 +43,14 @@ public class AuthenticationController {
     @PostMapping(value = "/register", produces = "application/json")
     @ResponseBody
     public ResponseEntity register(@RequestParam String username,
-                                   @RequestParam String password) {
+                                   @RequestParam String password,
+                                   @RequestParam String type) {
         User user = new User();
         user.setUsername(username);
         user.setPassword(password);
+        user.setType(Enum.valueOf(UserType.class,type));
         userRepository.save(user);
-        return ResponseEntity.ok().body(new SimpleResponse(true, "registered"));
+        return ResponseEntity.ok().body(new Response(true, "registered"));
     }
 
     @GetMapping("/login")
@@ -64,17 +66,16 @@ public class AuthenticationController {
     public ResponseEntity login(@RequestParam String username,
                                 @RequestParam String password,
                                 HttpSession session) {
-        Map<String, Object> map = new HashMap<>();
         if (session.getAttribute("userId") != null) {
-            return ResponseEntity.badRequest().body(new SimpleResponse(false, "already logged in"));
+            return ResponseEntity.badRequest().body(new Response(false, "already logged in"));
         } else {
             User user = userRepository.findByUsername(username);
             if (user == null || !CryptoUtils.verifyPassword(password, user.getPasswordHash())) {
-                return ResponseEntity.badRequest().body(new SimpleResponse(false, "username or password incorrect"));
+                return ResponseEntity.badRequest().body(new Response(false, "username or password incorrect"));
             }
             session.setAttribute("userId", user.getId());
             session.setAttribute("userType", user.getType());
-            return ResponseEntity.ok().body(new SimpleResponse(true, "logged in"));
+            return ResponseEntity.ok().body(new Response(true, "logged in"));
         }
     }
 
@@ -82,11 +83,11 @@ public class AuthenticationController {
     @ResponseBody
     public ResponseEntity logout(HttpSession session) {
         if (session.getAttribute("userId") == null) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new SimpleResponse(false, "not logged in"));
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new Response(false, "not logged in"));
         } else {
             session.removeAttribute("userId");
             session.removeAttribute("userType");
-            return ResponseEntity.ok().body(new SimpleResponse(true, "logged out"));
+            return ResponseEntity.ok().body(new Response(true, "logged out"));
         }
     }
 }
