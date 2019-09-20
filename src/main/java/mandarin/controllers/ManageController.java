@@ -5,7 +5,7 @@ import mandarin.dao.BookRepository;
 import mandarin.dao.LendingLogRepository;
 import mandarin.dao.UserRepository;
 import mandarin.entities.Book;
-import mandarin.entities.LendingLog;
+import mandarin.entities.LendingLogItem;
 import mandarin.entities.User;
 import mandarin.utils.CryptoUtils;
 import mandarin.utils.BasicResponse;
@@ -77,7 +77,7 @@ public class ManageController {
                                                   @RequestParam("bookId") Integer bookId) {
         User user = userRepository.findById(userId).orElse(null);
         Book book = bookRepository.findById(bookId).orElse(null);
-        lendingLogRepository.save(new LendingLog(book, user));
+        lendingLogRepository.save(new LendingLogItem(book, user));
         return ResponseEntity.ok(BasicResponse.ok());
     }
 
@@ -87,9 +87,9 @@ public class ManageController {
     public ResponseEntity<BasicResponse> returnBook(@RequestParam("userId") Integer userId,
                                                     @RequestParam("bookId") Integer bookId) {
 
-        LendingLog lendingLog = lendingLogRepository.findByUserIdAndBookId(userId, bookId);
-        lendingLog.setEndTime(Instant.now());
-        lendingLogRepository.save(lendingLog);
+        LendingLogItem lendingLogItem = lendingLogRepository.findByUserIdAndBookId(userId, bookId);
+        lendingLogItem.setEndTime(Instant.now());
+        lendingLogRepository.save(lendingLogItem);
         return ResponseEntity.accepted().body(BasicResponse.ok());
     }
 
@@ -119,8 +119,8 @@ public class ManageController {
                                       @RequestParam(value = "page", defaultValue = "0") Integer page,
                                       @RequestParam(value = "size", defaultValue = "10") Integer size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("startTime"));
-        List<LendingLog> list = lendingLogRepository.findByUserId(userId, pageable).getContent();
-        BasicResponse<List<LendingLog>> response = BasicResponse.ok();
+        List<LendingLogItem> list = lendingLogRepository.findByUserId(userId, pageable).getContent();
+        BasicResponse<List<LendingLogItem>> response = BasicResponse.ok();
         response.data(list);
         return ResponseEntity.ok(response);
     }

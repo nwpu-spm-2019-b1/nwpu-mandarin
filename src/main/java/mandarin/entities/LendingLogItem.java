@@ -5,7 +5,7 @@ import java.time.Instant;
 
 @Entity
 @Table(name = "lending_log")
-public class LendingLog {
+public class LendingLogItem {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,10 +21,10 @@ public class LendingLog {
     @Column(name = "end_time")
     private Instant endTime = null;
 
-    public LendingLog() {
+    public LendingLogItem() {
     }
 
-    public LendingLog(Book book, User user) {
+    public LendingLogItem(Book book, User user) {
         this.book = book;
         this.user = user;
     }

@@ -12,7 +12,7 @@ import java.util.Map;
 @Entity
 @Table(name = "action_log")
 @TypeDefs({@TypeDef(name = "JSONBType",typeClass = JSONBType.class)})
-public class ActionLog {
+public class ActionLogItem {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,10 +29,10 @@ public class ActionLog {
 
     private Instant time = Instant.now();
 
-    public ActionLog() {
+    public ActionLogItem() {
     }
 
-    public ActionLog(User user, String type, Map<String,Object> info) {
+    public ActionLogItem(User user, String type, Map<String,Object> info) {
         this.user = user;
         this.type = type;
         this.info = info;

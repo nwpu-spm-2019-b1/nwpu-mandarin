@@ -1,16 +1,14 @@
 package mandarin.dao;
 
-import mandarin.entities.LendingLog;
+import mandarin.entities.LendingLogItem;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 
-public interface LendingLogRepository extends JpaRepository<LendingLog, Integer> {
+public interface LendingLogRepository extends JpaRepository<LendingLogItem, Integer> {
 
-    LendingLog findByUserIdAndBookId(Integer userId, Integer bookId);
-    Page<LendingLog> findByUserId(Integer userId, Pageable pageable);
+    LendingLogItem findByUserIdAndBookId(Integer userId, Integer bookId);
+    Page<LendingLogItem> findByUserId(Integer userId, Pageable pageable);
 
 }
