@@ -15,6 +15,7 @@ import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Properties;
 
 @Component
@@ -36,11 +37,13 @@ public class StartupListener {
                     return;
                 }
                 conn = dataSource.getConnection();
+                conn.setAutoCommit(false);
                 conn.nativeSQL("BEGIN;");
                 StringWriter writer = new StringWriter();
                 IOUtils.copy(StartupListener.class.getClassLoader().getResourceAsStream("data.sql"), writer, StandardCharsets.UTF_8);
-                conn.nativeSQL(writer.toString());
-                conn.nativeSQL("COMMIT;");
+                Statement stmt=conn.createStatement();
+                stmt.execute(writer.toString());
+                conn.commit();
             } catch (IOException | SQLException e) {
                 try {
                     if (conn != null) {

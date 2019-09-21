@@ -11,12 +11,13 @@ DROP TABLE IF EXISTS books CASCADE;
 CREATE TABLE books
 (
     id       SERIAL PRIMARY KEY,
-    isbn     TEXT UNIQUE NOT NULL,
-    title    TEXT        NOT NULL,
-    author   TEXT        NOT NULL,
-    location TEXT        NOT NULL,
-    price    NUMERIC     NOT NULL
+    isbn     TEXT    NOT NULL,
+    title    TEXT    NOT NULL,
+    author   TEXT    NOT NULL,
+    price    NUMERIC NOT NULL,
+    location TEXT    NOT NULL
 );
+CREATE INDEX ON books (isbn);
 DROP TABLE IF EXISTS lending_log;
 CREATE TABLE lending_log
 (
@@ -26,6 +27,8 @@ CREATE TABLE lending_log
     start_time TIMESTAMP NOT NULL,
     end_time   TIMESTAMP
 );
+CREATE INDEX ON lending_log (book_id);
+CREATE INDEX ON lending_log (user_id);
 DROP TABLE IF EXISTS action_log;
 CREATE TABLE action_log
 (
@@ -35,6 +38,8 @@ CREATE TABLE action_log
     info    JSONB,
     time    TIMESTAMP NOT NULL
 );
+CREATE INDEX ON action_log (user_id);
+CREATE INDEX ON action_log (type);
 DROP TABLE IF EXISTS categories CASCADE;
 CREATE TABLE categories
 (
@@ -42,13 +47,16 @@ CREATE TABLE categories
     name               TEXT NOT NULL,
     parent_category_id INTEGER REFERENCES categories (id)
 );
+CREATE INDEX ON categories (name);
+CREATE INDEX ON categories (parent_category_id);
 DROP TABLE IF EXISTS book_category_rel;
 CREATE TABLE book_category_rel
 (
-    isbn        TEXT NOT NULL REFERENCES books (isbn),
+    isbn        TEXT NOT NULL,
     category_id INTEGER REFERENCES categories (id),
     PRIMARY KEY (isbn, category_id)
 );
+CREATE INDEX ON book_category_rel (category_id);
 DROP TABLE IF EXISTS reservations;
 CREATE TABLE reservations
 (
@@ -57,7 +65,9 @@ CREATE TABLE reservations
     user_id INTEGER   NOT NULL REFERENCES users (id),
     time    TIMESTAMP NOT NULL
 );
-
+CREATE INDEX ON reservations (book_id);
+CREATE INDEX ON reservations (user_id);
+CREATE INDEX ON reservations (time);
 INSERT INTO users (id, username, password_hash, type, signup_time)
 VALUES (1, 'admin', '$argon2id$v=19$m=65536,t=2,p=1$Awz7DXJOmoT4/DwNauoyjQ$geMYnip4NmWsxe7eukKOpps+bdOc7doefLm0480E0tY',
         'Admin', '2019-09-20 22:29:55.670000');
