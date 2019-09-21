@@ -50,6 +50,14 @@ public class StartupListener {
                     ex.printStackTrace();
                 }
                 throw new RuntimeException(e);
+            } finally {
+                try {
+                    if (conn != null) {
+                        conn.close();
+                    }
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
             }
             firstTime = false;
         }
