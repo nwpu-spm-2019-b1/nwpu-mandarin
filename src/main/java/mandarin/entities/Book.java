@@ -22,6 +22,7 @@ public class Book {
     private List<Category> categories;
 
     public Book() {
+        this.price=BigDecimal.ZERO;
         this.categories=new ArrayList<>();
     }
 

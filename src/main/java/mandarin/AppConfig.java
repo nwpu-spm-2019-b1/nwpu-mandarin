@@ -3,6 +3,7 @@ package mandarin;
 import com.zaxxer.hikari.HikariDataSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
@@ -34,6 +35,14 @@ public class AppConfig {
     }
 
     @Bean
+    public StartupListener startupListener() {
+        StartupListener startupListener = new StartupListener(dataSource());
+        startupListener.run();
+        return startupListener;
+    }
+
+    @Bean
+    @DependsOn("startupListener")
     public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
         HibernateJpaVendorAdapter hibernateJpa = new HibernateJpaVendorAdapter();
         hibernateJpa.setDatabasePlatform(env.getProperty("hibernate.dialect", String.class, ""));
@@ -52,4 +61,6 @@ public class AppConfig {
         txnMgr.setEntityManagerFactory(entityManagerFactory().getObject());
         return txnMgr;
     }
+
+
 }
