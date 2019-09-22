@@ -1,5 +1,6 @@
 package mandarin.auth;
 
+import mandarin.exceptions.ForbiddenException;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
@@ -19,11 +20,17 @@ public class AuthenticationInterceptor extends HandlerInterceptorAdapter {
         Method method = handlerMethod.getMethod();
         AuthenticationNeeded annotation = method.getAnnotation(AuthenticationNeeded.class);
         if (annotation != null) {
+            assert annotation.value().length != 0;
             HttpSession session = request.getSession(false);
             if (session != null && session.getAttribute("userId") != null) {
-                return true;
+                for (UserType userType : annotation.value()) {
+                    if (userType.equals(session.getAttribute("userType"))) {
+                        return true;
+                    }
+                }
+                throw new ForbiddenException();
             } else {
-                switch (annotation.value()) {
+                switch (annotation.value()[0]) {
                     case Admin:
                         response.sendRedirect("/admin/login");
                         break;
@@ -39,14 +46,5 @@ public class AuthenticationInterceptor extends HandlerInterceptorAdapter {
         } else {
             return true;
         }
-      /*  if (!(request.getRequestURI().startsWith("/admin") || request.getRequestURI().startsWith("/manage"))) {
-            return true;
-        }
-        HttpSession session = request.getSession(false);
-        if (session == null || session.getAttribute("userId") == null) {
-            response.sendRedirect("/login");
-            return false;
-        }
-        return super.preHandle(request, response, handler);*/
     }
 }

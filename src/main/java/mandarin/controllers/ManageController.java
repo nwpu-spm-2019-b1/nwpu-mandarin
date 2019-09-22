@@ -1,6 +1,9 @@
 package mandarin.controllers;
 
+import mandarin.auth.AuthenticationNeeded;
+import mandarin.auth.SessionHelper;
 import mandarin.auth.UserType;
+import mandarin.auth.exceptions.AuthenticationException;
 import mandarin.dao.BookRepository;
 import mandarin.dao.LendingLogRepository;
 import mandarin.dao.UserRepository;
@@ -39,6 +42,8 @@ public class ManageController {
     @Resource
     BookRepository bookRepository;
 
+    @Resource
+    SessionHelper sessionHelper;
 
     @GetMapping({"/", ""})
     public String index() {
@@ -53,8 +58,7 @@ public class ManageController {
             return "manage/login";
         }
         User user = userRepository.findById((Integer) session.getAttribute("userId")).orElse(null);
-        if(user==null)
-        {
+        if (user == null) {
             session.invalidate();
             return "redirect:/manage/login";
         }
@@ -65,33 +69,36 @@ public class ManageController {
         }
     }
 
+    @ResponseBody
     @PostMapping("/login")
     public ResponseEntity<BasicResponse> login(@RequestParam("username") String username,
                                                @RequestParam("password") String password,
-                                               HttpSession session) throws RuntimeException {
-        if (session.getAttribute("userId") != null) {
-            return ResponseEntity.badRequest().body(BasicResponse.fail().message("You are already logged in"));
+                                               HttpSession session) {
+        try {
+            sessionHelper.login(session, username, password, UserType.Librarian);
+            return ResponseEntity.ok().body(BasicResponse.ok().message("logged in"));
+        } catch (AuthenticationException e) {
+            return ResponseEntity.badRequest().body(BasicResponse.fail().message(e.getMessage()));
         }
-        User user = userRepository.findByUsername(username);
-        if (user == null || !CryptoUtils.verifyPassword(password, user.getPasswordHash())) {
-            return ResponseEntity.badRequest().body(BasicResponse.fail().message("Username and/or password incorrect"));
-        }
-        session.setAttribute("userId", user.getId());
-        session.setAttribute("userType", user.getType().toString());
-
-        return ResponseEntity.ok().body(BasicResponse.ok());
     }
 
     //登出
+    @ResponseBody
     @PostMapping("/logout")
+    @AuthenticationNeeded(UserType.Librarian)
     public ResponseEntity<BasicResponse> logout(HttpSession session) {
-        session.invalidate();
-        return ResponseEntity.ok(BasicResponse.ok());
+        try {
+            sessionHelper.logout(session, UserType.Librarian);
+            return ResponseEntity.ok().body(BasicResponse.ok().message("logged out"));
+        } catch (AuthenticationException e) {
+            return ResponseEntity.badRequest().body(BasicResponse.fail().message(e.getMessage()));
+        }
     }
 
     //借书
     @ResponseBody
     @PostMapping("/book/lend")
+    @AuthenticationNeeded(UserType.Librarian)
     public ResponseEntity<BasicResponse> lendBook(@RequestParam("userId") Integer userId,
                                                   @RequestParam("bookId") Integer bookId) {
         User user = userRepository.findById(userId).orElse(null);
@@ -103,6 +110,7 @@ public class ManageController {
     //还书
     @ResponseBody
     @PostMapping("/book/return")
+    @AuthenticationNeeded(UserType.Librarian)
     public ResponseEntity<BasicResponse> returnBook(@RequestParam("userId") Integer userId,
                                                     @RequestParam("bookId") Integer bookId) {
         LendingLogItem lendingLogItem = lendingLogRepository.findByUserIdAndBookId(userId, bookId);
@@ -114,6 +122,7 @@ public class ManageController {
     //添加书
     @ResponseBody
     @PostMapping("/book/add")
+    @AuthenticationNeeded(UserType.Librarian)
     public ResponseEntity<BasicResponse> addBook(@RequestBody Book book) {
         bookRepository.save(book);
         return ResponseEntity.status(HttpStatus.CREATED).body(BasicResponse.ok());
@@ -122,6 +131,7 @@ public class ManageController {
     //删除书
     @ResponseBody
     @DeleteMapping("/book/delete/{bookId}")
+    @AuthenticationNeeded(UserType.Librarian)
     public ResponseEntity<BasicResponse> deleteBook(@PathVariable("bookId") Integer bookId) {
 
         bookRepository.deleteById(bookId);
@@ -131,6 +141,7 @@ public class ManageController {
     //展示借阅、归还情况
     @ResponseBody
     @GetMapping("/history")
+    @AuthenticationNeeded(UserType.Librarian)
     public ResponseEntity viewHistory(@RequestParam("userId") Integer userId,
                                       @RequestParam(value = "page", defaultValue = "0") Integer page,
                                       @RequestParam(value = "size", defaultValue = "10") Integer size) {
@@ -144,6 +155,7 @@ public class ManageController {
     //添加READER
     @ResponseBody
     @PostMapping("/register")
+    @AuthenticationNeeded(UserType.Librarian)
     public ResponseEntity register(@RequestParam("username") String username,
                                    @RequestParam("password") String password) {
 
@@ -153,8 +165,9 @@ public class ManageController {
     }
 
     //编辑书
-    @PutMapping("/book/edit")
     @ResponseBody
+    @PutMapping("/book/edit")
+    @AuthenticationNeeded(UserType.Librarian)
     public ResponseEntity editBook(@RequestBody Book book) {
         Book oldBook = bookRepository.findById(book.getId()).orElse(null);
         BeanUtils.copyProperties(book, oldBook);
@@ -164,24 +177,27 @@ public class ManageController {
     }
 
     //搜索书(By title/author/categories)
-    @GetMapping("/book/search/{By}")
     @ResponseBody
+    @GetMapping("/book/search/{cond}")
+    @AuthenticationNeeded(UserType.Librarian)
     public ResponseEntity searchBook(@RequestParam("param") String param,
                                      @RequestParam(value = "page", defaultValue = "0") Integer page,
                                      @RequestParam(value = "size", defaultValue = "10") Integer size,
-                                     @PathVariable("By") String condition) {
-
+                                     @PathVariable("cond") String condition) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("id"));
         List<Book> books = new ArrayList<>();
         param = "%" + param + "%";
-        if (condition.equals("title")) {
-            books = bookRepository.findByTitleLike(param, pageable).getContent();
-        } else if (condition.equals("author")) {
-            books = bookRepository.findByAuthorLike(param, pageable).getContent();
-        } else if (condition.equals("categories")) {
-            books = bookRepository.findByCategoriesIsContaining(param, pageable).getContent();
+        switch (condition) {
+            case "title":
+                books = bookRepository.findByTitleLike(param, pageable).getContent();
+                break;
+            case "author":
+                books = bookRepository.findByAuthorLike(param, pageable).getContent();
+                break;
+            case "categories":
+                books = bookRepository.findByCategoriesIsContaining(param, pageable).getContent();
+                break;
         }
-
         BasicResponse response = BasicResponse.ok().data(books);
         return ResponseEntity.ok(response);
     }
