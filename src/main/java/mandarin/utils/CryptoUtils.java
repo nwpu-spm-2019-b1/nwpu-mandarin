@@ -55,8 +55,10 @@ public class CryptoUtils {
 
     public static boolean verifyPassword(String password, String hash) {
         byte[] hashBytes = hash.getBytes(StandardCharsets.US_ASCII);
+        byte[] processedHashBytes=new byte[hashBytes.length+1];
+        System.arraycopy(hashBytes,0,processedHashBytes,0,hashBytes.length);
         byte[] passwordBytes = password.getBytes(StandardCharsets.UTF_8);
-        int retcode = SODIUM.crypto_pwhash_str_verify(hashBytes, passwordBytes, passwordBytes.length);
+        int retcode = SODIUM.crypto_pwhash_str_verify(processedHashBytes, passwordBytes, passwordBytes.length);
         return retcode == 0;
     }
 
