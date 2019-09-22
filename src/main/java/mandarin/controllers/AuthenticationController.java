@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import mandarin.auth.UserType;
 import mandarin.dao.UserRepository;
 import mandarin.entities.User;
+import mandarin.utils.BasicResponse;
 import mandarin.utils.CryptoUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,18 +24,6 @@ public class AuthenticationController {
     @Resource
     UserRepository userRepository;
 
-    class Response {
-        @JsonProperty
-        boolean success;
-        @JsonProperty
-        String message;
-
-        public Response(boolean success, String message) {
-            this.success = success;
-            this.message = message;
-        }
-    }
-
     @GetMapping("/register")
     public String registerPage() {
         return "register";
@@ -50,7 +39,7 @@ public class AuthenticationController {
         user.setPassword(password);
         user.setType(Enum.valueOf(UserType.class,type));
         userRepository.save(user);
-        return ResponseEntity.ok().body(new Response(true, "registered"));
+        return ResponseEntity.ok().body(BasicResponse.ok().message("registered"));
     }
 
     @GetMapping("/login")
@@ -67,15 +56,15 @@ public class AuthenticationController {
                                 @RequestParam String password,
                                 HttpSession session) {
         if (session.getAttribute("userId") != null) {
-            return ResponseEntity.badRequest().body(new Response(false, "already logged in"));
+            return ResponseEntity.badRequest().body(BasicResponse.fail().message("already logged in"));
         } else {
             User user = userRepository.findByUsername(username);
             if (user == null || !CryptoUtils.verifyPassword(password, user.getPasswordHash())) {
-                return ResponseEntity.badRequest().body(new Response(false, "username or password incorrect"));
+                return ResponseEntity.badRequest().body(BasicResponse.fail().message("username or password incorrect"));
             }
             session.setAttribute("userId", user.getId());
             session.setAttribute("userType", user.getType());
-            return ResponseEntity.ok().body(new Response(true, "logged in"));
+            return ResponseEntity.ok().body(BasicResponse.fail().message("logged in"));
         }
     }
 
@@ -83,11 +72,11 @@ public class AuthenticationController {
     @ResponseBody
     public ResponseEntity logout(HttpSession session) {
         if (session.getAttribute("userId") == null) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new Response(false, "not logged in"));
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(BasicResponse.fail().message("not logged in"));
         } else {
             session.removeAttribute("userId");
             session.removeAttribute("userType");
-            return ResponseEntity.ok().body(new Response(true, "logged out"));
+            return ResponseEntity.ok().body(BasicResponse.fail().message("logged out"));
         }
     }
 }

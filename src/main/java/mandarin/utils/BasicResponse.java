@@ -1,8 +1,13 @@
 package mandarin.utils;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class BasicResponse<T> {
+    @JsonProperty
     private boolean status;
+    @JsonProperty
     private String message;
+    @JsonProperty
     private T data;
 
     public BasicResponse(boolean status, String message) {
