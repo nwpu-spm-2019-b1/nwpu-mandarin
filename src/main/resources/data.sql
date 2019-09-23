@@ -68,14 +68,14 @@ CREATE TABLE reservations
 CREATE INDEX ON reservations (book_id);
 CREATE INDEX ON reservations (user_id);
 CREATE INDEX ON reservations (time);
-INSERT INTO users (id, username, password_hash, type, signup_time)
-VALUES (1, 'admin', '$argon2id$v=19$m=65536,t=2,p=1$Awz7DXJOmoT4/DwNauoyjQ$geMYnip4NmWsxe7eukKOpps+bdOc7doefLm0480E0tY',
+INSERT INTO users (username, password_hash, type, signup_time)
+VALUES ('admin', '$argon2id$v=19$m=65536,t=2,p=1$Awz7DXJOmoT4/DwNauoyjQ$geMYnip4NmWsxe7eukKOpps+bdOc7doefLm0480E0tY',
         'Admin', '2019-09-20 22:29:55.670000');
-INSERT INTO users (id, username, password_hash, type, signup_time)
-VALUES (2, 'reader',
+INSERT INTO users (username, password_hash, type, signup_time)
+VALUES ('reader',
         '$argon2id$v=19$m=65536,t=2,p=1$M3j4icn1Le+EB6IeZ/7y7Q$T688ZmXe7nwkdULHMrYehB2vjTsOfU1nLGHa4sa0PUw', 'Reader',
         '2019-09-20 22:30:06.591000');
-INSERT INTO users (id, username, password_hash, type, signup_time)
-VALUES (3, 'librarian',
+INSERT INTO users (username, password_hash, type, signup_time)
+VALUES ('librarian',
         '$argon2id$v=19$m=65536,t=2,p=1$Db0a+QNTy9PZiOMeU1k5fA$dw/ibar4JiBHkZI1qamRINjdu8H2CEmW9aUL5dDZTSw',
         'Librarian', '2019-09-20 22:30:17.050000');
