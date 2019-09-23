@@ -4,14 +4,14 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class BasicResponse<T> {
     @JsonProperty
-    private boolean status;
+    private boolean success;
     @JsonProperty
     private String message;
     @JsonProperty
     private T data;
 
-    public BasicResponse(boolean status, String message) {
-        this.status = status;
+    public BasicResponse(boolean success, String message) {
+        this.success = success;
         this.message = message;
     }
 
@@ -21,15 +21,6 @@ public class BasicResponse<T> {
 
     public static <T> BasicResponse<T> fail() {
         return new BasicResponse<>(false, "Failed to perform the specified action");
-    }
-
-    public boolean status() {
-        return status;
-    }
-
-    public BasicResponse<T> status(boolean status) {
-        this.status = status;
-        return this;
     }
 
     public String message() {

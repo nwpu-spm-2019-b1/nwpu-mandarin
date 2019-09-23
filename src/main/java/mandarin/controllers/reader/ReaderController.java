@@ -1,4 +1,4 @@
-package mandarin.controllers;
+package mandarin.controllers.reader;
 
 import mandarin.auth.SessionHelper;
 import mandarin.auth.UserType;
@@ -6,8 +6,6 @@ import mandarin.auth.exceptions.AuthenticationException;
 import mandarin.dao.UserRepository;
 import mandarin.entities.User;
 import mandarin.utils.BasicResponse;
-import mandarin.utils.CryptoUtils;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,7 +17,11 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpSession;
 
 @Controller
-public class AuthenticationController {
+public class ReaderController {
+    @GetMapping("/")
+    public String index() {
+        return "index";
+    }
     @Resource
     UserRepository userRepository;
     @Resource
