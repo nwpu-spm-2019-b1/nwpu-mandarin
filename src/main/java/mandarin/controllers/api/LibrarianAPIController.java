@@ -2,6 +2,7 @@ package mandarin.controllers.api;
 
 import mandarin.auth.AuthenticationNeeded;
 import mandarin.auth.UserType;
+import mandarin.controllers.api.dto.AddBookDTO;
 import mandarin.dao.BookRepository;
 import mandarin.dao.CategoryRepository;
 import mandarin.dao.LendingLogRepository;
@@ -10,6 +11,7 @@ import mandarin.entities.Book;
 import mandarin.entities.Category;
 import mandarin.entities.LendingLogItem;
 import mandarin.entities.User;
+import mandarin.exceptions.APIException;
 import mandarin.utils.BasicResponse;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.PageRequest;
@@ -23,6 +25,7 @@ import javax.annotation.Resource;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/librarian")
@@ -61,8 +64,17 @@ public class LibrarianAPIController {
     }
 
     //添加书
-    @PostMapping("/book/add")
-    public ResponseEntity<BasicResponse> addBook(@RequestBody Book book) {
+    @PostMapping(value = "/book/add", consumes = "application/json")
+    public ResponseEntity<BasicResponse> addBook(@RequestBody AddBookDTO dto) {
+        List<Category> categories = new ArrayList<>();
+        for (Integer category_id : dto.category_ids) {
+            Optional<Category> category = categoryRepository.findById(category_id);
+            if (!category.isPresent()) {
+                throw new APIException("Invalid category id");
+            }
+            categories.add(category.get());
+        }
+        Book book = new Book(dto.isbn, dto.title, dto.author, dto.location, dto.price, categories);
         bookRepository.save(book);
         return ResponseEntity.status(HttpStatus.CREATED).body(BasicResponse.ok());
     }
@@ -133,7 +145,6 @@ public class LibrarianAPIController {
     @PostMapping("/category")
     public ResponseEntity addCategory(@RequestParam("name") String name,
                                       @RequestParam("pName") String pName) {
-
         Category category = categoryRepository.findByName(name);
         if (category == null)
             categoryRepository.save(new Category(name, categoryRepository.findByName(pName)));

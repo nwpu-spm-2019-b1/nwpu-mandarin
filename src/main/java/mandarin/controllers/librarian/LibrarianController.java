@@ -59,7 +59,7 @@ public class LibrarianController {
                                                HttpSession session) {
         try {
             sessionHelper.login(session, username, password, UserType.Librarian);
-            return ResponseEntity.ok().body(BasicResponse.ok().message("logged in"));
+            return ResponseEntity.ok().body(BasicResponse.ok().message("Logged in"));
         } catch (AuthenticationException e) {
             return ResponseEntity.badRequest().body(BasicResponse.fail().message(e.getMessage()));
         }
@@ -72,7 +72,7 @@ public class LibrarianController {
     public ResponseEntity<BasicResponse> logout(HttpSession session) {
         try {
             sessionHelper.logout(session, UserType.Librarian);
-            return ResponseEntity.ok().body(BasicResponse.ok().message("logged out"));
+            return ResponseEntity.ok().body(BasicResponse.ok().message("Logged out"));
         } catch (AuthenticationException e) {
             return ResponseEntity.badRequest().body(BasicResponse.fail().message(e.getMessage()));
         }
