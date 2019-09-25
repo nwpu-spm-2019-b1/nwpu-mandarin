@@ -48,8 +48,7 @@ public class LibrarianAPIController {
 
     //借书
     @PostMapping("/book/lend")
-    public ResponseEntity<BasicResponse> lendBook(@RequestParam("userId") Integer userId,
-                                                  @RequestParam("bookId") Integer bookId) {
+    public ResponseEntity<BasicResponse> lendBook(@RequestParam Integer userId, @RequestParam Integer bookId) {
         User user = userRepository.findById(userId).orElse(null);
         Book book = bookRepository.findById(bookId).orElse(null);
         if (user == null || book == null) {
@@ -61,8 +60,8 @@ public class LibrarianAPIController {
 
     //还书
     @PostMapping("/book/return")
-    public ResponseEntity<BasicResponse> returnBook(@RequestParam("userId") Integer userId,
-                                                    @RequestParam("bookId") Integer bookId) {
+    public ResponseEntity<BasicResponse> returnBook(@RequestParam Integer userId,
+                                                    @RequestParam Integer bookId) {
         LendingLogItem lendingLogItem = lendingLogRepository.findByUserIdAndBookId(userId, bookId);
         if (lendingLogItem == null) {
             throw new APIException("Could not find the specified lending record");
@@ -93,16 +92,16 @@ public class LibrarianAPIController {
 
     //删除书
     @DeleteMapping("/book/delete/{bookId}")
-    public ResponseEntity<BasicResponse> deleteBook(@PathVariable("bookId") Integer bookId) {
+    public ResponseEntity<BasicResponse> deleteBook(@PathVariable Integer bookId) {
         bookRepository.deleteById(bookId);
         return ResponseEntity.ok(BasicResponse.ok());
     }
 
     //展示借阅、归还情况
     @GetMapping("/history")
-    public ResponseEntity viewHistory(@RequestParam("userId") Integer userId,
-                                      @RequestParam(value = "page", defaultValue = "0") Integer page,
-                                      @RequestParam(value = "size", defaultValue = "10") Integer size) {
+    public ResponseEntity viewHistory(@RequestParam Integer userId,
+                                      @RequestParam(defaultValue = "0") Integer page,
+                                      @RequestParam(defaultValue = "10") Integer size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("startTime"));
         List<LendingLogItem> list = lendingLogRepository.findByUserId(userId, pageable).getContent();
         BasicResponse<List<LendingLogItem>> response = BasicResponse.ok();
@@ -111,9 +110,9 @@ public class LibrarianAPIController {
     }
 
     //添加READER
-    @PostMapping("/register")
-    public ResponseEntity register(@RequestParam("username") String username,
-                                   @RequestParam("password") String password) {
+    @PostMapping("/reader/register")
+    public ResponseEntity register(@RequestParam String username,
+                                   @RequestParam String password) {
 
         User user = new User(username, password, UserType.Reader);
         userRepository.save(user);
@@ -146,9 +145,9 @@ public class LibrarianAPIController {
 
     //搜索书(By title/author/categories)
     @GetMapping("/book/search/{cond}")
-    public ResponseEntity searchBook(@RequestParam("param") String param,
-                                     @RequestParam(value = "page", defaultValue = "0") Integer page,
-                                     @RequestParam(value = "size", defaultValue = "10") Integer size,
+    public ResponseEntity searchBook(@RequestParam String param,
+                                     @RequestParam(defaultValue = "0") Integer page,
+                                     @RequestParam(defaultValue = "10") Integer size,
                                      @PathVariable("cond") String condition) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("id"));
         List<Book> books = new ArrayList<>();
