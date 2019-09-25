@@ -4,6 +4,8 @@ import mandarin.auth.exceptions.AuthenticationException;
 import mandarin.auth.exceptions.UnauthorizedException;
 import mandarin.exceptions.APIException;
 import mandarin.utils.BasicResponse;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -15,7 +17,8 @@ import javax.xml.ws.Response;
 
 @ControllerAdvice("mandarin.controllers.api")
 public class APIControllerAdvice {
-    @ExceptionHandler(RuntimeException.class)
+    @ExceptionHandler(Exception.class)
+    @Order(Ordered.HIGHEST_PRECEDENCE)
     @ResponseBody
     public ResponseEntity<BasicResponse> onException(Exception e) {
         HttpStatus status = HttpStatus.BAD_REQUEST;
