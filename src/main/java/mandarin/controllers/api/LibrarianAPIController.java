@@ -3,6 +3,7 @@ package mandarin.controllers.api;
 import mandarin.auth.AuthenticationNeeded;
 import mandarin.auth.UserType;
 import mandarin.controllers.api.dto.BookDTO;
+import mandarin.controllers.api.dto.BookDetailDTO;
 import mandarin.controllers.api.dto.CategoryDTO;
 import mandarin.dao.BookRepository;
 import mandarin.dao.CategoryRepository;
@@ -113,7 +114,6 @@ public class LibrarianAPIController {
     @PostMapping("/reader/register")
     public ResponseEntity register(@RequestParam String username,
                                    @RequestParam String password) {
-
         User user = new User(username, password, UserType.Reader);
         userRepository.save(user);
         return ResponseEntity.status(HttpStatus.CREATED).body(BasicResponse.ok());
@@ -163,7 +163,7 @@ public class LibrarianAPIController {
                 books = bookRepository.findByCategoriesIsContaining(param, pageable).getContent();
                 break;
         }
-        BasicResponse response = BasicResponse.ok().data(books);
+        BasicResponse response = BasicResponse.ok().data(books.stream().map(BookDetailDTO::toDTO).collect(Collectors.toList()));
         return ResponseEntity.ok(response);
     }
 
