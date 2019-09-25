@@ -2,7 +2,7 @@ package mandarin.controllers.api;
 
 import mandarin.auth.AuthenticationNeeded;
 import mandarin.auth.UserType;
-import mandarin.controllers.api.dto.AddBookDTO;
+import mandarin.controllers.api.dto.BookDTO;
 import mandarin.controllers.api.dto.CategoryDTO;
 import mandarin.dao.BookRepository;
 import mandarin.dao.CategoryRepository;
@@ -74,7 +74,7 @@ public class LibrarianAPIController {
 
     //添加书
     @PostMapping(value = "/book/add", consumes = "application/json")
-    public ResponseEntity<BasicResponse> addBook(@RequestBody AddBookDTO dto) {
+    public ResponseEntity<BasicResponse> addBook(@RequestBody BookDTO dto) {
         List<Category> categories = new ArrayList<>();
         for (Integer category_id : dto.category_ids) {
             Optional<Category> category = categoryRepository.findById(category_id);
@@ -121,11 +121,26 @@ public class LibrarianAPIController {
     }
 
     //编辑书
-    @PutMapping("/book/edit")
-    public ResponseEntity editBook(@RequestBody Book book) {
-        Book oldBook = bookRepository.findById(book.getId()).orElse(null);
-        BeanUtils.copyProperties(book, oldBook);
-        bookRepository.save(oldBook);
+    @PutMapping(value = "/book/edit", consumes = "application/json")
+    public ResponseEntity editBook(@RequestBody BookDTO dto) {
+        Book book = bookRepository.findById(dto.id).orElse(null);
+        if (book == null) {
+            throw new APIException("No such book");
+        }
+        book.setISBN(dto.isbn);
+        book.setTitle(dto.title);
+        book.setAuthor(dto.author);
+        book.setLocation(dto.location);
+        book.setPrice(dto.price);
+        book.getCategories().clear();
+        book.getCategories().addAll(dto.category_ids.stream().map((Integer cid) -> {
+            Optional<Category> category = categoryRepository.findById(cid);
+            if (!category.isPresent()) {
+                throw new APIException("Invalid category ID");
+            }
+            return category.get();
+        }).collect(Collectors.toList()));
+        bookRepository.save(book);
         return ResponseEntity.accepted().body(BasicResponse.ok());
     }
 
