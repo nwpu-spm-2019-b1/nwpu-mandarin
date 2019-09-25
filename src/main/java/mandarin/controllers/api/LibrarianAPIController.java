@@ -2,7 +2,8 @@ package mandarin.controllers.api;
 
 import mandarin.auth.AuthenticationNeeded;
 import mandarin.auth.UserType;
-import mandarin.controllers.api.dto.AddBookDTO;
+import mandarin.controllers.api.dto.BookDTO;
+import mandarin.controllers.api.dto.BookDetailDTO;
 import mandarin.controllers.api.dto.CategoryDTO;
 import mandarin.dao.BookRepository;
 import mandarin.dao.CategoryRepository;
@@ -48,8 +49,7 @@ public class LibrarianAPIController {
 
     //借书
     @PostMapping("/book/lend")
-    public ResponseEntity<BasicResponse> lendBook(@RequestParam("userId") Integer userId,
-                                                  @RequestParam("bookId") Integer bookId) {
+    public ResponseEntity<BasicResponse> lendBook(@RequestParam Integer userId, @RequestParam Integer bookId) {
         User user = userRepository.findById(userId).orElse(null);
         Book book = bookRepository.findById(bookId).orElse(null);
         if (user == null || book == null) {
@@ -61,8 +61,8 @@ public class LibrarianAPIController {
 
     //还书
     @PostMapping("/book/return")
-    public ResponseEntity<BasicResponse> returnBook(@RequestParam("userId") Integer userId,
-                                                    @RequestParam("bookId") Integer bookId) {
+    public ResponseEntity<BasicResponse> returnBook(@RequestParam Integer userId,
+                                                    @RequestParam Integer bookId) {
         LendingLogItem lendingLogItem = lendingLogRepository.findByUserIdAndBookId(userId, bookId);
         if (lendingLogItem == null) {
             throw new APIException("Could not find the specified lending record");
@@ -74,7 +74,7 @@ public class LibrarianAPIController {
 
     //添加书
     @PostMapping(value = "/book/add", consumes = "application/json")
-    public ResponseEntity<BasicResponse> addBook(@RequestBody AddBookDTO dto) {
+    public ResponseEntity<BasicResponse> addBook(@RequestBody BookDTO dto) {
         List<Category> categories = new ArrayList<>();
         for (Integer category_id : dto.category_ids) {
             Optional<Category> category = categoryRepository.findById(category_id);
@@ -93,16 +93,16 @@ public class LibrarianAPIController {
 
     //删除书
     @DeleteMapping("/book/delete/{bookId}")
-    public ResponseEntity<BasicResponse> deleteBook(@PathVariable("bookId") Integer bookId) {
+    public ResponseEntity<BasicResponse> deleteBook(@PathVariable Integer bookId) {
         bookRepository.deleteById(bookId);
         return ResponseEntity.ok(BasicResponse.ok());
     }
 
     //展示借阅、归还情况
     @GetMapping("/history")
-    public ResponseEntity viewHistory(@RequestParam("userId") Integer userId,
-                                      @RequestParam(value = "page", defaultValue = "0") Integer page,
-                                      @RequestParam(value = "size", defaultValue = "10") Integer size) {
+    public ResponseEntity viewHistory(@RequestParam Integer userId,
+                                      @RequestParam(defaultValue = "0") Integer page,
+                                      @RequestParam(defaultValue = "10") Integer size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("startTime"));
         List<LendingLogItem> list = lendingLogRepository.findByUserId(userId, pageable).getContent();
         BasicResponse<List<LendingLogItem>> response = BasicResponse.ok();
@@ -111,29 +111,43 @@ public class LibrarianAPIController {
     }
 
     //添加READER
-    @PostMapping("/register")
-    public ResponseEntity register(@RequestParam("username") String username,
-                                   @RequestParam("password") String password) {
-
+    @PostMapping("/reader/register")
+    public ResponseEntity register(@RequestParam String username,
+                                   @RequestParam String password) {
         User user = new User(username, password, UserType.Reader);
         userRepository.save(user);
         return ResponseEntity.status(HttpStatus.CREATED).body(BasicResponse.ok());
     }
 
     //编辑书
-    @PutMapping("/book/edit")
-    public ResponseEntity editBook(@RequestBody Book book) {
-        Book oldBook = bookRepository.findById(book.getId()).orElse(null);
-        BeanUtils.copyProperties(book, oldBook);
-        bookRepository.save(oldBook);
+    @PutMapping(value = "/book/edit", consumes = "application/json")
+    public ResponseEntity editBook(@RequestBody BookDTO dto) {
+        Book book = bookRepository.findById(dto.id).orElse(null);
+        if (book == null) {
+            throw new APIException("No such book");
+        }
+        book.setISBN(dto.isbn);
+        book.setTitle(dto.title);
+        book.setAuthor(dto.author);
+        book.setLocation(dto.location);
+        book.setPrice(dto.price);
+        book.getCategories().clear();
+        book.getCategories().addAll(dto.category_ids.stream().map((Integer cid) -> {
+            Optional<Category> category = categoryRepository.findById(cid);
+            if (!category.isPresent()) {
+                throw new APIException("Invalid category ID");
+            }
+            return category.get();
+        }).collect(Collectors.toList()));
+        bookRepository.save(book);
         return ResponseEntity.accepted().body(BasicResponse.ok());
     }
 
     //搜索书(By title/author/categories)
     @GetMapping("/book/search/{cond}")
-    public ResponseEntity searchBook(@RequestParam("param") String param,
-                                     @RequestParam(value = "page", defaultValue = "0") Integer page,
-                                     @RequestParam(value = "size", defaultValue = "10") Integer size,
+    public ResponseEntity searchBook(@RequestParam String param,
+                                     @RequestParam(defaultValue = "0") Integer page,
+                                     @RequestParam(defaultValue = "10") Integer size,
                                      @PathVariable("cond") String condition) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("id"));
         List<Book> books = new ArrayList<>();
@@ -149,7 +163,7 @@ public class LibrarianAPIController {
                 books = bookRepository.findByCategoriesIsContaining(param, pageable).getContent();
                 break;
         }
-        BasicResponse response = BasicResponse.ok().data(books);
+        BasicResponse response = BasicResponse.ok().data(books.stream().map(BookDetailDTO::toDTO).collect(Collectors.toList()));
         return ResponseEntity.ok(response);
     }
 
