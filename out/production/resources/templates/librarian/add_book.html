@@ -1,0 +1,276 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Home</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="keywords" content="" />
+    <script type="application/x-javascript"> addEventListener("load", function() { setTimeout(hideURLbar, 0); }, false); function hideURLbar(){ window.scrollTo(0,1); } </script>
+    <!-- Bootstrap Core CSS -->
+
+    <script>
+        dict = {"science" : 1, "fiction" : 2, "magazine" : 3, "tool" : 4};
+        function add_book()
+        {
+            var isbn = (document.getElementById("input_book_isbn")).value;
+            var title = (document.getElementById("input_book_title")).value;
+            var author = (document.getElementById("input_book_author")).value;
+            var location = (document.getElementById("selector1")).value;
+            var price = (document.getElementById("input_book_price")).value;
+            var checkbox = (document.getElementsByName("box"));
+            var category =[];
+            var i;
+            for (i in checkbox)
+            {
+                if (checkbox[i].checked)
+                    category.push(dict[checkbox[i].value]);
+            }
+
+            var data = {"isbn" : isbn, "title" : title, "author" : author, "location" : location, "price" : price, "category_ids" : category};
+
+            $.ajax({
+                url: "/api/librarian/book/add",
+                type: "post",
+                data: JSON.stringify(data),
+                contentType : 'application/json',
+                dataType : 'json',
+                success: function(XMLHttpRequest, msg){
+                    if (msg){
+                        alert(msg)
+                    }
+                    else{
+                        alert("you add successfully, but some errors occur");
+                    }
+                },
+                error: function(msg){
+                    alert("error");
+                    console.log(msg);
+                }
+            });
+        }
+
+        function update_checkbox()
+        {
+            var source = document.getElementById("category-template").innerHTML;
+            var template = Handlebars.compile(source);
+            $.ajax({
+                url: "/api/librarian/category",
+                dataType: "json",
+                type: "get",
+                success: function(resp) {
+                    resp.data.forEach((element) => {element.postTime = moment.unix(element.postTime).format("YYYY-M-D H:mm");});
+                    $("#checkbox").remove();
+                    $("#checkbox_div").append(template({categories: resp.data}));
+                    //$("#checkbox_div").load(location.href + " #checkbox_div");
+                }
+            });
+        }
+
+        function update_selector2() {
+            var source = document.getElementById("selector2-template").innerHTML;
+            var template = Handlebars.compile(source);
+            $.ajax({
+                url: "/api/librarian/category",
+                dataType: "json",
+                type: "get",
+                success: function (resp) {
+                    resp.data.forEach((element) => {
+                        element.postTime = moment.unix(element.postTime).format("YYYY-M-D H:mm");
+                });
+                    $("#selector2").remove();
+                    $("#selector2_div").append(template({categories: resp.data}));
+                }
+            });
+        }
+        
+        function add_category()
+        {
+            var parent_name = (document.getElementById("selector2")).value;
+            var name = (document.getElementById("input_category")).value;
+
+            if (parent_name == "none")
+                parent_name = "";
+
+            $.ajax({
+                url: "/api/librarian/category",
+                type: "post",
+                data: {
+                    "name": name,
+                    "pName": parent_name
+                },
+                success: function(XMLHttpRequest, msg){
+                    if (msg) {
+                        alert(msg);
+                        update_checkbox();
+                        update_selector2();
+                    }
+                    else{
+                        alert("you add successfully, but some errors occur");
+                    }
+                },
+                error: function(msg){
+                    alert("error");
+                    console.log(msg);
+                }
+            });
+        }
+
+    </script>
+
+</head>
+<body>
+    <div th:replace="/librarian/common::dependency"></div>
+    <div class="page-container">
+        <!--/content-inner-->
+        <div class="left-content">
+            <div class="inner-content">
+                <div th:replace="/librarian/common::header-section"></div>
+                <div class="outter-wp">
+                    <!--/sub-heard-part-->
+                    <div class="sub-heard-part">
+                        <ol class="breadcrumb m-b-0">
+                            <li><a href="index.html">Home</a></li>
+                            <li class="active">Forms</li>
+                        </ol>
+                    </div>
+                    <!--/sub-heard-part-->
+                    <!--/forms-->
+                    <div class="forms-main">
+                    <div class="set-1">
+                        <div class="graph-2 general">
+                            <h3 class="inner-tittle two">Add Book</h3>
+                            <div class="grid-1">
+                                <div class="form-body">
+                                    <form class="form-horizontal">
+                                        <!-- book isbn begin-->
+                                        <div class="form-group">
+                                            <label for="input_book_isbn" class="col-sm-2 control-label">Book ISBN</label>
+                                            <div class="col-sm-8">
+                                                <input type="text" class="form-control1" id="input_book_isbn" placeholder="Book ISBN">
+                                            </div>
+                                        </div>
+                                        <!-- book isbn end-->
+                                        <!-- book title begin-->
+                                        <div class="form-group">
+                                            <label for="input_book_title" class="col-sm-2 control-label">Book Title</label>
+                                            <div class="col-sm-8">
+                                                <input type="text" class="form-control1" id="input_book_title" placeholder="Book Title">
+                                            </div>
+                                        </div>
+                                        <!-- book title end-->
+                                        <!-- book author begin-->
+                                        <div class="form-group">
+                                            <label for="input_book_author" class="col-sm-2 control-label">Book Author</label>
+                                            <div class="col-sm-8">
+                                                <input type="text" class="form-control1" id="input_book_author" placeholder="Book Author">
+                                            </div>
+                                        </div>
+                                        <!-- book author end-->
+                                        <div class="form-group">
+                                            <label for="selector1" class="col-sm-2 control-label">Location</label>
+                                            <div class="col-sm-8">
+                                                <select name="selector1" id="selector1" class="form-control1">
+                                                    <option>A1</option>
+                                                    <option>A2</option>
+                                                    <option>B1</option>
+                                                    <option>B2</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div id="checkbox_div" class="form-group">
+                                            <label for="checkbox" class="col-sm-2 control-label">Category</label>
+                                            <!-- body in the script -->
+                                        </div>
+                                        <div class="modal fade" id="add_category_form" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="display: none;">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">x</button>
+                                                        <h2 class="modal-title">Add Category</h2>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <!h3><span class="label label-info">Parent Category</span></h3>
+                                                        <div id="selector2_div">
+                                                            <!-- body in the script -->
+                                                        </div>
+                                                        <h3><span class="label label-info">Input new category's name below</span></h3>
+                                                        <input type="text" class="form-control1 input-lg" id="input_category" placeholder="Input new category's name">
+                                                    </div>
+                                                    <div class="bs-example-tooltips">
+                                                        <button type="button" class="btn blue btn-primary tip" data-placement="left" data-dismiss="modal">Cancel</button>
+                                                        <button type="button" class="btn btn-default tip" data-placement="left" onclick="add_category()">Add</button>
+                                                    </div>
+                                                </div><!-- /.modal-content -->
+                                            </div><!-- /.modal-dialog -->
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="input_book_price" class="col-sm-2 control-label">Book Price</label>
+                                            <div class="col-sm-8">
+                                                <input type="text" class="form-control1" id="input_book_price" placeholder="Book Price">
+                                            </div>
+                                        </div>
+                                        <p class="four">
+                                            <a onclick="add_book()"  class="btn btn-success">Submit</a>
+                                        </p>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!--//forms-inner-->
+            </div>
+            <!--//forms-->
+        </div>
+                <footer>
+                    <p>Copyright &copy; 2016.Company name All rights reserved.More Templates <a href="http://www.cssmoban.com/" target="_blank" title="模板之家">模板之家</a> - Collect from <a href="http://www.cssmoban.com/" title="网页模板" target="_blank">网页模板</a></p>
+                </footer>
+                <!--footer section end-->
+            </div>
+        </div>
+        <div th:replace="/librarian/common::sidebar-menu"></div>
+    </div>
+    </div>
+
+<script id="category-template" type="text/x-handlebars-template">
+    <div id="checkbox" class="col-sm-8">
+    {{#each categories}}
+    <div class="checkbox-inline1"><label><input type="checkbox" name="box" value="{{id}}"> {{name}}</label></div>
+    {{/each}}
+    <p class="four">
+        <a class="a_demo_four" data-toggle="modal" data-target="#add_category_form" onclick="update_selector2()">
+            add category kind
+        </a>
+    </p>
+    </div>
+</script>
+
+<script id="selector2-template" type="text/x-handlebars-template">
+    <select name="selector2" id="selector2" class="form-control1">
+        <option>none</option>
+        {{#each categories}}
+        <option>{{name}}</option>
+        {{/each}}
+    </select>
+</script>
+
+
+<script id="update_checkbox" th:inline="javascript">
+    var source = document.getElementById("category-template").innerHTML;
+    var template = Handlebars.compile(source);
+    $.ajax({
+        url: "/api/librarian/category",
+        dataType: "json",
+        type: "get",
+        success: function (resp) {
+            resp.data.forEach((element) => {
+                element.postTime = moment.unix(element.postTime).format("YYYY-M-D H:mm");
+        });
+            $("#checkbox_div").append(template({categories: resp.data}));
+        }
+    });
+</script>
+
+
+</body>
+</html>

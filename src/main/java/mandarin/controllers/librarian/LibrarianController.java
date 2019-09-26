@@ -8,6 +8,7 @@ import mandarin.dao.BookRepository;
 import mandarin.dao.CategoryRepository;
 import mandarin.dao.LendingLogRepository;
 import mandarin.dao.UserRepository;
+import mandarin.entities.Category;
 import mandarin.entities.User;
 import mandarin.exceptions.ForbiddenException;
 import mandarin.utils.BasicResponse;
@@ -18,6 +19,8 @@ import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import java.util.List;
+import java.util.Map;
 
 @RequestMapping("/librarian")
 @Controller
@@ -29,9 +32,14 @@ public class LibrarianController {
     @Resource
     SessionHelper sessionHelper;
 
+    @Resource
+    CategoryRepository categoryRepository;
+
     @GetMapping({"/", ""})
-    public String index() {
-        return "manage";
+    public String index()
+    {
+
+        return "librarian/index";
     }
 
     //登录
@@ -39,17 +47,17 @@ public class LibrarianController {
     public String loginPage(HttpServletRequest request) throws RuntimeException {
         HttpSession session = request.getSession(false);
         if (session == null) {
-            return "manage/login";
+            return "librarian/login";
         }
         User user = userRepository.findById((Integer) session.getAttribute("userId")).orElse(null);
         if (user == null) {
             session.invalidate();
-            return "redirect:/manage/login";
+            return "redirect:/librarian/login";
         }
         if (user.getType() != UserType.Librarian) {
             throw new ForbiddenException();
         }
-        return "redirect:/manage";
+        return "redirect:/librarian";
     }
 
     @ResponseBody
@@ -77,4 +85,35 @@ public class LibrarianController {
             return ResponseEntity.badRequest().body(BasicResponse.fail().message(e.getMessage()));
         }
     }
+
+    @PostMapping("/categories")
+    public ResponseEntity getCategories(){
+        List<Category> categories = categoryRepository.findAll();
+        return ResponseEntity.ok().body(BasicResponse.ok().data(categories));
+    }
+
+    @GetMapping("/add-book")
+    public String getAddBookPage()
+    {
+        return "/librarian/add_book";
+    }
+
+    @GetMapping("/delete-book")
+    public String getDeleteBookPage()
+    {
+        return "/librarian/delete_book";
+    }
+
+    @GetMapping("/register-reader")
+    public String getRegisterReaderPage()
+    {
+        return "/librarian/register_reader";
+    }
+
+    @GetMapping("/lend-return-book")
+    public String getLendBookPage()
+    {
+        return "/librarian/lend_return_book";
+    }
+
 }

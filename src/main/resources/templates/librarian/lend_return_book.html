@@ -1,0 +1,261 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Home</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="keywords" content="" />
+    <script type="application/x-javascript"> addEventListener("load", function() { setTimeout(hideURLbar, 0); }, false); function hideURLbar(){ window.scrollTo(0,1); } </script>
+    <!-- Bootstrap Core CSS -->
+
+    <script>
+        function lend_book() {
+            var bookId = document.getElementById("input_bookID").value;
+            var userId = document.getElementById("input_userID").value;
+
+            $.ajax({
+                url : "/api/librarian/book/lend",
+                type: "post",
+                data:{
+                    "userId" : userId,
+                    "bookId" : bookId
+                },
+                success: function (msg) {
+                    alert("success");
+                },
+                error: function (msg) {
+                    alert("error");
+                }
+            });
+        }
+        
+        function return_book() {
+            var bookId = document.getElementById("input_bookID_").value;
+            var userId = document.getElementById("input_userID_").value;
+
+            $.ajax({
+                url : "/api/librarian/book/return",
+                type: "post",
+                data:{
+                    "userId" : userId,
+                    "bookId" : bookId
+                },
+                success: function (msg) {
+                    alert("success");
+                },
+                error: function (msg) {
+                    alert("error");
+                }
+            });
+        }
+        
+        function update_info() {
+            var source = document.getElementById("book-detail-template").innerHTML;
+            var nullsource = document.getElementById("book-null-template").innerHTML;
+            var template = Handlebars.compile(source);
+            var nulltemplate = Handlebars.compile(nullsource);
+            var param = document.getElementById("input_book_title").value;
+
+            $.ajax({
+                url: "/api/librarian/book/search/title",
+                type: "get",
+                data:{
+                  "param" : param
+                },
+                success: function (resp) {
+                    resp.data.forEach((element) => {
+                        element.postTime = moment.unix(element.postTime).format("YYYY-M-D H:mm");
+                });
+                    $("#book-detail").remove();
+                    if (resp.data != null && resp.data!="")
+                        $("#book-detail-p").append(template({books: resp.data}));
+                    else
+                        $("#book-detail-p").append(nulltemplate({books: resp.data}));
+                }
+            });
+        }
+
+
+        function update_info_() {
+            var source = document.getElementById("book-detail-template-").innerHTML;
+            var nullsource = document.getElementById("book-null-template-").innerHTML;
+            var template = Handlebars.compile(source);
+            var nulltemplate = Handlebars.compile(nullsource);
+            var param = document.getElementById("input_book_title_").value;
+
+            $.ajax({
+                url: "/api/librarian/book/search/title",
+                type: "get",
+                data:{
+                    "param" : param
+                },
+                success: function (resp) {
+                    resp.data.forEach((element) => {
+                        element.postTime = moment.unix(element.postTime).format("YYYY-M-D H:mm");
+                });
+                    $("#book-detail-").remove();
+                    if (resp.data != null && resp.data!="")
+                        $("#book-detail-p-").append(template({books: resp.data}));
+                    else
+                        $("#book-detail-p-").append(nulltemplate({books: resp.data}));
+                }
+            });
+        }
+        
+    </script>
+
+</head>
+<body>
+<div th:replace="/librarian/common::dependency"></div>
+<div class="page-container">
+    <!--/content-inner-->
+    <div class="left-content">
+        <div class="inner-content">
+            <div th:replace="/librarian/common::header-section"></div>
+            <div class="outter-wp">
+                <div class="tab-main">
+                    <!--/tabs-inner-->
+                    <div class="tab-inner">
+                        <div id="tabs" class="tabs">
+                            <h2 class="inner-tittle">Lend and Return Book </h2>
+                            <div class="graph">
+                                <nav>
+                                    <ul>
+                                        <li><a href="#section-1" class="icon-shop"><i class="lnr lnr-briefcase"></i><span>Lend</span></a></li>
+                                        <li><a href="#section-2" class="icon-cup"><i class="lnr lnr-lighter"></i> <span>Return</span></a></li>
+                                    </ul>
+                                </nav>
+                                <div class="content tab">
+                                    <section id="section-1">
+                                        <div class="mediabox">
+                                            <i class="fa fa-coffee"></i>
+                                            <h3>Input the book title below</h3>
+                                            <p class="four">
+                                                <input type="text" class="form-control1" id="input_book_title" placeholder="Book Title">
+                                                <a class="btn btn-success" onclick="update_info()">query</a>
+                                             </p>
+                                            <p>Check the book detail carefully and to input userID and bookID here</p>
+                                            <p class="four">
+                                                <input type="text" class="form-control1" id="input_userID" placeholder="userId">
+                                                <input type="text" class="form-control1" id="input_bookID" placeholder="bookId">
+                                                <a class="btn btn-primary" onclick="lend_book()">Lend</a>
+                                            </p>
+                                            <!--i id="spin-ring" class="fa fa-fw fa-spin fa-spinner"></i-->
+                                        </div>
+                                        <div class="mediabox">
+                                            <i class="fa fa-trophy"></i>
+                                            <h3>Book Detail</h3>
+                                            <p id="book-detail-p" class="four">
+                                                <!-- the body is in script -->
+                                            </p>
+                                        </div>
+                                    </section>
+                                    <section id="section-2">
+                                        <div class="mediabox">
+                                            <i class="fa fa-legal"></i>
+                                            <h3>Input the book title below</h3>
+                                            <p class="four">
+                                                <input type="text" class="form-control1" id="input_book_title_" placeholder="Book Title">
+                                                <a class="btn btn-success" onclick="update_info_()">query</a>
+                                            </p>
+                                            <!--i id="spin-ring" class="fa fa-fw fa-spin fa-spinner"></i-->
+                                            <p>Check the book detail carefully and to input userID and bookID here</p>
+                                            <p class="four">
+                                                <input type="text" class="form-control1" id="input_userID_" placeholder="userId">
+                                                <input type="text" class="form-control1" id="input_bookID_" placeholder="bookId">
+                                                <a class="btn btn-primary" onclick="return_book()">Return</a>
+                                            </p>
+                                        </div>
+                                        <div class="mediabox">
+                                            <i class="fa fa-trophy"></i>
+                                            <h3>Book Detail</h3>
+                                            <p id="book-detail-p-">
+                                                <!-- the body is in script -->
+                                            </p>
+                                        </div>
+                                    </section>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <script src="/static/librarian/js/cbpFWTabs.js"></script>
+                <script>
+                    new CBPFWTabs( document.getElementById( 'tabs' ) );
+                </script>
+            </div>
+            <!--//forms-->
+        </div>
+        <footer>
+            <p>Copyright &copy; 2016.Company name All rights reserved.More Templates <a href="http://www.cssmoban.com/" target="_blank" title="模板之家">模板之家</a> - Collect from <a href="http://www.cssmoban.com/" title="网页模板" target="_blank">网页模板</a></p>
+        </footer>
+        <!--footer section end-->
+    </div>
+</div>
+<div th:replace="/librarian/common::sidebar-menu"></div>
+</div>
+</div>
+
+<script id="book-null-template" type="text/x-handlebars-template">
+    <ul id="book-null">
+        <h2 class="four">book not found</h2>
+    </ul>
+</script>
+
+<script id="book-null-template-" type="text/x-handlebars-template">
+    <ul id="book-null-">
+        <h2 class="four">book not found</h2>
+    </ul>
+</script>
+<script id="book-detail-template" type="text/x-handlebars-template">
+    <div id="book-detail">
+        <div style=" overflow:scroll; width: initial; height: 400px">
+        <table  class="table table-bordered">
+            <thead>
+                <tr>
+                    <th width="50%">attribute</th>
+                    <th width="50%">value</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{#each books}}
+                <tr><td>id</td><td>{{id}}</td></tr>
+                <tr><td>isbn</td><td>{{isbn}}</td></tr>
+                <tr><td>title</td><td>{{title}}</td></tr>
+                <tr><td>author</td><td>{{author}}</td></tr>
+                <tr><td>location</td><td>{{location}}</td></tr>
+                <tr><td>price</td><td>{{price}}</td></tr>
+                {{/each}}
+            </tbody>
+        </table>
+        </div>
+    </div>
+</script>
+
+<script id="book-detail-template-" type="text/x-handlebars-template">
+    <div id="book-detail-">
+        <div style=" overflow:scroll; width: initial; height: 400px">
+            <table  class="table table-bordered">
+                <thead>
+                <tr>
+                    <th width="50%">attribute</th>
+                    <th width="50%">value</th>
+                </tr>
+                </thead>
+                <tbody>
+                {{#each books}}
+                <tr><td>id</td><td>{{id}}</td></tr>
+                <tr><td>isbn</td><td>{{isbn}}</td></tr>
+                <tr><td>title</td><td>{{title}}</td></tr>
+                <tr><td>author</td><td>{{author}}</td></tr>
+                <tr><td>location</td><td>{{location}}</td></tr>
+                <tr><td>price</td><td>{{price}}</td></tr>
+                {{/each}}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</script>
+
+</body>
+</html>

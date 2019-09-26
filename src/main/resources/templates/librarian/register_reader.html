@@ -1,0 +1,142 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Home</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="keywords" content="" />
+    <script type="application/x-javascript"> addEventListener("load", function() { setTimeout(hideURLbar, 0); }, false); function hideURLbar(){ window.scrollTo(0,1); } </script>
+    <!-- Bootstrap Core CSS -->
+
+    <script>
+
+        function hideElement() {
+            $("#success-alert").hide();
+            $("#failed-alert").hide();
+            $("#spin-ring").hide();
+        }
+        //@ sourceMappingURL=jquery-1.10.2.min.map
+
+        function register_reader()
+        {
+            $("#success-alert").hide();
+            $("#failed-alert").hide();
+
+            var account = (document.getElementById("input_account")).value;
+            var password = (document.getElementById("input_password")).value;
+            var alert_success = document.getElementById("success-alert");
+            var alert_failed = document.getElementById("failed-alert");
+
+            if (account==null || account=="") {
+                alert_failed.innerText = "the account is null.";
+                $("#failed-alert").show();
+                return false;
+            }
+
+            if (password==null || password==""){
+                alert_failed.innerText = "the password is null.";
+                $("#failed-alert").show();
+                return false;
+            }
+
+            $("#spin-ring").show();
+            $.ajax({
+                url: "/api/librarian//reader/register",
+                type: "post",
+                data: {
+                    "username" : account,
+                    "password" : password
+                },
+                success: function(XMLHttpRequest, msg){
+                    if (msg){
+                        alert_success.innerText = "success";
+                        $("#success-alert").show();
+                    }
+                    else{
+                        alert_failed.innerText = "you add successfully, but some errors occur.";
+                        $("#failed-alert").show();
+                    }
+                    $("#spin-ring").hide();
+                },
+                error: function(msg){
+                    alert_failed.innerText = msg.message;
+                    $("#failed-alert").show();
+                    $("#spin-ring").hide();
+                }
+            });
+
+        }
+
+    </script>
+
+</head>
+<body onload="hideElement()">
+    <div th:replace="/librarian/common::dependency"></div>
+    <div class="page-container" >
+        <!--/content-inner-->
+        <div class="left-content">
+            <div class="inner-content">
+                <div th:replace="/librarian/common::header-section"></div>
+                <div class="outter-wp">
+                    <!--/sub-heard-part-->
+                    <div class="sub-heard-part">
+                        <ol class="breadcrumb m-b-0">
+                            <li><a href="index.html">Home</a></li>
+                            <li class="active">Forms</li>
+                        </ol>
+                    </div>
+                    <!--/sub-heard-part-->
+                    <!--/forms-->
+                    <div class="forms-main">
+                        <!--/set-3-->
+                        <div class="set-3">
+                            <div class="graph-2 general">
+                                <h3 class="inner-tittle two">Register Reader  </h3>
+                                <div class="grid-1">
+                                    <form class="form-horizontal">
+                                        <div class="form-group">
+                                            <label class="col-md-2 control-label">Account</label>
+                                            <div class="col-md-8">
+                                                <div class="input-group">
+                                                    <span class="input-group-addon">
+                                                        <i class="fa fa-envelope-o"></i>
+                                                    </span>
+                                                    <input id="input_account" type="text" class="form-control1 icon" placeholder="Account">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-md-2 control-label">Password</label>
+                                            <div class="col-md-8">
+                                                <div class="input-group">
+                                                    <span class="input-group-addon">
+                                                        <i class="fa fa-key"></i>
+                                                    </span>
+                                                    <input id="input_password" type="password" class="form-control1 icon" placeholder="Password">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <p class="four">
+                                            <div id="success-alert" class="alert alert-success" role="alert" ></div>
+                                            <div id="failed-alert" class="alert alert-danger" role="alert" ></div>
+                                            <i id="spin-ring" class="fa fa-fw fa-spin fa-spinner"></i>
+                                            <a onclick="register_reader()"  class="btn btn-success">Submit</a>
+                                        </p>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        <!--//set-3-->
+                    </div>
+                    <!--//forms-inner-->
+                </div>
+                <!--//forms-->
+            </div>
+            <footer>
+                <p>Copyright &copy; 2016.Company name All rights reserved.More Templates <a href="http://www.cssmoban.com/" target="_blank" title="模板之家">模板之家</a> - Collect from <a href="http://www.cssmoban.com/" title="网页模板" target="_blank">网页模板</a></p>
+            </footer>
+            <!--footer section end-->
+        </div>
+    </div>
+    <div th:replace="/librarian/common::sidebar-menu"></div>
+</body>
