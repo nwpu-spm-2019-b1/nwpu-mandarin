@@ -2,6 +2,7 @@ package mandarin.controllers.api;
 
 import mandarin.controllers.api.dto.BookDetailDTO;
 import mandarin.controllers.api.dto.CategoryDTO;
+import mandarin.controllers.librarian.HistoryResult;
 import mandarin.dao.BookRepository;
 import mandarin.dao.LendingLogRepository;
 import mandarin.entities.Book;
@@ -27,6 +28,8 @@ public class GeneralAPIController {
     BookRepository bookRepository;
     @Resource
     LendingLogRepository lendingLogRepository;
+    @Resource
+    HistoryResult historyResult;
 
     @GetMapping("/book/{bookId}")
     public ResponseEntity getBook(@PathVariable Integer bookId) {
@@ -43,6 +46,7 @@ public class GeneralAPIController {
                                       @RequestParam(defaultValue = "0") Integer page,
                                       @RequestParam(defaultValue = "10") Integer size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("startTime"));
-        return ResponseEntity.ok(BasicResponse.ok().data(lendingLogRepository.findByUserId(userId, pageable).getContent()));
+        List<HistoryResult> results = new HistoryResult().listHistory(userId, pageable);
+        return ResponseEntity.ok(BasicResponse.ok().data(results));
     }
 }

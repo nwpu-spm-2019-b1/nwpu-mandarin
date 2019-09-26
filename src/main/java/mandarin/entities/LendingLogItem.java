@@ -29,6 +29,10 @@ public class LendingLogItem {
         this.user = user;
     }
 
+    public Integer getId(){
+        return this.id;
+    }
+
     public Book getBook() {
         return book;
     }
