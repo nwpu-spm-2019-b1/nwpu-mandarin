@@ -15,7 +15,7 @@ import mandarin.entities.LendingLogItem;
 import mandarin.entities.User;
 import mandarin.exceptions.APIException;
 import mandarin.utils.BasicResponse;
-import org.springframework.beans.BeanUtils;
+import mandarin.utils.ObjectUtils;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -49,7 +49,7 @@ public class LibrarianAPIController {
 
     //借书
     @PostMapping("/book/lend")
-    public ResponseEntity<BasicResponse> lendBook(@RequestParam Integer userId, @RequestParam Integer bookId) {
+    public ResponseEntity lendBook(@RequestParam Integer userId, @RequestParam Integer bookId) {
         User user = userRepository.findById(userId).orElse(null);
         Book book = bookRepository.findById(bookId).orElse(null);
         if (user == null || book == null) {
@@ -61,8 +61,8 @@ public class LibrarianAPIController {
 
     //还书
     @PostMapping("/book/return")
-    public ResponseEntity<BasicResponse> returnBook(@RequestParam Integer userId,
-                                                    @RequestParam Integer bookId) {
+    public ResponseEntity returnBook(@RequestParam Integer userId,
+                                     @RequestParam Integer bookId) {
         LendingLogItem lendingLogItem = lendingLogRepository.findByUserIdAndBookId(userId, bookId);
         if (lendingLogItem == null) {
             throw new APIException("Could not find the specified lending record");
@@ -74,7 +74,7 @@ public class LibrarianAPIController {
 
     //添加书
     @PostMapping(value = "/book/add", consumes = "application/json")
-    public ResponseEntity<BasicResponse> addBook(@RequestBody BookDTO dto) {
+    public ResponseEntity addBook(@RequestBody BookDTO dto) {
         List<Category> categories = new ArrayList<>();
         for (Integer category_id : dto.category_ids) {
             Optional<Category> category = categoryRepository.findById(category_id);
@@ -93,21 +93,9 @@ public class LibrarianAPIController {
 
     //删除书
     @DeleteMapping("/book/delete/{bookId}")
-    public ResponseEntity<BasicResponse> deleteBook(@PathVariable Integer bookId) {
+    public ResponseEntity deleteBook(@PathVariable Integer bookId) {
         bookRepository.deleteById(bookId);
         return ResponseEntity.ok(BasicResponse.ok());
-    }
-
-    //展示借阅、归还情况
-    @GetMapping("/history")
-    public ResponseEntity viewHistory(@RequestParam Integer userId,
-                                      @RequestParam(defaultValue = "0") Integer page,
-                                      @RequestParam(defaultValue = "10") Integer size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("startTime"));
-        List<LendingLogItem> list = lendingLogRepository.findByUserId(userId, pageable).getContent();
-        BasicResponse<List<LendingLogItem>> response = BasicResponse.ok();
-        response.data(list);
-        return ResponseEntity.ok(response);
     }
 
     //添加READER
@@ -126,11 +114,7 @@ public class LibrarianAPIController {
         if (book == null) {
             throw new APIException("No such book");
         }
-        book.setISBN(dto.isbn);
-        book.setTitle(dto.title);
-        book.setAuthor(dto.author);
-        book.setLocation(dto.location);
-        book.setPrice(dto.price);
+        ObjectUtils.copyFields(dto,book,"isbn","title","author","location","price");
         book.getCategories().clear();
         book.getCategories().addAll(dto.category_ids.stream().map((Integer cid) -> {
             Optional<Category> category = categoryRepository.findById(cid);
@@ -171,8 +155,7 @@ public class LibrarianAPIController {
     public ResponseEntity listCategories() {
         List<CategoryDTO> result = categoryRepository.findAll().stream().map((Category c) -> {
             CategoryDTO dto = new CategoryDTO();
-            dto.id = c.getId();
-            dto.name = c.getName();
+            ObjectUtils.copyFields(c, dto, "id", "name");
             Category parent = c.getParentCategory();
             if (parent != null) {
                 dto.parent_category_id = parent.getId();
@@ -184,27 +167,30 @@ public class LibrarianAPIController {
         return ResponseEntity.ok(BasicResponse.ok().data(result));
     }
 
-    //增加种类(修改)
+    //增加种类
     @PostMapping("/category")
-    public ResponseEntity addCategory(@RequestParam("name") String name,
-                                      @RequestParam("pName") String pName) {
-        Category category = categoryRepository.findByName(name);
-        if (category == null)
-            categoryRepository.save(new Category(name, categoryRepository.findByName(pName)));
-        else {
-            category.setParentCategory(categoryRepository.findByName(pName));
-            categoryRepository.save(category);
+    public ResponseEntity addCategory(@RequestParam String name,
+                                      @RequestParam(required = false) Integer parentId) {
+        Category category = new Category(name, null);
+        if (parentId != null) {
+            Category parent = categoryRepository.findById(parentId).orElse(null);
+            if (parent == null) {
+                throw new APIException("Could not found parent category by ID");
+            }
+            category.setParentCategory(parent);
         }
-        return ResponseEntity.ok(BasicResponse.ok());
+        categoryRepository.save(category);
+        return ResponseEntity.ok(BasicResponse.ok().data(category.getId()));
     }
 
     //删除种类
     @DeleteMapping("/category/{id}")
-    public ResponseEntity deleteCategory(@PathVariable("id") Integer id) {
-        if (categoryRepository.findById(id).orElse(null) == null)
+    public ResponseEntity deleteCategory(@PathVariable Integer id) {
+        Category target = categoryRepository.findById(id).orElse(null);
+        if (target == null)
             return ResponseEntity.ok(BasicResponse.fail().message("Category does not exist"));
         else {
-            categoryRepository.deleteById(id);
+            categoryRepository.delete(target);
             return ResponseEntity.ok(BasicResponse.ok());
         }
     }
