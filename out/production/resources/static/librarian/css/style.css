@@ -10,7 +10,7 @@ body a{
 	-moz-transition:0.5s all;
 	-o-transition:0.5s all;
 	-ms-transition:0.5s all;
-	background:#011D4A!mportant;
+	background:#011D4A!important;
 }
 a:focus, a:active, a:hover ,a.dropdown-toggle{
     outline: none;

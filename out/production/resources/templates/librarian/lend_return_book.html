@@ -9,10 +9,38 @@
     <!-- Bootstrap Core CSS -->
 
     <script>
+        function hideElement() {
+            $("#success-alert").hide();
+            $("#failed-alert").hide();
+            $("#spin-ring").hide();
+            $("#success-alert-").hide();
+            $("#failed-alert-").hide();
+            $("#spin-ring-").hide();
+        }s
+
         function lend_book() {
+
+            $("#success-alert").hide();
+            $("#failed-alert").hide();
+
+            var alert_success = document.getElementById("success-alert");
+            var alert_failed = document.getElementById("failed-alert");
+
             var bookId = document.getElementById("input_bookID").value;
             var userId = document.getElementById("input_userID").value;
 
+            if(bookId == null || bookId == "") {
+                alert_failed.innerText = "the bookId is null.";
+                $("#failed-alert").show();
+                return;
+            }
+            if(userId == null || userId == "") {
+                alert_failed.innerText = "the userId is null.";
+                $("#failed-alert").show();
+                return;
+            }
+
+            $("#spin-ring").show();
             $.ajax({
                 url : "/api/librarian/book/lend",
                 type: "post",
@@ -21,18 +49,41 @@
                     "bookId" : bookId
                 },
                 success: function (msg) {
-                    alert("success");
+                    alert_success.innerText = "lend success";
+                    $("#success-alert").show();
+                    $("#spin-ring").hide();
                 },
                 error: function (msg) {
-                    alert("error");
+                    alert_failed.innerText = "lend error, check the bookId and the userId";
+                    $("#failed-alert").show();
+                    $("#spin-ring").hide();
                 }
             });
         }
         
         function return_book() {
+
+            $("#success-alert-").hide();
+            $("#failed-alert-").hide();
+
+            var alert_success = document.getElementById("success-alert-");
+            var alert_failed = document.getElementById("failed-alert-");
+
             var bookId = document.getElementById("input_bookID_").value;
             var userId = document.getElementById("input_userID_").value;
 
+            if(bookId == null || bookId == "") {
+                alert_failed.innerText = "the bookId is null.";
+                $("#failed-alert-").show();
+                return;
+            }
+            if(userId == null || userId == "") {
+                alert_failed.innerText = "the userId is null.";
+                $("#failed-alert-").show();
+                return;
+            }
+
+            $("#spin-ring-").show();
             $.ajax({
                 url : "/api/librarian/book/return",
                 type: "post",
@@ -41,10 +92,14 @@
                     "bookId" : bookId
                 },
                 success: function (msg) {
-                    alert("success");
+                    alert_success.innerText = "return success";
+                    $("#success-alert-").show();
+                    $("#spin-ring-").hide();
                 },
                 error: function (msg) {
-                    alert("error");
+                    alert_failed.innerText = "return error, check the bookId and the userId";
+                    $("#failed-alert-").show();
+                    $("#spin-ring-").hide();
                 }
             });
         }
@@ -67,6 +122,7 @@
                         element.postTime = moment.unix(element.postTime).format("YYYY-M-D H:mm");
                 });
                     $("#book-detail").remove();
+                    $("#book-null").remove();
                     if (resp.data != null && resp.data!="")
                         $("#book-detail-p").append(template({books: resp.data}));
                     else
@@ -74,7 +130,6 @@
                 }
             });
         }
-
 
         function update_info_() {
             var source = document.getElementById("book-detail-template-").innerHTML;
@@ -94,6 +149,7 @@
                         element.postTime = moment.unix(element.postTime).format("YYYY-M-D H:mm");
                 });
                     $("#book-detail-").remove();
+                    $("#book-null-").remove();
                     if (resp.data != null && resp.data!="")
                         $("#book-detail-p-").append(template({books: resp.data}));
                     else
@@ -105,7 +161,7 @@
     </script>
 
 </head>
-<body>
+<body onload="hideElement()">
 <div th:replace="/librarian/common::dependency"></div>
 <div class="page-container">
     <!--/content-inner-->
@@ -135,12 +191,15 @@
                                                 <a class="btn btn-success" onclick="update_info()">query</a>
                                              </p>
                                             <p>Check the book detail carefully and to input userID and bookID here</p>
+
                                             <p class="four">
                                                 <input type="text" class="form-control1" id="input_userID" placeholder="userId">
                                                 <input type="text" class="form-control1" id="input_bookID" placeholder="bookId">
+                                                <div id="success-alert" class="alert alert-success" role="alert"></div>
+                                                <div id="failed-alert" class="alert alert-danger" role="alert" ></div>
+                                                <div id="spin-ring" class="fa fa-fw fa-spin fa-spinner"></div>
                                                 <a class="btn btn-primary" onclick="lend_book()">Lend</a>
                                             </p>
-                                            <!--i id="spin-ring" class="fa fa-fw fa-spin fa-spinner"></i-->
                                         </div>
                                         <div class="mediabox">
                                             <i class="fa fa-trophy"></i>
@@ -163,6 +222,9 @@
                                             <p class="four">
                                                 <input type="text" class="form-control1" id="input_userID_" placeholder="userId">
                                                 <input type="text" class="form-control1" id="input_bookID_" placeholder="bookId">
+                                                <div id="success-alert-" class="alert alert-success" role="alert"></div>
+                                                <div id="failed-alert-" class="alert alert-danger" role="alert" ></div>
+                                                <div id="spin-ring-" class="fa fa-fw fa-spin fa-spinner"></div>
                                                 <a class="btn btn-primary" onclick="return_book()">Return</a>
                                             </p>
                                         </div>
@@ -186,14 +248,10 @@
             </div>
             <!--//forms-->
         </div>
-        <footer>
-            <p>Copyright &copy; 2016.Company name All rights reserved.More Templates <a href="http://www.cssmoban.com/" target="_blank" title="模板之家">模板之家</a> - Collect from <a href="http://www.cssmoban.com/" title="网页模板" target="_blank">网页模板</a></p>
-        </footer>
+        <div th:replace="/librarian/common::footer-section"></div>
         <!--footer section end-->
     </div>
-</div>
-<div th:replace="/librarian/common::sidebar-menu"></div>
-</div>
+    <div th:replace="/librarian/common::sidebar-menu"></div>
 </div>
 
 <script id="book-null-template" type="text/x-handlebars-template">
@@ -210,7 +268,7 @@
 <script id="book-detail-template" type="text/x-handlebars-template">
     <div id="book-detail">
         <div style=" overflow:scroll; width: initial; height: 400px">
-        <table  class="table table-bordered">
+        <table  class="table table-bordered table-hover">
             <thead>
                 <tr>
                     <th width="50%">attribute</th>

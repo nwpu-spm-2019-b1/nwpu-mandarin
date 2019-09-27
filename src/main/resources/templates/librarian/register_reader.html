@@ -78,14 +78,6 @@
             <div class="inner-content">
                 <div th:replace="/librarian/common::header-section"></div>
                 <div class="outter-wp">
-                    <!--/sub-heard-part-->
-                    <div class="sub-heard-part">
-                        <ol class="breadcrumb m-b-0">
-                            <li><a href="index.html">Home</a></li>
-                            <li class="active">Forms</li>
-                        </ol>
-                    </div>
-                    <!--/sub-heard-part-->
                     <!--/forms-->
                     <div class="forms-main">
                         <!--/set-3-->
@@ -132,11 +124,10 @@
                 </div>
                 <!--//forms-->
             </div>
-            <footer>
-                <p>Copyright &copy; 2016.Company name All rights reserved.More Templates <a href="http://www.cssmoban.com/" target="_blank" title="模板之家">模板之家</a> - Collect from <a href="http://www.cssmoban.com/" title="网页模板" target="_blank">网页模板</a></p>
-            </footer>
+            <div th:replace="/librarian/common::footer-section"></div>
             <!--footer section end-->
         </div>
+        <div th:replace="/librarian/common::sidebar-menu"></div>
     </div>
-    <div th:replace="/librarian/common::sidebar-menu"></div>
+
 </body>
