@@ -1,9 +1,11 @@
 package mandarin.controllers.librarian;
 
 import mandarin.auth.AuthenticationNeeded;
+import mandarin.auth.NoAuthentication;
 import mandarin.auth.SessionHelper;
 import mandarin.auth.UserType;
 import mandarin.auth.exceptions.AuthenticationException;
+import mandarin.auth.exceptions.UnauthorizedException;
 import mandarin.dao.BookRepository;
 import mandarin.dao.CategoryRepository;
 import mandarin.dao.LendingLogRepository;
@@ -20,6 +22,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 @RequestMapping("/librarian")
+@AuthenticationNeeded(UserType.Librarian)
 @Controller
 public class LibrarianController {
 
@@ -29,31 +32,39 @@ public class LibrarianController {
     @Resource
     SessionHelper sessionHelper;
 
+    @NoAuthentication
+    @ExceptionHandler(UnauthorizedException.class)
+    public String loginRedirect() {
+        return "redirect:/librarian/login";
+    }
+
     @GetMapping({"/", ""})
     public String index() {
-        return "manage";
+        return "librarian/view_history";
     }
 
     //登录
     @GetMapping("/login")
+    @NoAuthentication
     public String loginPage(HttpServletRequest request) throws RuntimeException {
         HttpSession session = request.getSession(false);
         if (session == null) {
-            return "manage/login";
+            return "librarian/login";
         }
         User user = userRepository.findById((Integer) session.getAttribute("userId")).orElse(null);
         if (user == null) {
             session.invalidate();
-            return "redirect:/manage/login";
+            return "redirect:/librarian/login";
         }
         if (user.getType() != UserType.Librarian) {
             throw new ForbiddenException();
         }
-        return "redirect:/manage";
+        return "redirect:/librarian";
     }
 
     @ResponseBody
     @PostMapping("/login")
+    @NoAuthentication
     public ResponseEntity<BasicResponse> login(@RequestParam String username,
                                                @RequestParam String password,
                                                HttpSession session) {

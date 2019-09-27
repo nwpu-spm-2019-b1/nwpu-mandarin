@@ -3,6 +3,7 @@ package mandarin.utils;
 import org.apache.commons.lang3.reflect.FieldUtils;
 
 import java.lang.reflect.Field;
+import java.util.HashMap;
 import java.util.Map;
 
 public class ObjectUtils {
@@ -20,8 +21,11 @@ public class ObjectUtils {
         }
     }
 
-    public static void copyFieldsIntoMap(Object src, Map<String, Object> dest, String... fieldNames) {
+    public static Map<String, Object> copyFieldsIntoMap(Object src, Map<String, Object> dest, String... fieldNames) {
         Class<?> srcClass = src.getClass();
+        if (dest == null) {
+            dest = new HashMap<>();
+        }
         for (String fieldName : fieldNames) {
             try {
                 Field srcField = FieldUtils.getField(srcClass, fieldName, true);
@@ -30,5 +34,6 @@ public class ObjectUtils {
                 throw new RuntimeException(e);
             }
         }
+        return dest;
     }
 }

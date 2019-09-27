@@ -26,9 +26,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
@@ -46,6 +44,22 @@ public class LibrarianAPIController {
 
     @Resource
     CategoryRepository categoryRepository;
+
+    //展示借阅、归还情况
+    @GetMapping("/user/{userId}/history")
+    public ResponseEntity viewHistory(@PathVariable Integer userId,
+                                      @RequestParam(defaultValue = "0") Integer page,
+                                      @RequestParam(defaultValue = "10") Integer size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("startTime"));
+        List<?> items = lendingLogRepository.findByUserId(userId, pageable).getContent().stream().map((LendingLogItem item) -> {
+            Map<String, Object> map = new HashMap<>();
+            ObjectUtils.copyFieldsIntoMap(item, map, "id", "startTime", "endTime");
+            map.put("book", BookDetailDTO.toDTO(item.getBook()));
+            map.put("user", ObjectUtils.copyFieldsIntoMap(item.getUser(), null, "id", "username"));
+            return map;
+        }).collect(Collectors.toList());
+        return ResponseEntity.ok(BasicResponse.ok().data(items));
+    }
 
     //借书
     @PostMapping("/book/lend")
@@ -114,7 +128,7 @@ public class LibrarianAPIController {
         if (book == null) {
             throw new APIException("No such book");
         }
-        ObjectUtils.copyFields(dto,book,"isbn","title","author","location","price");
+        ObjectUtils.copyFields(dto, book, "isbn", "title", "author", "location", "price");
         book.getCategories().clear();
         book.getCategories().addAll(dto.category_ids.stream().map((Integer cid) -> {
             Optional<Category> category = categoryRepository.findById(cid);

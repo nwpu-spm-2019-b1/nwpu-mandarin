@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-hans en" xmlns:th="https://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+    <title>View user history</title>
+</head>
+<body>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-2 col-xl-1 sidebar">Sidebar</div>
+        <div class="col-10 col-xl-11">
+            <div class="mb-2">
+                <h2>Borrowing and returning records</h2>
+                <form class="form-inline" id="search">
+                    <div class="form-group mr-sm-2">
+                        <input id="query" type="text" placeholder="User ID" class="form-control">
+                    </div>
+                    <button class="btn btn-primary">
+                        <span class="fas fa-search">Search</span>
+                    </button>
+                </form>
+            </div>
+            <div class="get-list"></div>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/moment@2.24.0/moment.min.js"></script>
+<script src="/static/js/jquery-3.4.1.min.js"></script>
+<script crossorigin src="https://unpkg.com/react@16/umd/react.development.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
+<script src="/static/dist/librarian-bundle.js"></script>
+<script th:inline="javascript">
+    var data = {
+        rows: []
+    };
+    document.addEventListener('DOMContentLoaded', () => {
+        render_table();
+    });
+
+    $("#search").bind("submit", function (e) {
+        e.preventDefault();
+        load_data();
+    });
+
+    function load_data() {
+        $.ajax({
+            url: "/api/librarian/user/" + $("#query").val().toString() + "/history",
+            dataType: "json",
+            type: "get",
+            success: function (resp) {
+                resp.data.forEach((element) => {
+                    element.startTime = moment.unix(element.startTime.epochSecond).format("YYYY-M-D H:mm");
+                    if (element.endTime !== null) {
+                        element.endTime = moment.unix(element.endTime.epochSecond).format("YYYY-M-D H:mm");
+                    } else {
+                        element.endTime = "-";
+                    }
+                    element.key = element.id;
+                });
+                data.rows = resp.data;
+                render_table();
+            }
+        });
+    }
+
+    function render_table() {
+        ReactDOM.render(React.createElement(Table, data), document.getElementsByClassName("get-list")[0]);
+    }
+</script>
+</body>
+</html>
