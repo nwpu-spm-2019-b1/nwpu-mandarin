@@ -5,7 +5,6 @@ import mandarin.auth.exceptions.InvalidStateException;
 import mandarin.auth.exceptions.WrongUserTypeException;
 import mandarin.dao.UserRepository;
 import mandarin.entities.User;
-import mandarin.exceptions.ForbiddenException;
 import mandarin.utils.CryptoUtils;
 import org.springframework.stereotype.Component;
 
@@ -30,6 +29,7 @@ public class SessionHelper {
         }
         session.setAttribute("userId", user.getId());
         session.setAttribute("userType", user.getType());
+        session.setAttribute("username",user.getUsername());
     }
 
     public void logout(HttpSession session, UserType userType) {
