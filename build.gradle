@@ -22,7 +22,7 @@ task webpack(type:Exec) {
 }
 
 afterEvaluate {
-    war.dependsOn(webpack)
+    // war.dependsOn(webpack)
 }
 
 dependencies {
