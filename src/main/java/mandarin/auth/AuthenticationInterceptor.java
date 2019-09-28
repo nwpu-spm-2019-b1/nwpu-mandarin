@@ -19,6 +19,7 @@ public class AuthenticationInterceptor extends HandlerInterceptorAdapter {
         HttpSession session = request.getSession(false);
         if (session != null && session.getAttribute("userId") == null) {
             session.invalidate();
+            response.sendRedirect(request.getRequestURL());
         }
         HandlerMethod handlerMethod = (HandlerMethod) handler;
         Method method = handlerMethod.getMethod();
