@@ -1,7 +1,6 @@
 package mandarin.auth;
 
 import mandarin.auth.exceptions.UnauthorizedException;
-import org.springframework.lang.UsesSunMisc;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
@@ -19,7 +18,7 @@ public class AuthenticationInterceptor extends HandlerInterceptorAdapter {
         HttpSession session = request.getSession(false);
         if (session != null && session.getAttribute("userId") == null) {
             session.invalidate();
-            response.sendRedirect(request.getRequestURL());
+            response.sendRedirect(request.getRequestURL().toString());
         }
         HandlerMethod handlerMethod = (HandlerMethod) handler;
         Method method = handlerMethod.getMethod();
