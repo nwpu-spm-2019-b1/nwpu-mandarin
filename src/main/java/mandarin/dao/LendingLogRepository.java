@@ -11,4 +11,5 @@ public interface LendingLogRepository extends JpaRepository<LendingLogItem, Inte
     LendingLogItem findByUserIdAndBookId(Integer userId, Integer bookId);
     Page<LendingLogItem> findByUserId(Integer userId, Pageable pageable);
 
+    LendingLogItem findByBookId(Integer bookId);
 }

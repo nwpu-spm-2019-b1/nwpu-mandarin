@@ -55,6 +55,9 @@ public class LibrarianAPIController {
         if (user == null || book == null) {
             throw new APIException("Invalid ID(s)");
         }
+        if (lendingLogRepository.findByBookId(bookId) != null){
+            throw new APIException("already has been borrowed");
+        }
         lendingLogRepository.save(new LendingLogItem(book, user));
         return ResponseEntity.ok(BasicResponse.ok());
     }
