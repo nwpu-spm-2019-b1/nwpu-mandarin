@@ -14,6 +14,7 @@ import mandarin.entities.Category;
 import mandarin.entities.LendingLogItem;
 import mandarin.entities.User;
 import mandarin.exceptions.APIException;
+import mandarin.services.BookService;
 import mandarin.utils.BasicResponse;
 import mandarin.utils.ObjectUtils;
 import org.springframework.data.domain.PageRequest;
@@ -45,6 +46,9 @@ public class LibrarianAPIController {
     @Resource
     CategoryRepository categoryRepository;
 
+    @Resource
+    BookService bookService;
+
     //展示借阅、归还情况
     @GetMapping("/user/{userId}/history")
     public ResponseEntity viewHistory(@PathVariable Integer userId,
@@ -69,6 +73,9 @@ public class LibrarianAPIController {
         if (user == null || book == null) {
             throw new APIException("Invalid ID(s)");
         }
+        if (!bookService.checkAvailibility(bookId)) {
+            throw new APIException("Book not available");
+        }
         lendingLogRepository.save(new LendingLogItem(book, user));
         return ResponseEntity.ok(BasicResponse.ok());
     }
@@ -80,6 +87,9 @@ public class LibrarianAPIController {
         LendingLogItem lendingLogItem = lendingLogRepository.findByUserIdAndBookId(userId, bookId);
         if (lendingLogItem == null) {
             throw new APIException("Could not find the specified lending record");
+        }
+        if (lendingLogItem.getEndTime() != null) {
+            throw new APIException("Book already returned");
         }
         lendingLogItem.setEndTime(Instant.now());
         lendingLogRepository.save(lendingLogItem);
