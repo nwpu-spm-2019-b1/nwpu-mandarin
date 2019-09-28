@@ -9,9 +9,13 @@ import mandarin.dao.CategoryRepository;
 import mandarin.dao.LendingLogRepository;
 import mandarin.dao.UserRepository;
 import mandarin.entities.Category;
+import mandarin.entities.LendingLogItem;
 import mandarin.entities.User;
 import mandarin.exceptions.ForbiddenException;
 import mandarin.utils.BasicResponse;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -34,6 +38,12 @@ public class LibrarianController {
 
     @Resource
     CategoryRepository categoryRepository;
+
+    @Resource
+    LendingLogRepository lendingLogRepository;
+
+    @Resource
+    HistoryResult historyResult;
 
     @GetMapping({"/", ""})
     public String index()
@@ -86,10 +96,42 @@ public class LibrarianController {
         }
     }
 
+
+    //展示借阅、归还情况
+    @ResponseBody
+    @GetMapping("/history")
+    @AuthenticationNeeded(UserType.Librarian)
+    public ResponseEntity viewHistory(@RequestParam("userId") Integer userId,
+                                      @RequestParam(value = "page", defaultValue = "0") Integer page,
+                                      @RequestParam(value = "size", defaultValue = "10") Integer size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("startTime"));
+        List<LendingLogItem> list = lendingLogRepository.findByUserId(userId, pageable).getContent();
+        BasicResponse<List<LendingLogItem>> response = BasicResponse.ok();
+        response.data(list);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/user/{userId}/history")
+    public ResponseEntity viewHistory1(@PathVariable Integer userId,
+                                       @RequestParam(defaultValue = "0") Integer page,
+                                       @RequestParam(defaultValue = "10") Integer size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("startTime"));
+        List<HistoryResult> results = historyResult.listHistory(userId, pageable);
+        return ResponseEntity.ok(BasicResponse.ok().data(results));
+    }
+
+
     @PostMapping("/categories")
     public ResponseEntity getCategories(){
         List<Category> categories = categoryRepository.findAll();
         return ResponseEntity.ok().body(BasicResponse.ok().data(categories));
+    }
+
+
+    @GetMapping("/show-history")
+    public String getHistoryPage()
+    {
+        return "/librarian/compose";
     }
 
     @GetMapping("/add-book")

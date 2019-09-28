@@ -56,4 +56,8 @@ public class LendingLogItem {
     public void setEndTime(Instant endTime) {
         this.endTime = endTime;
     }
+
+    public Integer getId(){
+        return this.id;
+    }
 }
