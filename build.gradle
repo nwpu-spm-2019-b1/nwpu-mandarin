@@ -17,6 +17,14 @@ configurations.all {
     exclude group: 'commons-logging', module: 'commons-logging'
 }
 
+task webpack(type:Exec) {
+    commandLine 'npx', 'webpack'
+}
+
+afterEvaluate {
+    war.dependsOn(webpack)
+}
+
 dependencies {
     compile group: 'org.thymeleaf', name: 'thymeleaf', version: '3.0.11.RELEASE'
     compile group: 'org.thymeleaf', name: 'thymeleaf-spring5', version: '3.0.11.RELEASE'
