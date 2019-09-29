@@ -3,3 +3,4 @@
 build
 src/main/resources/static/dist
 node_modules
+out
