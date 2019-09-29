@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh-hans en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Mandarin</title>
+    <th:block th:replace="reader/common :: head"></th:block>
+    <style>
+        .welcome-message {
+            font-weight: bold;
+            font-size: 2em;
+            text-align: center;
+            width: 100%;
+            margin-bottom: 3em;
+        }
+
+        .search-box {
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .search-button {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+<th:block th:replace="reader/common :: navbar"></th:block>
+<div class="container main">
+    <div class="welcome-message">
+        <div>
+            <img src="/static/images/logo.png"/>
+        </div>
+        <div>
+            Welcome to the Mandarin&#8482; system
+        </div>
+    </div>
+    <div class="search-box">
+        <form action="/search">
+            <div class="row">
+                <div class="col">
+                    <select class="form-control" name="type">
+                        <option value="title">Title</option>
+                        <option value="author">Author</option>
+                    </select>
+                </div>
+                <div class="col-8">
+                    <input class="form-control" name="query" placeholder="Type your search keyword here" type="text">
+                </div>
+                <div class="col">
+                    <button class="btn btn-primary btn-block search-button" type="submit">
+                        <span class="fas fa-search mr-1"></span>Search
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<th:block th:replace="reader/common :: scripts"></th:block>
+</body>
+</html>

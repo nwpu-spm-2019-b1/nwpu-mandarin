@@ -11,12 +11,12 @@ public class LendingLogItem {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     @ManyToOne
-    @JoinColumn(name = "book_id",nullable = false)
+    @JoinColumn(name = "book_id", nullable = false)
     private Book book;
     @ManyToOne
-    @JoinColumn(name = "user_id",nullable = false)
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
-    @Column(name = "start_time",nullable = false)
+    @Column(name = "start_time", nullable = false)
     private Instant startTime = Instant.now();
     @Column(name = "end_time")
     private Instant endTime = null;
@@ -27,6 +27,10 @@ public class LendingLogItem {
     public LendingLogItem(Book book, User user) {
         this.book = book;
         this.user = user;
+    }
+
+    public Integer getId() {
+        return id;
     }
 
     public Book getBook() {

@@ -17,6 +17,12 @@ public class Reservation {
     private User user;
     private Instant time;
 
+    public Reservation() {
+        this.book = null;
+        this.user = null;
+        this.time = Instant.now();
+    }
+
     public Reservation(Book book, User user) {
         this.book = book;
         this.user = user;

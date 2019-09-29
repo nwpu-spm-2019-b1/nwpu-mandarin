@@ -7,9 +7,13 @@ import mandarin.dao.UserRepository;
 import mandarin.entities.User;
 import mandarin.utils.CryptoUtils;
 import org.springframework.stereotype.Component;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpSession;
+import java.util.Optional;
 
 @Component
 public class SessionHelper {
@@ -29,7 +33,20 @@ public class SessionHelper {
         }
         session.setAttribute("userId", user.getId());
         session.setAttribute("userType", user.getType());
-        session.setAttribute("username",user.getUsername());
+        session.setAttribute("username", user.getUsername());
+    }
+
+    public User getCurrentUser() {
+        ServletRequestAttributes attrs = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
+        return getCurrentUser(attrs.getRequest().getSession(false));
+    }
+
+    public User getCurrentUser(HttpSession session) {
+        if (session == null || session.getAttribute("userId") == null) {
+            return null;
+        } else {
+            return userRepository.findById((Integer) session.getAttribute("userId")).orElse(null);
+        }
     }
 
     public void logout(HttpSession session, UserType userType) {

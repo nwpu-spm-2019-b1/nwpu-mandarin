@@ -1,56 +1,98 @@
 package mandarin.controllers.reader;
 
+import mandarin.auth.AuthenticationNeeded;
 import mandarin.auth.SessionHelper;
 import mandarin.auth.UserType;
 import mandarin.auth.exceptions.AuthenticationException;
+import mandarin.auth.exceptions.UnauthorizedException;
+import mandarin.dao.BookRepository;
+import mandarin.dao.LendingLogRepository;
 import mandarin.dao.UserRepository;
+import mandarin.entities.Book;
+import mandarin.entities.LendingLogItem;
 import mandarin.entities.User;
+import mandarin.services.BookService;
 import mandarin.utils.BasicResponse;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpSession;
+import java.util.ArrayList;
+import java.util.List;
 
 @Controller
 public class ReaderController {
-    @GetMapping("/")
-    public String index() {
-        return "index";
-    }
+    @Resource
+    BookRepository bookRepository;
+
+    @Resource
+    BookService bookService;
+
+    @Resource
+    LendingLogRepository lendingLogRepository;
+
     @Resource
     UserRepository userRepository;
+
     @Resource
     SessionHelper sessionHelper;
 
-    @GetMapping("/register")
-    public String registerPage() {
-        return "register";
+    @ModelAttribute("sessionHelper")
+    public SessionHelper getSessionHelper() {
+        return sessionHelper;
     }
 
-    @PostMapping(value = "/register", produces = "application/json")
-    @ResponseBody
-    public ResponseEntity register(@RequestParam String username,
-                                   @RequestParam String password,
-                                   @RequestParam String type) {
-        User user = new User();
-        user.setUsername(username);
-        user.setPassword(password);
-        user.setType(Enum.valueOf(UserType.class, type));
-        userRepository.save(user);
-        return ResponseEntity.ok().body(BasicResponse.ok().message("registered"));
+    @ModelAttribute("bookService")
+    public BookService getBookService() {
+        return bookService;
     }
 
-    @GetMapping("/login")
-    public String loginPage(HttpSession session) {
-        if (session.getAttribute("userId") != null) {
-            return "redirect:/";
+    @ExceptionHandler(UnauthorizedException.class)
+    public String loginRedirect() {
+        return "redirect:/#login";
+    }
+
+    @GetMapping("/")
+    public String index() {
+        return "reader/index";
+    }
+
+    @GetMapping("/history")
+    public String showHistory(Model model) {
+        User user = sessionHelper.getCurrentUser();
+        if (user != null) {
+            Page<LendingLogItem> items = lendingLogRepository.findByUserId(user.getId(), Pageable.unpaged());
+            model.addAttribute("items", items.getContent());
         }
-        return "login";
+        return "reader/history";
+    }
+
+    @GetMapping("/search")
+    public String searchBook(@RequestParam String query,
+                             @RequestParam(defaultValue = "0") Integer page,
+                             @RequestParam(defaultValue = "10") Integer size,
+                             @RequestParam("type") String type,
+                             Model model) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("id"));
+        List<Book> books = new ArrayList<>();
+        query = "%" + query + "%";
+        switch (type) {
+            case "title":
+                books = bookRepository.findByTitleLike(query, pageable).getContent();
+                break;
+            case "author":
+                books = bookRepository.findByAuthorLike(query, pageable).getContent();
+                break;
+        }
+        model.addAttribute("books", books);
+        return "reader/search";
     }
 
     @PostMapping(value = "/login", produces = "application/json")

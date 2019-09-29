@@ -1,9 +1,6 @@
 package mandarin;
 
-import mandarin.entities.Book;
-import mandarin.entities.Category;
-import mandarin.entities.LendingLogItem;
-import mandarin.entities.User;
+import mandarin.entities.*;
 import org.apache.commons.io.IOUtils;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -24,6 +21,8 @@ import java.sql.Array;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.*;
 
 @Component
@@ -55,9 +54,12 @@ public class StartupListener {
             session.save(new Book("9781617294945", "Spring in Action", "Craig Walls", "Shelf 1", BigDecimal.ONE, Collections.singletonList(c1)));
             session.save(new Book("9780262033848", "Introduction to Algorithms", "Thomas H. Cormen, Charles E. Leiserson, Ronald L. Rivest, Clifford Stein", "Shelf 1", BigDecimal.ONE, Arrays.asList(c1, c2)));
             session.save(new Book("9781119183471", "Applied Cryptography: Protocols, Algorithms, and Source Code in C", "Bruce Schneier", "Shelf 1", BigDecimal.ONE, Arrays.asList(c1, c2, c3)));
-            session.save(new LendingLogItem(session.get(Book.class,1),session.get(User.class,3)));
-            session.save(new LendingLogItem(session.get(Book.class,2),session.get(User.class,3)));
-            session.save(new LendingLogItem(session.get(Book.class,3),session.get(User.class,3)));
+            session.save(new LendingLogItem(session.get(Book.class,1),session.get(User.class,2)));
+            session.save(new LendingLogItem(session.get(Book.class,2),session.get(User.class,2)));
+            session.save(new LendingLogItem(session.get(Book.class,3),session.get(User.class,2)));
+            Reservation reservation=new Reservation(session.get(Book.class,1),session.get(User.class,2));
+            reservation.setTime(Instant.now().minus(Duration.ofHours(1)));
+            session.save(reservation);
             session.flush();
             tx.commit();
             session.close();
