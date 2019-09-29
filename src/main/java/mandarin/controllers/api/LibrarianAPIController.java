@@ -91,7 +91,8 @@ public class LibrarianAPIController {
         }
         Book book = new Book(dto.isbn, dto.title, dto.author, dto.location, dto.price, categories);
         bookRepository.save(book);
-        return ResponseEntity.status(HttpStatus.CREATED).body(BasicResponse.ok());
+        Integer bookId = book.getId();
+        return ResponseEntity.status(HttpStatus.CREATED).body(BasicResponse.ok().data(bookId));
     }
 
     //删除书
@@ -103,9 +104,9 @@ public class LibrarianAPIController {
 
     //添加READER
     @PostMapping("/reader/register")
-    public ResponseEntity register(@RequestParam String username,
-                                   @RequestParam String password) {
-        User user = new User(username, password, UserType.Reader);
+    public ResponseEntity register(@RequestParam String username) {
+        String defaultPassword = "12345678";
+        User user = new User(username, defaultPassword, UserType.Reader);
         userRepository.save(user);
         return ResponseEntity.status(HttpStatus.CREATED).body(BasicResponse.ok());
     }
