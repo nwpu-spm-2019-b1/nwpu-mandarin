@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="zh-hans en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Mandarin - User history</title>
+    <th:block th:replace="reader/common :: head"></th:block>
+    <style>
+        .need-login-message {
+            padding-top: 4em;
+            padding-bottom: 4em;
+            padding-left: 6em;
+            padding-right: 6em;
+            margin-left: auto;
+            margin-right: auto;
+            border: 1px #b3b7bb solid;
+            border-radius: 1em;
+            text-align: center;
+            font-size: 1.3em;
+        }
+    </style>
+</head>
+<body>
+<th:block th:replace="reader/common :: navbar"></th:block>
+<div class="container main">
+    <h2 class="mb-3">
+        Your borrowing history
+    </h2>
+    <div th:with="user=${sessionHelper.getCurrentUser()}">
+        <th:block th:if="${user!=null}">
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>Record #</th>
+                    <th>Book ID</th>
+                    <th>Book title</th>
+                    <th>Borrowed at</th>
+                    <th>Returned at</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="item : ${items}">
+                    <td th:text="${item.id}"></td>
+                    <td th:text="${item.book.id}"></td>
+                    <td th:text="${item.book.title}"></td>
+                    <td th:text="${formatter.format(item.startTime)}"></td>
+                    <td th:text="${formatter.format(item.endTime)}"></td>
+                </tr>
+                </tbody>
+            </table>
+        </th:block>
+        <th:block th:if="${user==null}">
+            <div class="need-login-message">
+                To view your borrowing history, please
+                <a href="javascript:void(0);" onclick="show_login()" style="font-weight: bold;">
+                    login
+                </a>
+                first.
+            </div>
+        </th:block>
+    </div>
+</div>
+<th:block th:replace="reader/common :: scripts"></th:block>
+</body>
+</html>

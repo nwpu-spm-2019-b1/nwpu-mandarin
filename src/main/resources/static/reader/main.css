@@ -1,0 +1,19 @@
+html, body {
+    height: 100%;
+}
+
+body {
+    background-color: rgb(238, 245, 249);
+}
+
+.main.container {
+    background-color: #FFFFFF;
+    height: 100%;
+    padding-top: 2em;
+    padding-left: 3em;
+    padding-right: 3em;
+}
+
+tr th {
+    white-space: nowrap;
+}

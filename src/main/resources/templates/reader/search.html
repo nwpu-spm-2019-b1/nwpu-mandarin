@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="zh-hans en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Mandarin - Search</title>
+    <th:block th:replace="reader/common :: head"></th:block>
+</head>
+<body>
+<th:block th:replace="reader/common :: navbar"></th:block>
+<div class="container main">
+    <h2 class="mb-3">
+        Your search results
+    </h2>
+    <div>
+        <table class="table">
+            <thead>
+            <tr>
+                <th>Book ID</th>
+                <th>ISBN</th>
+                <th>Book title</th>
+                <th>Author(s)</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr class="lineItem" th:each="book : ${books}">
+                <td th:text="${book.id}"></td>
+                <td th:text="${book.ISBN}"></td>
+                <td th:text="${book.title}"></td>
+                <td th:text="${book.author}"></td>
+                <td>
+                    <ul class="actions-list" style="display: flex; list-style: none; padding: 0;">
+                        <li>
+                            <th:block th:switch="${bookService.checkAvailability(book)}">
+                                <th:block th:case="true">
+                                    <a href="javascript:void(0);" th:data-id="${book.id}"
+                                       onclick="reserve_book(this)">
+                                        Reserve
+                                    </a>
+                                </th:block>
+                                <th:block th:case="false">
+                                    Not available
+                                </th:block>
+                            </th:block>
+                        </li>
+                    </ul>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+<th:block th:replace="reader/common :: scripts"></th:block>
+</body>
+</html>

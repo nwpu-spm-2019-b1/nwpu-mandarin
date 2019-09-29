@@ -73,8 +73,7 @@ public class LibrarianAPIController {
         if (user == null || book == null) {
             throw new APIException("Invalid ID(s)");
         }
-
-        if (!bookService.checkAvailibility(bookId)) {
+        if (!bookService.checkAvailability(bookId)) {
             throw new APIException("Book not available");
         }
         lendingLogRepository.save(new LendingLogItem(book, user));
@@ -151,30 +150,6 @@ public class LibrarianAPIController {
         }).collect(Collectors.toList()));
         bookRepository.save(book);
         return ResponseEntity.accepted().body(BasicResponse.ok());
-    }
-
-    //搜索书(By title/author/categories)
-    @GetMapping("/book/search/{cond}")
-    public ResponseEntity searchBook(@RequestParam String param,
-                                     @RequestParam(defaultValue = "0") Integer page,
-                                     @RequestParam(defaultValue = "10") Integer size,
-                                     @PathVariable("cond") String condition) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("id"));
-        List<Book> books = new ArrayList<>();
-        param = "%" + param + "%";
-        switch (condition) {
-            case "title":
-                books = bookRepository.findByTitleLike(param, pageable).getContent();
-                break;
-            case "author":
-                books = bookRepository.findByAuthorLike(param, pageable).getContent();
-                break;
-            case "categories":
-                books = bookRepository.findByCategoriesIsContaining(param, pageable).getContent();
-                break;
-        }
-        BasicResponse response = BasicResponse.ok().data(books.stream().map(BookDetailDTO::toDTO).collect(Collectors.toList()));
-        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/category")

@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="zh-hans en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Common</title>
+    <th:block th:fragment="head">
+        <meta content="width=device-width, initial-scale=1" name="viewport">
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
+        <link rel='stylesheet' th:href="@{/static/css/bootstrap.min.css}" type='text/css'/>
+        <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.10.2/css/all.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="/static/reader/main.css">
+        <style>
+            .nav-link {
+                color: #F1F1F1 !important;
+                display: flex;
+                flex-direction: row;
+                justify-content: center;
+                align-items: center;
+            }
+
+            .nav-link .fas {
+                margin-right: 0.3em;
+            }
+        </style>
+    </th:block>
+</head>
+<body>
+<th:block th:fragment="navbar">
+    <div class="modal" tabindex="-1" role="dialog" id="login-modal">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Login</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form action="#" id="login-modal-form">
+                        <div class="form-group">
+                            <label for="login-modal-username">Username:</label>
+                            <input id="login-modal-username" name="username" type="text" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label for="login-modal-password">Password:</label>
+                            <input id="login-modal-password" name="password" type="password" class="form-control">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" onclick="do_login()">Login</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">Mandarin<span style="margin-left: 0.1em;">&#8482;</span></a>
+            <ul class="ml-auto navbar-nav">
+                <li class="nav-item">
+                    <a href="/history" class="nav-link">
+                        <span class="fas fa-list"></span>
+                        View your own borrowing history
+                    </a>
+                </li>
+                <th:block th:switch="${session.userId==null}">
+                    <th:block th:case="true">
+                        <li class="nav-item">
+                            <a href="javascript:void(0);" class="nav-link"
+                               onclick="show_login()">
+                                <span class="fas fa-sign-in-alt"></span>
+                                Login
+                            </a>
+                        </li>
+                    </th:block>
+                    <th:block th:case="false">
+                        <li class="nav-item">
+                            <a href="/profile" class="nav-link">
+                                <span class="fas fa-user"></span>
+                                [[${session.username}]]
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="javascript:void(0);" class="nav-link" onclick="do_logout()">
+                                <span class="fas fa-sign-out-alt"></span>
+                                Logout
+                            </a>
+                        </li>
+                    </th:block>
+                </th:block>
+            </ul>
+        </div>
+    </nav>
+</th:block>
+<th:block th:fragment="scripts">
+    <script th:src="@{/static/js/jquery-3.4.1.js}"></script>
+    <script th:src="@{/static/js/bootstrap.min.js}"></script>
+    <script>
+        function show_login() {
+            $("#login-modal").modal();
+        }
+
+        function do_login() {
+            $.ajax({
+                url: "/login",
+                type: "POST",
+                dataType: "json",
+                data: {
+                    username: $("#login-modal-username").val(),
+                    password: $("#login-modal-password").val()
+                },
+                success: function (resp) {
+                    window.location.reload();
+                },
+                error: function (xhr) {
+                    var resp = JSON.parse(xhr.responseText);
+                    alert(resp.message);
+                }
+            });
+        }
+
+        function do_logout() {
+            $.ajax({
+                url: "/logout",
+                type: "POST",
+                dataType: "json",
+                success: function (resp) {
+                    window.location.reload();
+                },
+                error: function (xhr) {
+                    var resp = JSON.parse(xhr.responseText);
+                    alert(resp.message);
+                }
+            });
+        }
+    </script>
+</th:block>
+</body>
+</html>
