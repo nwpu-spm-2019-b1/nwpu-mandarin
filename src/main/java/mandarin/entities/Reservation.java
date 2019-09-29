@@ -1,6 +1,9 @@
 package mandarin.entities;
 
+import org.springframework.util.unit.DataUnit;
+
 import javax.persistence.*;
+import java.time.Duration;
 import java.time.Instant;
 
 @Entity
@@ -55,5 +58,9 @@ public class Reservation {
 
     public void setTime(Instant time) {
         this.time = time;
+    }
+
+    public Instant getDeadline() {
+        return this.time.plus(Duration.ofHours(2));
     }
 }

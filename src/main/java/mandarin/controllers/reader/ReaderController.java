@@ -7,9 +7,11 @@ import mandarin.auth.exceptions.AuthenticationException;
 import mandarin.auth.exceptions.UnauthorizedException;
 import mandarin.dao.BookRepository;
 import mandarin.dao.LendingLogRepository;
+import mandarin.dao.ReservationRepository;
 import mandarin.dao.UserRepository;
 import mandarin.entities.Book;
 import mandarin.entities.LendingLogItem;
+import mandarin.entities.Reservation;
 import mandarin.entities.User;
 import mandarin.services.BookService;
 import mandarin.utils.BasicResponse;
@@ -39,7 +41,7 @@ public class ReaderController {
     LendingLogRepository lendingLogRepository;
 
     @Resource
-    UserRepository userRepository;
+    ReservationRepository reservationRepository;
 
     @Resource
     SessionHelper sessionHelper;
@@ -68,7 +70,9 @@ public class ReaderController {
     public String showHistory(Model model) {
         User user = sessionHelper.getCurrentUser();
         if (user != null) {
+            List<Reservation> reservations = reservationRepository.findAllByUser(user);
             Page<LendingLogItem> items = lendingLogRepository.findByUserId(user.getId(), Pageable.unpaged());
+            model.addAttribute("reservations", reservations);
             model.addAttribute("items", items.getContent());
         }
         return "reader/history";

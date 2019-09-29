@@ -6,6 +6,8 @@ import mandarin.auth.SessionHelper;
 import mandarin.auth.UserType;
 import mandarin.auth.exceptions.AuthenticationException;
 import mandarin.auth.exceptions.UnauthorizedException;
+import mandarin.dao.CategoryRepository;
+import mandarin.dao.LendingLogRepository;
 import mandarin.dao.UserRepository;
 import mandarin.entities.Category;
 import mandarin.entities.LendingLogItem;
@@ -48,7 +50,6 @@ public class LibrarianController {
     @GetMapping({"/", ""})
     public String index()
     {
-
         return "librarian/index";
     }
 

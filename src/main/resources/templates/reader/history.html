@@ -21,6 +21,42 @@
 <body>
 <th:block th:replace="reader/common :: navbar"></th:block>
 <div class="container main">
+    <div th:if="${sessionHelper.getCurrentUser()!=null}">
+        <h2 class="mb-3">
+            Your reservations
+        </h2>
+        <table class="table">
+            <thead>
+            <tr>
+                <th>Record #</th>
+                <th>Book ID</th>
+                <th>Book title</th>
+                <th>Reserved at</th>
+                <th>Valid until</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="reservation : ${reservations}">
+                <td th:text="${reservation.id}"></td>
+                <td th:text="${reservation.book.id}"></td>
+                <td th:text="${reservation.book.title}"></td>
+                <td th:text="${formatter.format(reservation.time)}"></td>
+                <td th:text="${formatter.format(reservation.deadline)}"></td>
+                <td>
+                    <ul class="actions-list" style="display: flex; list-style: none; padding: 0;">
+                        <li>
+                            <a href="javascript:void(0);" th:data-id="${reservation.id}"
+                               onclick="cancel_reservation(this)">
+                                Cancel
+                            </a>
+                        </li>
+                    </ul>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
     <h2 class="mb-3">
         Your borrowing history
     </h2>
@@ -59,5 +95,21 @@
     </div>
 </div>
 <th:block th:replace="reader/common :: scripts"></th:block>
+<script>
+    function cancel_reservation(e) {
+        $.ajax({
+            url: "/api/reader/reserve/" + e.dataset.id,
+            type: "DELETE",
+            dataType: "json",
+            success: function (resp) {
+                window.location.reload();
+            },
+            error: function (xhr) {
+                var resp = JSON.parse(xhr.responseText);
+                alert(resp.message);
+            }
+        });
+    }
+</script>
 </body>
 </html>

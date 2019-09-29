@@ -50,5 +50,24 @@
     </div>
 </div>
 <th:block th:replace="reader/common :: scripts"></th:block>
+<script>
+    function reserve_book(e) {
+        $.ajax({
+            url: "/api/reader/reserve",
+            type: "POST",
+            dataType: "json",
+            data: {
+                bookId: e.dataset.id
+            },
+            success: function (resp) {
+                window.location.reload();
+            },
+            error: function (xhr) {
+                var resp = JSON.parse(xhr.responseText);
+                alert(resp.message);
+            }
+        });
+    }
+</script>
 </body>
 </html>
