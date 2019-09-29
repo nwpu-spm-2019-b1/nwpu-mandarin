@@ -2,6 +2,8 @@ package mandarin;
 
 import mandarin.entities.Book;
 import mandarin.entities.Category;
+import mandarin.entities.LendingLogItem;
+import mandarin.entities.User;
 import org.apache.commons.io.IOUtils;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -53,6 +55,9 @@ public class StartupListener {
             session.save(new Book("9781617294945", "Spring in Action", "Craig Walls", "Shelf 1", BigDecimal.ONE, Collections.singletonList(c1)));
             session.save(new Book("9780262033848", "Introduction to Algorithms", "Thomas H. Cormen, Charles E. Leiserson, Ronald L. Rivest, Clifford Stein", "Shelf 1", BigDecimal.ONE, Arrays.asList(c1, c2)));
             session.save(new Book("9781119183471", "Applied Cryptography: Protocols, Algorithms, and Source Code in C", "Bruce Schneier", "Shelf 1", BigDecimal.ONE, Arrays.asList(c1, c2, c3)));
+            session.save(new LendingLogItem(session.get(Book.class,1),session.get(User.class,3)));
+            session.save(new LendingLogItem(session.get(Book.class,2),session.get(User.class,3)));
+            session.save(new LendingLogItem(session.get(Book.class,3),session.get(User.class,3)));
             session.flush();
             tx.commit();
             session.close();

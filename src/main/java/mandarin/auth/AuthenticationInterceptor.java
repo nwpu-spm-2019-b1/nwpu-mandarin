@@ -15,6 +15,11 @@ public class AuthenticationInterceptor extends HandlerInterceptorAdapter {
         if (!(handler instanceof HandlerMethod)) {
             return true;
         }
+        HttpSession session = request.getSession(false);
+        if (session != null && session.getAttribute("userId") == null) {
+            session.invalidate();
+            response.sendRedirect(request.getRequestURL().toString());
+        }
         HandlerMethod handlerMethod = (HandlerMethod) handler;
         Method method = handlerMethod.getMethod();
         Class<?> clazz = method.getDeclaringClass();
@@ -26,7 +31,6 @@ public class AuthenticationInterceptor extends HandlerInterceptorAdapter {
             annotation = clazz.getAnnotation(AuthenticationNeeded.class);
         }
         if (annotation != null) {
-            HttpSession session = request.getSession(false);
             if (session != null && session.getAttribute("userId") != null) {
                 for (UserType userType : annotation.value()) {
                     if (userType.equals(session.getAttribute("userType"))) {

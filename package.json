@@ -1,0 +1,36 @@
+{
+  "name": "mandarin",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nwpu-spm-2019-b1/nwpu-mandarin.git"
+  },
+  "author": "NWPU SPM 2019 Group B1",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/nwpu-spm-2019-b1/nwpu-mandarin/issues"
+  },
+  "homepage": "https://github.com/nwpu-spm-2019-b1/nwpu-mandarin#readme",
+  "devDependencies": {
+    "@babel/cli": "^7.6.2",
+    "@babel/core": "^7.6.2",
+    "@babel/preset-env": "^7.6.2",
+    "@babel/preset-react": "^7.0.0",
+    "babel-loader": "^8.0.6",
+    "bootstrap": "^4.3.1",
+    "css-loader": "^3.2.0",
+    "uglifyjs-webpack-plugin": "^2.2.0",
+    "webpack": "^4.41.0",
+    "webpack-cli": "^3.3.9",
+    "webpack-dev-server": "^3.8.1"
+  },
+  "dependencies": {
+    "react": "^16.9.0",
+    "react-dom": "^16.9.0"
+  }
+}

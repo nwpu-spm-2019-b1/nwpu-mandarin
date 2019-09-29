@@ -3,6 +3,7 @@
 * [Gradle](https://gradle.org/)
 * [PostgreSQL](https://www.postgresql.org/download/windows/)
 * [IntelliJ IDEA](https://www.jetbrains.com/idea/download/)
+* [Node.js](https://nodejs.org/en/download/current/)
 
 ## Database
 ~~~

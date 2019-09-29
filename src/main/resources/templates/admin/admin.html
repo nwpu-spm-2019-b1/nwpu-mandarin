@@ -1,0 +1,257 @@
+<!doctype html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>Mandarin Admin</title>
+    <link href="/static/css/bootstrap.min.css" rel="stylesheet"/>
+    <link href="/static/admin/css/main.css" rel="stylesheet"/>
+    <script src="/static/js/jquery-3.4.1.min.js"></script>
+    <script src="/static/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.10.2/css/all.min.css">
+</head>
+<body>
+<div class="modal" tabindex="-1" role="dialog" id="add-user-modal">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add librarian account</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div>
+                    <div class="form-group">
+                        <label for="add-user-username">Username</label>
+                        <input type="text" name="username" id="add-user-username" class="form-control">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-success" onclick="add_user()">Create account</button>
+                <button class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal" tabindex="-1" role="dialog" id="edit-user-modal">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit librarian account</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div>
+                    <div class="form-group">
+                        <label for="edit-user-username">New username</label>
+                        <input type="text" name="username" class="form-control" id="edit-user-username">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-success" onclick="edit_user()">Save</button>
+                <button class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-2 col-xl-1 sidebar">
+            <nav class="sidebar-nav">
+                <div class="sidebar-item">
+                    <a href="/admin/profile">
+                        <i class="fas fa-user"></i>
+                        <span>[[${session.username}]]</span>
+                    </a>
+                </div>
+                <div class="sidebar-item">
+                    <a href="/admin/logout">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Logout</span>
+                    </a>
+                </div>
+            </nav>
+        </div>
+        <div class="col-10 col-xl-11 main" style="background-color: rgb(238, 245, 249);">
+            <div class="content">
+                <h2 class="mb-3">List of librarian accounts</h2>
+                <button class="btn btn-success mb-3" data-toggle="modal" data-target="#add-user-modal">
+                    Add new librarian
+                </button>
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>Librarian ID</th>
+                        <th>Librarian Name</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr class="lineItem" th:each="librarian : ${librarianList}">
+                        <td th:text="${librarian.id}">Librarian ID</td>
+                        <td th:text="${librarian.username}">Librarian name</td>
+                        <td>
+                            <ul class="actions-list" style="display: flex; list-style: none; padding: 0;">
+                                <li>
+                                    <a href="javascript:void(0);" th:data-id="${librarian.id}"
+                                       onclick="delete_user(this)">
+                                        Delete
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="javascript:void(0);" th:data-id="${librarian.id}"
+                                       onclick="start_edit_user(this)">
+                                        Edit
+                                    </a>
+                                </li>
+                            </ul>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function add_user() {
+        $.ajax({
+            url: "/api/admin/register",
+            type: "POST",
+            dataType: "json",
+            data: {
+                username: $("#add-user-username").val(),
+                password: "123456"
+            },
+            success: function (resp) {
+                window.location.reload();
+            },
+            error: function (xhr) {
+                var resp = JSON.parse(xhr.responseText);
+                alert(resp.message);
+            }
+        });
+    }
+
+    function delete_user(e) {
+        $.ajax({
+            url: "/api/admin/user/" + e.dataset.id,
+            type: "DELETE",
+            dataType: "json",
+            success: function (resp) {
+                window.location.reload();
+            },
+            error: function (xhr) {
+                var resp = JSON.parse(xhr.responseText);
+                alert(resp.message);
+            }
+        });
+    }
+
+    var userId = null;
+
+    function start_edit_user(e) {
+        userId = e.dataset.id;
+        $("#edit-user-modal").modal();
+    }
+
+    function edit_user() {
+        $.ajax({
+            url: "/api/admin/user/" + userId,
+            type: "PUT",
+            dataType: "json",
+            contentType: "application/json",
+            data: JSON.stringify({
+                username: $("#edit-user-username").val()
+            }),
+            success: function (resp) {
+                window.location.reload();
+            },
+            error: function (xhr) {
+                var resp = JSON.parse(xhr.responseText);
+                alert(resp.message);
+            }
+        });
+    }
+</script>
+<!--
+<div class="page-container">
+    <div class="left-content" style="background-color: rgb(238, 245, 249); min-height: 800px;">
+        <div class="header-section">
+            <div class="top_menu">
+                <div class="profile_details_left">
+                    <ul class="nofitications-dropdown">
+                        <li class="dropdown note">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false"></a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="clearfix"></div>
+            </div>
+        </div>
+        <div name="info">
+            <div class="modal-title" style="background-color: rgb(255, 255, 255);">
+                <div style="padding-left: 3em;padding-top:2em;margin-bottom: 2em; border: 1px solid #E7E7E8;">
+                    <h2 class="inner-tittle" style="margin:0 auto;">Librarian</h2>
+
+                    <div style="padding-left: 1em">
+                        <ul class="breadcrumb">
+                            <li class="breadcrumb-item"><a th:href="@{/admin}">Home</a></li>
+                            <li class="breadcrumb-item active">Librarian Edit</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="graph" style="width:90%;margin:0 auto;margin-left: 5%;">
+
+
+            </div>
+            <footer>
+                <p></p>
+            </footer>
+        </div>
+        <div class="sidebar-menu">
+            <header class="logo">
+                <a href="#" class="sidebar-icon">
+                    <span class="fa fa-bars">
+                    </span>
+                </a>
+                <h1>Mandarin</h1>
+            </header>
+            <div style="border-top:1px solid rgba(69, 74, 84, 0.7)"></div>
+            <div class="down"><a th:href="/admin/profile"><img th:src="@{/static/admin/images/admin.jpg}"></a><a><span
+                    class="name-caret">[[${username}]]</span></a>
+                <p>Mandarin admin</p>
+                <ul>
+                    <li><a class="tooltips" th:href="'/admin/'+${username}"><span>Profile</span><i
+                            class="lnr lnr-user"></i></a></li>
+                    <li><a class="tooltips" th:href="@{/admin/logout}"><span>Log out</span><i
+                            class="lnr lnr-power-switch"></i></a></li>
+                </ul>
+            </div>
+            <div class="menu">
+                <ul id="menu">
+                    <li id="menu-academico"><a href="#"><i class="fa fa-users"></i> <span>manage librarians</span> <span
+                            class="fa fa-angle-right" style="float: right"></span></a>
+                        <ul id="menu-academico-sub">
+                            <li id="menu-academico-boletim"><a th:href="@{/admin}">all librarians</a></li>
+                            <li id="menu-academico-avaliacoes"><a th:href="@{/admin/register}">add librarian</a></li>
+                        </ul>
+                    </li>
+                    <li><a th:href="'/admin/'+${username}"><i class="fa fa-key"></i> <span>change password</span> </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="clearfix"></div>
+    </div>
+</div>
+-->
+<script th:src="@{/static/admin/js/scripts.js}"></script>
+</body>
+</html>

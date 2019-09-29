@@ -36,13 +36,4 @@ public class GeneralAPIController {
         }
         return ResponseEntity.ok(BasicResponse.ok().data(BookDetailDTO.toDTO(book)));
     }
-
-    //展示借阅、归还情况
-    @GetMapping("/user/{userId}/history")
-    public ResponseEntity viewHistory(@PathVariable Integer userId,
-                                      @RequestParam(defaultValue = "0") Integer page,
-                                      @RequestParam(defaultValue = "10") Integer size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("startTime"));
-        return ResponseEntity.ok(BasicResponse.ok().data(lendingLogRepository.findByUserId(userId, pageable).getContent()));
-    }
 }
