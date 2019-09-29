@@ -1,0 +1,113 @@
+
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<title>History</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Type" content="text/html;" />
+<meta name="keywords" content="" />
+<script type="application/x-javascript">
+	addEventListener("load", function() {
+		setTimeout(hideURLbar, 0); }, false);
+	function hideURLbar(){ window.scrollTo(0,1); }
+</script>
+
+<!--//skycons-icons-->
+</head>
+<div th:include="/librarian/common :: dependency"></div>
+<body>
+   <div class="page-container">
+   <!--/content-inner-->
+	<div class="left-content">
+	   <div class="inner-content">
+		   <div th:replace="/librarian/common::header-section"></div>
+		   <!--//outer-wp-->
+		   <div class="outter-wp">
+			   <style>
+				   table, td, th
+				   {
+					   border:1px solid black;
+				   }
+				   td
+				   {
+					   padding:15px;
+				   }
+			   </style>
+			   <div class="forms-main">
+				   <div class="set-3">
+					   <div class="graph-2 general">
+						   <h3 class="inner-tittle two">User Lend/Return Book History</h3>
+						   <div class="grid-1">
+							   <div class="search mr-auto">
+								   <div class="col-md-3">
+									   <label for="query" class="col-md-8 control-label">input userId</label>
+									   <input id="query" type="text" placeholder="userId" class="form-control">
+									   <a class="search-button btn btn-primary" type="button" id="submit">
+										   <span class="fa fa-search"></span>
+									   </a>
+								   </div>
+							   </div>
+							   <div class="get-list"></div>
+							   <script src="https://cdn.jsdelivr.net/npm/handlebars@4.1.2/dist/handlebars.min.js"></script>
+							   <script src="https://cdn.jsdelivr.net/npm/moment@2.24.0/moment.min.js"></script>
+							   <script id="lendingLog-template" type="text/x-handlebars-template">
+								   <table class="table table-hover">
+									   <thead>
+									   <tr>
+										   <th>#</th>
+										   <th>userId</th>
+										   <th>bookId</th>
+										   <th>startTime</th>
+										   <th>endTime</th>
+									   </tr>
+									   </thead>
+									   {{#each lendingLogs}}
+									   <tbody>
+									   <tr>
+										   <td>{{id}}</td>
+										   <td>{{userId}}</td>
+										   <td>{{bookId}}</td>
+										   <td>{{startTime}}</td>
+										   <td>{{endTime}}</td>
+									   </tr>
+
+									   </tbody>
+									   {{/each}}
+								   </table>
+
+							   </script>
+
+						   </div>
+						   <script th:inline="javascript">
+							   $("#submit").bind("click", function () {
+								   var source = document.getElementById("lendingLog-template").innerHTML;
+								   var template = Handlebars.compile(source);
+								   $.ajax({
+									   url: "/librarian/user/" + $("#query").val().toString() + "/history",
+									   dataType: "json",
+									   type: "get",
+									   success: function (resp) {
+										   console.log(template({lendingLogs: resp.data}));
+										   resp.data.forEach((element) => {
+											   element.startTime = moment.unix(element.startTime.epochSecond).format("YYYY-M-D H:mm");
+										   if (element.endTime != null)
+											   element.endTime = moment.unix(element.endTime.epochSecond).format("YYYY-M-D H:mm");
+									   });
+										   $(".get-list").html(template({lendingLogs: resp.data}));
+									   }
+								   });
+							   });
+						   </script>
+					   </div>
+				   </div>
+			   </div>
+		   </div>
+		   <div th:replace="/librarian/common::footer-section"></div>
+		   <!--footer section end-->
+	   </div>
+		<div th:replace="/librarian/common::sidebar-menu"></div>
+	</div>
+   </div>
+</body>
+</html>

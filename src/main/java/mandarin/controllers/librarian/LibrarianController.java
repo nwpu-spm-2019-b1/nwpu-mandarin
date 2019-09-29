@@ -7,9 +7,14 @@ import mandarin.auth.UserType;
 import mandarin.auth.exceptions.AuthenticationException;
 import mandarin.auth.exceptions.UnauthorizedException;
 import mandarin.dao.UserRepository;
+import mandarin.entities.Category;
+import mandarin.entities.LendingLogItem;
 import mandarin.entities.User;
 import mandarin.exceptions.ForbiddenException;
 import mandarin.utils.BasicResponse;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -17,6 +22,8 @@ import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import java.util.List;
+import java.util.Map;
 
 @RequestMapping("/librarian")
 @AuthenticationNeeded(UserType.Librarian)
@@ -29,15 +36,20 @@ public class LibrarianController {
     @Resource
     SessionHelper sessionHelper;
 
-    @NoAuthentication
-    @ExceptionHandler(UnauthorizedException.class)
-    public String loginRedirect() {
-        return "redirect:/librarian/login";
-    }
+    @Resource
+    CategoryRepository categoryRepository;
+
+    @Resource
+    LendingLogRepository lendingLogRepository;
+
+    @Resource
+    HistoryResult historyResult;
 
     @GetMapping({"/", ""})
-    public String index() {
-        return "librarian/view_history";
+    public String index()
+    {
+
+        return "librarian/index";
     }
 
     //登录
@@ -85,4 +97,67 @@ public class LibrarianController {
             return ResponseEntity.badRequest().body(BasicResponse.fail().message(e.getMessage()));
         }
     }
+
+
+    //展示借阅、归还情况
+    @ResponseBody
+    @GetMapping("/history")
+    @AuthenticationNeeded(UserType.Librarian)
+    public ResponseEntity viewHistory(@RequestParam("userId") Integer userId,
+                                      @RequestParam(value = "page", defaultValue = "0") Integer page,
+                                      @RequestParam(value = "size", defaultValue = "10") Integer size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("startTime"));
+        List<LendingLogItem> list = lendingLogRepository.findByUserId(userId, pageable).getContent();
+        BasicResponse<List<LendingLogItem>> response = BasicResponse.ok();
+        response.data(list);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/user/{userId}/history")
+    public ResponseEntity viewHistory1(@PathVariable Integer userId,
+                                       @RequestParam(defaultValue = "0") Integer page,
+                                       @RequestParam(defaultValue = "10") Integer size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("startTime"));
+        List<HistoryResult> results = historyResult.listHistory(userId, pageable);
+        return ResponseEntity.ok(BasicResponse.ok().data(results));
+    }
+
+
+    @PostMapping("/categories")
+    public ResponseEntity getCategories(){
+        List<Category> categories = categoryRepository.findAll();
+        return ResponseEntity.ok().body(BasicResponse.ok().data(categories));
+    }
+
+
+    @GetMapping("/show-history")
+    public String getHistoryPage()
+    {
+        return "/librarian/compose";
+    }
+
+    @GetMapping("/add-book")
+    public String getAddBookPage()
+    {
+        return "/librarian/add_book";
+    }
+
+    @GetMapping("/delete-book")
+    public String getDeleteBookPage()
+    {
+        return "/librarian/delete_book";
+    }
+
+    @GetMapping("/register-reader")
+    public String getRegisterReaderPage()
+    {
+        return "/librarian/register_reader";
+    }
+
+    @GetMapping("/lend-return-book")
+    public String getLendBookPage()
+    {
+        return "/librarian/lend_return_book";
+    }
+
 }

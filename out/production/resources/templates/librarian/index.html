@@ -1,0 +1,230 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+<title>Home</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Type" content="text/html;" />
+<meta name="keywords" content="" />
+<script type="application/x-javascript"> addEventListener("load", function() { setTimeout(hideURLbar, 0); }, false); function hideURLbar(){ window.scrollTo(0,1); } </script>
+
+<!--//skycons-icons-->
+</head> 
+<body>
+<div th:replace="/librarian/common::dependency"></div>
+
+<div class="page-container">
+   <!--/content-inner-->
+	<div class="left-content">
+	   <div class="inner-content">
+		<!-- header-starts -->
+		   <div th:replace="/librarian/common::header-section"></div>
+					<!-- //header-ends -->
+						<div class="outter-wp">
+								<!--custom-widgets-->
+							<div class="custom-widgets">
+										<div class="col-md-3 widget">
+											<div class="stats-left ">
+												<h5>Today</h5>
+												<h4> Users</h4>
+											</div>
+											<div class="stats-right">
+												<label>90</label>
+											</div>
+											<div class="clearfix"> </div>
+										</div>
+										<div class="col-md-3 widget states-mdl">
+											<div class="stats-left">
+												<h5>Today</h5>
+												<h4>Visitors</h4>
+											</div>
+											<div class="stats-right">
+												<label> 85</label>
+											</div>
+											<div class="clearfix"> </div>
+										</div>
+										<div class="col-md-3 widget states-thrd">
+											<div class="stats-left">
+												<h5>Today</h5>
+												<h4>Tasks</h4>
+											</div>
+											<div class="stats-right">
+												<label>51</label>
+											</div>
+											<div class="clearfix"> </div>
+										</div>
+										<div class="col-md-3 widget states-last">
+											<div class="stats-left">
+												<h5>Today</h5>
+												<h4>Alerts</h4>
+											</div>
+											<div class="stats-right">
+												<label>30</label>
+											</div>
+											<div class="clearfix"> </div>
+										</div>
+										<div class="clearfix"> </div>
+							</div>
+							<!--//custom-widgets-->
+							<!--/charts-->
+							<div class="charts">
+								<div class="chrt-inner">
+									<div class="chrt-bars">
+										<div class="col-md-6 chrt-three">
+											<h3 class="sub-tittle">Daily Lend Book Count (todo)</h3>
+											<div id="chartdiv"></div>
+											<script>
+												var chart = AmCharts.makeChart( "chartdiv", {
+												  "type": "serial",
+												  "theme": "light",
+												  "dataProvider": [ {
+													"date": "2019.9.27",
+													"value": 11.5,
+													"error": 5
+												  }, {
+													"date": "2019.9.28",
+													"value": 26.2,
+													"error": 5
+												  }, {
+													"date": "2019.9.29",
+													"value": 30.1,
+													"error": 5
+												  }, {
+													"date": "2019.9.30",
+													"value": 29.5,
+													"error": 7
+												  }, {
+													"date": "2019.10.1",
+													"value": 24.6,
+													"error": 10
+												  } ],
+												  "balloon": {
+													"textAlign": "left"
+												  },
+												  "valueAxes": [ {
+													"id": "v1",
+													"axisAlpha": 0
+												  } ],
+												  "startDuration": 1,
+												  "graphs": [ {
+													"balloonText": "count:<b>[[value]]</b>",
+													"bullet": "yError",
+													"bulletSize": 10,
+													"errorField": "error",
+													"lineThickness": 2,
+													"valueField": "count",
+													"bulletAxis": "v1",
+													"fillAlphas": 0
+												  }, {
+													"bullet": "round",
+													"bulletBorderAlpha": 1,
+													"bulletBorderColor": "#FFFFFF",
+													"lineAlpha": 0,
+													"lineThickness": 2,
+													"showBalloon": false,
+													"valueField": "value"
+
+												  } ],
+												  "chartCursor": {
+													"cursorAlpha": 0,
+													"cursorPosition": "mouse",
+													"graphBulletSize": 1,
+													"zoomable": false
+												  },
+												  "categoryField": "date",
+												  "categoryAxis": {
+													"gridPosition": "start",
+													"axisAlpha": 0
+												  },
+												  "export": {
+													"enabled": true
+												  }
+												} );
+											</script>
+										</div>
+										<div class="clearfix"> </div>
+									</div>
+
+									<!--//charts-->
+									<div class="area-charts">
+										<div class="col-md-6 tini-time-line">
+											<h3 class="sub-tittle">Reader Discuss (todo) </h3>
+											<ul class="timeline">
+												<li>
+													<div class="timeline-badge info"><i class="fa fa-smile-o"></i></div>
+													<div class="timeline-panel">
+														<div class="timeline-heading">
+															<h4 class="timeline-title">Title</h4>
+														</div>
+														<div class="timeline-body">
+															<p>Description...</p>
+														</div>
+													</div>
+												</li>
+
+												<li>
+													<div class="timeline-badge primary"><i class="fa fa-star-o"></i></div>
+													<div class="timeline-panel">
+														<div class="timeline-heading">
+															<h4 class="timeline-title">Title</h4>
+														</div>
+														<div class="timeline-body">
+															<p>Description...</p>
+														</div>
+													</div>
+												</li>
+
+												<li>
+													<div class="timeline-badge danger"><i class="fa fa-times-circle-o"></i></div>
+													<div class="timeline-panel">
+														<div class="timeline-heading">
+															<h4 class="timeline-title">Title</h4>
+														</div>
+														<div class="timeline-body">
+															<p>Description...</p>
+														</div>
+													</div>
+												</li>
+
+												<li>
+													<div class="timeline-badge success"><i class="fa fa-check-circle-o"></i></div>
+													<div class="timeline-panel">
+														<div class="timeline-heading">
+															<h4 class="timeline-title">Title</h4>
+														</div>
+														<div class="timeline-body">
+															<p>Description...</p>
+														</div>
+													</div>
+												</li>
+											</ul>
+										</div>
+										<div class="clearfix"></div>
+									</div>
+
+								</div>
+								<!--/charts-inner-->
+							</div>
+							<!--//outer-wp-->
+						</div>
+		   <!--footer section start-->
+		   <div th:replace="/librarian/common::footer-section"></div>
+		   <!--footer section end-->
+	   </div>
+	</div>
+	<!--//content-inner-->
+	<!--/sidebar-menu-->
+	<div th:replace="/librarian/common::sidebar-menu"></div>
+</div>
+<!--js -->
+<link rel="stylesheet" href="/static/librarian/css/vroom.css">
+<script type="text/javascript" src="/static/librarian/js/vroom.js"></script>
+<script type="text/javascript" src="/static/librarian/js/TweenLite.min.js"></script>
+<script type="text/javascript" src="/static/librarian/js/CSSPlugin.min.js"></script>
+<script src="/static/librarian/js/jquery.nicescroll.js"></script>
+<script src="/static/librarian/js/scripts.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+   <script src="/static/librarian/js/bootstrap.min.js"></script>
+</body>
+</html>
