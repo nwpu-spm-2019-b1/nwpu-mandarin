@@ -47,10 +47,9 @@ public class LibrarianController {
     @Resource
     HistoryResult historyResult;
 
-    @GetMapping({"/", ""})
-    public String index()
-    {
-        return "librarian/index";
+    @GetMapping({"", "/", "/users", "/books"})
+    public String index() {
+        return "librarian-new/main";
     }
 
     //登录
@@ -58,16 +57,9 @@ public class LibrarianController {
     @NoAuthentication
     public String loginPage(HttpServletRequest request) throws RuntimeException {
         HttpSession session = request.getSession(false);
-        if (session == null) {
-            return "librarian/login";
-        }
-        User user = userRepository.findById((Integer) session.getAttribute("userId")).orElse(null);
+        User user = sessionHelper.getCurrentUser();
         if (user == null) {
-            session.invalidate();
-            return "redirect:/librarian/login";
-        }
-        if (user.getType() != UserType.Librarian) {
-            throw new ForbiddenException();
+            return "librarian-new/login";
         }
         return "redirect:/librarian";
     }
@@ -79,7 +71,7 @@ public class LibrarianController {
                                                @RequestParam String password,
                                                HttpSession session) {
         try {
-            sessionHelper.login(session, username, password, UserType.Librarian);
+            sessionHelper.login(username, password, UserType.Librarian);
             return ResponseEntity.ok().body(BasicResponse.ok().message("Logged in"));
         } catch (AuthenticationException e) {
             return ResponseEntity.badRequest().body(BasicResponse.fail().message(e.getMessage()));
@@ -92,7 +84,7 @@ public class LibrarianController {
     @AuthenticationNeeded(UserType.Librarian)
     public ResponseEntity<BasicResponse> logout(HttpSession session) {
         try {
-            sessionHelper.logout(session, UserType.Librarian);
+            sessionHelper.logout(UserType.Librarian);
             return ResponseEntity.ok().body(BasicResponse.ok().message("Logged out"));
         } catch (AuthenticationException e) {
             return ResponseEntity.badRequest().body(BasicResponse.fail().message(e.getMessage()));
@@ -125,39 +117,34 @@ public class LibrarianController {
 
 
     @PostMapping("/categories")
-    public ResponseEntity getCategories(){
+    public ResponseEntity getCategories() {
         List<Category> categories = categoryRepository.findAll();
         return ResponseEntity.ok().body(BasicResponse.ok().data(categories));
     }
 
 
     @GetMapping("/show-history")
-    public String getHistoryPage()
-    {
+    public String getHistoryPage() {
         return "/librarian/compose";
     }
 
     @GetMapping("/add-book")
-    public String getAddBookPage()
-    {
+    public String getAddBookPage() {
         return "/librarian/add_book";
     }
 
     @GetMapping("/delete-book")
-    public String getDeleteBookPage()
-    {
+    public String getDeleteBookPage() {
         return "/librarian/delete_book";
     }
 
     @GetMapping("/register-reader")
-    public String getRegisterReaderPage()
-    {
+    public String getRegisterReaderPage() {
         return "/librarian/register_reader";
     }
 
     @GetMapping("/lend-return-book")
-    public String getLendBookPage()
-    {
+    public String getLendBookPage() {
         return "/librarian/lend_return_book";
     }
 

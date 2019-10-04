@@ -10,12 +10,13 @@ CREATE TABLE users
 DROP TABLE IF EXISTS books CASCADE;
 CREATE TABLE books
 (
-    id       SERIAL PRIMARY KEY,
-    isbn     TEXT    NOT NULL,
-    title    TEXT    NOT NULL,
-    author   TEXT    NOT NULL,
-    price    NUMERIC NOT NULL,
-    location TEXT    NOT NULL
+    id          SERIAL  PRIMARY KEY,
+    isbn        TEXT    NOT NULL,
+    title       TEXT    NOT NULL,
+    author      TEXT    NOT NULL,
+    description TEXT    NOT NULL,
+    price       NUMERIC NOT NULL,
+    location    TEXT    NOT NULL
 );
 CREATE INDEX ON books (isbn);
 DROP TABLE IF EXISTS lending_log;
@@ -52,9 +53,9 @@ CREATE INDEX ON categories (parent_category_id);
 DROP TABLE IF EXISTS book_category_rel;
 CREATE TABLE book_category_rel
 (
-    isbn        TEXT NOT NULL,
-    category_id INTEGER REFERENCES categories (id),
-    PRIMARY KEY (isbn, category_id)
+    book_id        INTEGER NOT NULL,
+    category_id    INTEGER REFERENCES categories (id),
+    PRIMARY KEY    (book_id, category_id)
 );
 CREATE INDEX ON book_category_rel (category_id);
 DROP TABLE IF EXISTS reservations;

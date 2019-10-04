@@ -17,6 +17,7 @@ import mandarin.exceptions.APIException;
 import mandarin.services.BookService;
 import mandarin.utils.BasicResponse;
 import mandarin.utils.ObjectUtils;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -48,6 +49,32 @@ public class LibrarianAPIController {
 
     @Resource
     BookService bookService;
+
+    @GetMapping("/book/search")
+    public ResponseEntity searchBook(@RequestParam String type, @RequestParam String query) {
+        Page<Book> books = null;
+        switch (type) {
+            case "isbn":
+                books = bookRepository.findAllByISBN(query, Pageable.unpaged());
+                break;
+            case "title":
+                books = bookRepository.findAllByTitleContainsIgnoreCase(query, Pageable.unpaged());
+                break;
+            case "author":
+                books = bookRepository.findAllByAuthorContaining(query, Pageable.unpaged());
+                break;
+            case "description":
+                books = Page.empty();
+                break;
+            default:
+                return ResponseEntity.badRequest().body(BasicResponse.fail().data("No such type of search"));
+        }
+        return ResponseEntity.ok(BasicResponse.ok().data(books.getContent().stream().map((Book book) -> {
+            Map<String, Object> result = new HashMap<>();
+            ObjectUtils.copyFieldsIntoMap(book, result, "id", "isbn", "title", "description", "author");
+            return result;
+        }).collect(Collectors.toList())));
+    }
 
     //展示借阅、归还情况
     @GetMapping("/user/{userId}/history")

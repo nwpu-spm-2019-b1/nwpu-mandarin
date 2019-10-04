@@ -7,18 +7,35 @@ import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import java.io.IOException;
 import java.lang.reflect.Method;
+import java.util.Properties;
 
 public class AuthenticationInterceptor extends HandlerInterceptorAdapter {
+    private boolean disabled = false;
+
+    public AuthenticationInterceptor() {
+        Properties properties = new Properties();
+        try {
+            properties.load(this.getClass().getClassLoader().getResourceAsStream("application.properties"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        disabled = !Boolean.parseBoolean(properties.getProperty("mandarin.auth", "true"));
+    }
+
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         if (!(handler instanceof HandlerMethod)) {
             return true;
         }
+        if (disabled) {
+            return true;
+        }
         HttpSession session = request.getSession(false);
         if (session != null && session.getAttribute("userId") == null) {
             session.invalidate();
-            return true;
+            session = null;
         }
         HandlerMethod handlerMethod = (HandlerMethod) handler;
         Method method = handlerMethod.getMethod();

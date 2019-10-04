@@ -4,6 +4,7 @@ const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 
 module.exports = {
     entry: {
+        common: "./src/main/resources/ui/js/common.js",
         librarian: "./src/main/resources/ui/js/librarian.js"
     },
     mode: "development",
@@ -35,9 +36,13 @@ module.exports = {
         ],
     },
     externals: {
-        // require("jquery") is external and available
-        //  on the global var jQuery
         "react": "React",
         "react-dom": "ReactDOM"
+    },
+    devServer: {
+        contentBase: [path.join(__dirname, 'src/main/resources/static/'), path.join(__dirname, "temp/")],
+        publicPath: '/static/dist/',
+        compress: true,
+        port: 9000
     }
 };

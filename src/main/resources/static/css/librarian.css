@@ -1,0 +1,61 @@
+html, body {
+    height: 100%;
+}
+
+#app {
+    height: 100%;
+}
+
+.row {
+    height: 100%;
+}
+
+.container-fluid {
+    height: 100%;
+}
+
+.main-column {
+    padding: 0;
+}
+
+.sidebar {
+    height: 100%;
+    padding-left: 0;
+    padding-right: 0;
+}
+
+.sidebar-nav {
+    height: 100%;
+    border-right: #e1e1e1 1px solid;
+}
+
+.sidebar-nav ul {
+    display: flex;
+    flex-direction: column;
+    list-style: none;
+    padding: 0;
+}
+
+.sidebar-nav ul li {
+    padding-top: 0.4em;
+    padding-bottom: 0.4em;
+    padding-left: 0.3em;
+    border-bottom: #E7E7E7 1px solid;
+}
+
+.sidebar-nav ul li a {
+    color: #606060;
+}
+
+.sidebar-nav ul li.active {
+    background-color: #FAF582;
+}
+
+.book-search-box {
+    margin-bottom: 0.4em;
+}
+
+.book-search-box .input-container {
+    padding-left: 0.2em;
+    padding-right: 0.2em;
+}

@@ -72,7 +72,7 @@ public class AdminController {
                                 @RequestParam("password") String password,
                                 HttpSession session) {
         try {
-            sessionHelper.login(session, username, password, UserType.Admin);
+            sessionHelper.login(username, password, UserType.Admin);
             return ResponseEntity.status(HttpStatus.CREATED).body(BasicResponse.ok());
         } catch (AuthenticationException e) {
             return ResponseEntity.badRequest().body(BasicResponse.fail().message(e.getMessage()));
@@ -81,7 +81,7 @@ public class AdminController {
 
     @GetMapping("/logout")
     public String logout(HttpSession session) {
-        sessionHelper.logout(session, UserType.Admin);
+        sessionHelper.logout(UserType.Admin);
         return "redirect:/admin/login";
     }
 

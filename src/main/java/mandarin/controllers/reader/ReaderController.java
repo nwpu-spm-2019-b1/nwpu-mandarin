@@ -86,16 +86,18 @@ public class ReaderController {
                              Model model) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("id"));
         List<Book> books = new ArrayList<>();
-        query = "%" + query + "%";
+        String fullQuery = "%" + query + "%";
         switch (type) {
             case "title":
-                books = bookRepository.findByTitleLike(query, pageable).getContent();
+                books = bookRepository.findByTitleLike(fullQuery, pageable).getContent();
                 break;
             case "author":
-                books = bookRepository.findByAuthorLike(query, pageable).getContent();
+                books = bookRepository.findByAuthorLike(fullQuery, pageable).getContent();
                 break;
         }
         model.addAttribute("books", books);
+        model.addAttribute("type", type);
+        model.addAttribute("query", query);
         return "reader/search";
     }
 
@@ -105,7 +107,7 @@ public class ReaderController {
                                 @RequestParam String password,
                                 HttpSession session) {
         try {
-            sessionHelper.login(session, username, password, UserType.Reader);
+            sessionHelper.login(username, password, UserType.Reader);
             return ResponseEntity.ok().body(BasicResponse.ok().message("logged in"));
         } catch (AuthenticationException e) {
             return ResponseEntity.badRequest().body(BasicResponse.fail().message(e.getMessage()));
@@ -116,7 +118,7 @@ public class ReaderController {
     @ResponseBody
     public ResponseEntity logout(HttpSession session) {
         try {
-            sessionHelper.logout(session, UserType.Reader);
+            sessionHelper.logout(UserType.Reader);
             return ResponseEntity.ok().body(BasicResponse.ok().message("logged out"));
         } catch (AuthenticationException e) {
             return ResponseEntity.badRequest().body(BasicResponse.fail().message(e.getMessage()));

@@ -15,15 +15,16 @@ public class Book implements Serializable {
     private String isbn;
     private String title;
     private String author;
+    private String description;
     private String location;
     private BigDecimal price;
     @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(name = "book_category_rel",joinColumns = {@JoinColumn(name = "isbn",referencedColumnName = "isbn")},inverseJoinColumns = {@JoinColumn(name = "category_id")})
+    @JoinTable(name = "book_category_rel", joinColumns = {@JoinColumn(name = "book_id")}, inverseJoinColumns = {@JoinColumn(name = "category_id")})
     private List<Category> categories;
 
     public Book() {
-        this.price=BigDecimal.ZERO;
-        this.categories=new ArrayList<>();
+        this.price = BigDecimal.ZERO;
+        this.categories = new ArrayList<>();
     }
 
     public Book(String isbn, String title, String author, String location, BigDecimal price, List<Category> categories) {
@@ -61,6 +62,14 @@ public class Book implements Serializable {
 
     public void setAuthor(String author) {
         this.author = author;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public String getLocation() {

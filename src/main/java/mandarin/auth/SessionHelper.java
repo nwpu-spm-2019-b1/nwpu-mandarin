@@ -20,7 +20,13 @@ public class SessionHelper {
     @Resource
     UserRepository userRepository;
 
-    public void login(HttpSession session, String username, String password, UserType userType) {
+    private HttpSession getSession(){
+        ServletRequestAttributes attrs = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
+        return attrs.getRequest().getSession(false);
+    }
+
+    public void login(String username, String password, UserType userType) {
+        HttpSession session=getSession();
         if (session.getAttribute("userId") != null) {
             throw new InvalidStateException("already logged in");
         }
@@ -49,7 +55,8 @@ public class SessionHelper {
         }
     }
 
-    public void logout(HttpSession session, UserType userType) {
+    public void logout(UserType userType) {
+        HttpSession session=getSession();
         if (session.getAttribute("userType").equals(userType)) {
             session.invalidate();
         } else {
