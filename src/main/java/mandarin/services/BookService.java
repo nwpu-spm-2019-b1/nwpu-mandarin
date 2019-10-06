@@ -9,6 +9,7 @@ import mandarin.entities.*;
 import mandarin.utils.ObjectUtils;
 import org.hibernate.SessionFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
@@ -52,7 +53,7 @@ public class BookService {
         return checkAvailability(book);
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
     public BookStatus getBookStatus(Book book) {
         Reservation reservation = reservationRepository.findByBookId(book.getId()).orElse(null);
         LendingLogItem lendingLogItem = lendingLogRepository.findOutstandingByBook(book).orElse(null);
@@ -65,6 +66,7 @@ public class BookService {
         }
     }
 
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
     public boolean checkAvailability(Book book) {
         Reservation reservation = reservationRepository.findByBookId(book.getId()).orElse(null);
         if (reservation != null) {
@@ -80,7 +82,7 @@ public class BookService {
         return deleteBook(book.getId());
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public int deleteBook(Integer bookId) {
         Map<String, Object> actionInfo = new HashMap<>();
         Map<String, Object> bookInfo = new HashMap<>();
