@@ -10,11 +10,13 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import javax.sql.DataSource;
 import java.util.Collections;
 
 @Configuration
+@EnableTransactionManagement
 @EnableJpaRepositories(basePackages = "mandarin.dao")
 @PropertySource("classpath:/application.properties")
 public class AppConfig {
@@ -61,6 +63,4 @@ public class AppConfig {
         txnMgr.setEntityManagerFactory(entityManagerFactory().getObject());
         return txnMgr;
     }
-
-
 }

@@ -8,6 +8,8 @@ import org.apache.commons.io.IOUtils;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
@@ -38,7 +40,7 @@ public class StartupListener {
     private DataSource dataSource;
 
     @Resource
-    EntityManagerFactory entityManagerFactory;
+    private EntityManagerFactory entityManagerFactory;
 
     public StartupListener(DataSource dataSource) {
         this.dataSource = dataSource;
@@ -48,8 +50,7 @@ public class StartupListener {
     public void addEntities() throws IOException {
         if (firstTime) {
             firstTime = false;
-            SessionFactory sessionFactory = entityManagerFactory.unwrap(SessionFactory.class);
-            Session session = sessionFactory.openSession();
+            Session session = entityManagerFactory.unwrap(SessionFactory.class).openSession();
             Transaction tx = session.beginTransaction();
             Category c1 = new Category("Programming", null);
             session.save(c1);
@@ -74,8 +75,7 @@ public class StartupListener {
             Random random = new Random();
             for (Map<String, Object> item : items) {
                 String location = String.format("Floor %s, shelf %s", random.nextInt(5) + 1, random.nextInt(16) + 1);
-                Book book = new Book((String) item.getOrDefault("isbn", "N/A"), (String) item.get("title"), (String) item.get("author"), location, new BigDecimal("123.456"), new ArrayList<>());
-                book.setDescription((String) item.get("description"));
+                Book book = new Book((String) item.getOrDefault("isbn", "N/A"), (String) item.get("title"), (String) item.get("author"), (String) item.get("description"), location, new BigDecimal("123.456"), new ArrayList<>());
                 if (item.containsKey("isbn")) {
                     book.getCategories().addAll(((List<String>) item.get("categories")).stream().map((String name) -> {
                         if (!categories.containsKey(name)) {

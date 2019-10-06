@@ -20,17 +20,17 @@ public class SessionHelper {
     @Resource
     UserRepository userRepository;
 
-    private HttpSession getSession(){
+    private HttpSession getSession() {
         ServletRequestAttributes attrs = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
         return attrs.getRequest().getSession(false);
     }
 
     public void login(String username, String password, UserType userType) {
-        HttpSession session=getSession();
+        HttpSession session = getSession();
         if (session.getAttribute("userId") != null) {
             throw new InvalidStateException("already logged in");
         }
-        User user = userRepository.findByUsername(username);
+        User user = userRepository.findByUsername(username).orElse(null);
         if (user == null || !CryptoUtils.verifyPassword(password, user.getPasswordHash())) {
             throw new InvalidCredentialsException();
         }
@@ -56,7 +56,7 @@ public class SessionHelper {
     }
 
     public void logout(UserType userType) {
-        HttpSession session=getSession();
+        HttpSession session = getSession();
         if (session.getAttribute("userType").equals(userType)) {
             session.invalidate();
         } else {

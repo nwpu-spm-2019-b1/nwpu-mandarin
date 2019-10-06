@@ -1,24 +1,32 @@
 const path = require("path");
 const webpack = require("webpack");
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
-
+const VueLoaderPlugin = require('vue-loader/lib/plugin');
 module.exports = {
     entry: {
-        common: "./src/main/resources/ui/js/common.js",
         librarian: "./src/main/resources/ui/js/librarian.js"
     },
     mode: "development",
     module: {
         rules: [
             {
-                test: /\.(js|jsx)$/,
+                test: /\.vue$/,
                 exclude: /(node_modules|bower_components)/,
+                loader: "vue-loader"
+                /*options: {presets: ["@babel/env"]}*/
+            },
+            {
+                test: /\.js$/,
                 loader: "babel-loader",
                 options: {presets: ["@babel/env"]}
             }
+
         ]
     },
-    resolve: {extensions: ["*", ".js", ".jsx"]},
+    plugins: [
+        new VueLoaderPlugin()
+    ],
+    resolve: {extensions: ["*", ".js", ".vue"]},
     output: {
         path: path.resolve(__dirname, "src/main/resources/static/dist/"),
         publicPath: "/static/dist/",
@@ -36,8 +44,7 @@ module.exports = {
         ],
     },
     externals: {
-        "react": "React",
-        "react-dom": "ReactDOM"
+        jquery: 'jQuery'
     },
     devServer: {
         contentBase: [path.join(__dirname, 'src/main/resources/static/'), path.join(__dirname, "temp/")],

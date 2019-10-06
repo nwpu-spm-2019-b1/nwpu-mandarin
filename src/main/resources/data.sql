@@ -14,8 +14,8 @@ CREATE TABLE books
     isbn        TEXT    NOT NULL,
     title       TEXT    NOT NULL,
     author      TEXT    NOT NULL,
-    description TEXT    NOT NULL,
-    price       NUMERIC NOT NULL,
+    description TEXT,
+    price       NUMERIC,
     location    TEXT    NOT NULL
 );
 CREATE INDEX ON books (isbn);

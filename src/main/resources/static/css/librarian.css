@@ -48,14 +48,50 @@ html, body {
 }
 
 .sidebar-nav ul li.active {
-    background-color: #FAF582;
+    box-sizing: border-box;
+    border-right: 5px #FAF582 solid;
 }
 
-.book-search-box {
+.search-box {
     margin-bottom: 0.4em;
 }
 
-.book-search-box .input-container {
+.search-box .input-container {
     padding-left: 0.2em;
     padding-right: 0.2em;
+}
+
+.delete-warning {
+    border-radius: 1.5em;
+    padding: 1em;
+    font-size: 1.2em;
+    border: #e1e1e1 1px solid;
+}
+
+.action-buttons {
+    padding-bottom: 0.3em;
+}
+
+.action-buttons button {
+    padding-right: 0.5em;
+}
+
+.pager-container {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.module-title {
+    padding-bottom: 0.2em;
+    border-bottom: 1px #D1D1D1 solid;
+    margin-bottom: 0.5em;
+}
+
+.book-info-row label {
+    font-weight: bold;
+    display: block;
+}
+
+.book-info-row .info-item {
+    margin-bottom: 0.3em;
 }

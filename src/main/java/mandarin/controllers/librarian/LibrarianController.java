@@ -47,7 +47,7 @@ public class LibrarianController {
     @Resource
     HistoryResult historyResult;
 
-    @GetMapping({"", "/", "/users", "/books"})
+    @GetMapping({"","/","/**"})
     public String index() {
         return "librarian-new/main";
     }

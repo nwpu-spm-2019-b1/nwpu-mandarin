@@ -12,6 +12,7 @@ public class BookDTO {
     public String title;
     public String author;
     public String location;
+    public String description;
     public BigDecimal price;
     public List<Integer> category_ids;
 }

@@ -1,5 +1,6 @@
 package mandarin.entities;
 
+import javax.annotation.Resource;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -21,16 +22,21 @@ public class Book implements Serializable {
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "book_category_rel", joinColumns = {@JoinColumn(name = "book_id")}, inverseJoinColumns = {@JoinColumn(name = "category_id")})
     private List<Category> categories;
+    @OneToOne(cascade = {CascadeType.ALL}, orphanRemoval = true, mappedBy = "book")
+    private Reservation reservation;
+    @OneToMany(cascade = {CascadeType.REMOVE}, orphanRemoval = true, mappedBy = "book")
+    private List<LendingLogItem> lendingLog;
 
     public Book() {
         this.price = BigDecimal.ZERO;
         this.categories = new ArrayList<>();
     }
 
-    public Book(String isbn, String title, String author, String location, BigDecimal price, List<Category> categories) {
+    public Book(String isbn, String title, String author, String description, String location, BigDecimal price, List<Category> categories) {
         this.isbn = isbn;
         this.title = title;
         this.author = author;
+        this.description = description;
         this.location = location;
         this.price = price;
         this.categories = categories;
@@ -90,5 +96,17 @@ public class Book implements Serializable {
 
     public List<Category> getCategories() {
         return categories;
+    }
+
+    public Reservation getReservation() {
+        return reservation;
+    }
+
+    public void setReservation(Reservation reservation) {
+        this.reservation = reservation;
+    }
+
+    public List<LendingLogItem> getLendingLog() {
+        return lendingLog;
     }
 }

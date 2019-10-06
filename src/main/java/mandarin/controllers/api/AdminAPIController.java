@@ -43,7 +43,7 @@ public class AdminAPIController {
     @PostMapping(value = "/register")
     public ResponseEntity register(@RequestParam("username") String username,
                                    @RequestParam("password") String password) {
-        User user = userRepository.findByUsername(username);
+        User user = userRepository.findByUsername(username).orElse(null);
         if (user != null) {
             throw new APIException("Username already existed");
         }
