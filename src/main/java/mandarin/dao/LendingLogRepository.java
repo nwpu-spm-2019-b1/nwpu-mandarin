@@ -27,7 +27,7 @@ public interface LendingLogRepository extends JpaRepository<LendingLogItem, Inte
     List<LendingLogItem> findByBookId(Integer bookId, Pageable pageable);
 
     @Query("SELECT item FROM LendingLogItem item WHERE item.user=:user AND item.book=:book AND item.endTime=NULL")
-    List<LendingLogItem> findOutstandingByUserAndBook(@Param("user") User user, @Param("book") Book book);
+    Optional<LendingLogItem> findOutstandingByUserAndBook(@Param("user") User user, @Param("book") Book book);
 
     @Query("SELECT item FROM LendingLogItem item WHERE item.book=:book AND item.endTime=NULL")
     Optional<LendingLogItem> findOutstandingByBook(@Param("book") Book book);
