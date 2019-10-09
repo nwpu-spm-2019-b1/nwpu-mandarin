@@ -8,29 +8,22 @@ import org.apache.commons.io.IOUtils;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
-import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
-import java.sql.Array;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.Duration;
-import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -90,11 +83,14 @@ public class StartupListener {
                     session.save(book);
                 }
             }
-            session.save(new LendingLogItem(session.get(Book.class, 1), session.get(User.class, 2)));
-            session.save(new LendingLogItem(session.get(Book.class, 2), session.get(User.class, 2)));
-            session.save(new LendingLogItem(session.get(Book.class, 3), session.get(User.class, 2)));
-            Reservation reservation = new Reservation(session.get(Book.class, 1), session.get(User.class, 2));
-            reservation.setTime(Instant.now().minus(Duration.ofHours(1)));
+            User reader = session.get(User.class, 2);
+            for (int i = 1; i <= 3; i++) {
+                LendingLogItem item = new LendingLogItem(session.get(Book.class, i), reader);
+                item.setStartTime(item.getStartTime().minus(Duration.ofDays(15 * (4 - i))));
+                session.save(item);
+            }
+            Reservation reservation = new Reservation(session.get(Book.class, 4), reader);
+            reservation.setTime(reservation.getTime().minus(Duration.ofHours(1)));
             session.save(reservation);
             session.flush();
             tx.commit();

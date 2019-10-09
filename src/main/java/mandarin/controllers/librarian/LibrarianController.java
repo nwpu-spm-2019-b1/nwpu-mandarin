@@ -106,6 +106,7 @@ public class LibrarianController {
         return ResponseEntity.ok(response);
     }
 
+    /*
     @GetMapping("/user/{userId}/history")
     public ResponseEntity viewHistory1(@PathVariable Integer userId,
                                        @RequestParam(defaultValue = "0") Integer page,
@@ -114,7 +115,7 @@ public class LibrarianController {
         List<HistoryResult> results = historyResult.listHistory(userId, pageable);
         return ResponseEntity.ok(BasicResponse.ok().data(results));
     }
-
+     */
 
     @PostMapping("/categories")
     public ResponseEntity getCategories() {

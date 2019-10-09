@@ -5,18 +5,14 @@ import mandarin.auth.UserType;
 import mandarin.controllers.api.dto.BookDTO;
 import mandarin.controllers.api.dto.BookDetailDTO;
 import mandarin.controllers.api.dto.CategoryDTO;
-import mandarin.dao.BookRepository;
-import mandarin.dao.CategoryRepository;
-import mandarin.dao.LendingLogRepository;
-import mandarin.dao.UserRepository;
-import mandarin.entities.Book;
-import mandarin.entities.Category;
-import mandarin.entities.LendingLogItem;
-import mandarin.entities.User;
+import mandarin.dao.*;
+import mandarin.entities.*;
 import mandarin.exceptions.APIException;
 import mandarin.services.BookService;
 import mandarin.utils.BasicResponse;
+import mandarin.utils.FormatUtils;
 import mandarin.utils.ObjectUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -39,6 +35,9 @@ import java.util.stream.Collectors;
 public class LibrarianAPIController {
     @Resource
     UserRepository userRepository;
+
+    @Resource
+    ReservationRepository reservationRepository;
 
     @Resource
     LendingLogRepository lendingLogRepository;
@@ -119,15 +118,30 @@ public class LibrarianAPIController {
         return ResponseEntity.ok().body(BasicResponse.ok().data(data));
     }
 
+    @GetMapping("/user/reservations")
+    public ResponseEntity getReservations(@RequestParam("id") Integer userId) {
+        List<Reservation> reservations = reservationRepository.findAllByUser(userRepository.findById(userId).orElse(null));
+        return ResponseEntity.ok(BasicResponse.ok().data(reservations.stream().map((Reservation item) -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("id", item.getId());
+            map.put("book", BookDetailDTO.toDTO(item.getBook()));
+            map.put("time", FormatUtils.formatInstant(item.getTime()).orElse("-"));
+            map.put("deadline", FormatUtils.formatInstant(item.getDeadline()).orElse("-"));
+            return map;
+        }).collect(Collectors.toList())));
+    }
+
     //展示借阅、归还情况
-    @GetMapping("/user/{userId}/history")
-    public ResponseEntity viewHistory(@PathVariable Integer userId,
+    @GetMapping("/user/history")
+    public ResponseEntity viewHistory(@RequestParam("id") Integer userId,
                                       @RequestParam(defaultValue = "1") Integer page,
                                       @RequestParam(defaultValue = "10") Integer size) {
         Pageable pageable = PageRequest.of(page - 1, size, Sort.by("startTime"));
         List<?> items = lendingLogRepository.findByUserId(userId, pageable).getContent().stream().map((LendingLogItem item) -> {
             Map<String, Object> map = new HashMap<>();
-            ObjectUtils.copyFieldsIntoMap(item, map, "id", "startTime", "endTime");
+            map.put("id", item.getId());
+            map.put("startTime", FormatUtils.formatInstant(item.getStartTime()).orElse("-"));
+            map.put("endTime", FormatUtils.formatInstant(item.getEndTime()).orElse("-"));
             map.put("book", BookDetailDTO.toDTO(item.getBook()));
             map.put("user", ObjectUtils.copyFieldsIntoMap(item.getUser(), null, "id", "username"));
             return map;
@@ -145,11 +159,12 @@ public class LibrarianAPIController {
         if (user == null || book == null) {
             throw new APIException("Invalid ID(s)");
         }
-        if (!bookService.checkAvailability(bookId)) {
-            throw new APIException("Book not available");
+        try {
+            LendingLogItem item = bookService.lendBook(user, book);
+            return ResponseEntity.ok(BasicResponse.ok().data(item.getId()));
+        } catch (RuntimeException e) {
+            throw new APIException(e.getMessage());
         }
-        lendingLogRepository.save(new LendingLogItem(book, user));
-        return ResponseEntity.ok(BasicResponse.ok());
     }
 
     //还书
@@ -184,12 +199,16 @@ public class LibrarianAPIController {
             }
             categories.add(category.get());
         }
-        if (dto.isbn.length() == 0 || dto.title.length() == 0 || dto.author.length() == 0 || dto.location.length() == 0 || dto.price.compareTo(BigDecimal.ZERO) < 0) {
+        if (dto.isbn.length() == 0 || dto.title.length() == 0 || dto.author.length() == 0 || dto.location.length() == 0 || dto.price.compareTo(BigDecimal.ZERO) < 0 || dto.count == null || dto.count <= 0) {
             throw new APIException("Invalid input");
         }
-        Book book = new Book(dto.isbn, dto.title, dto.author, dto.description, dto.location, dto.price, categories);
-        bookRepository.save(book);
-        return ResponseEntity.status(HttpStatus.CREATED).body(BasicResponse.ok().data(book.getId()));
+        List<Book> allBooks = new ArrayList<>();
+        for (int i = 0; i < dto.count; i++) {
+            Book book = new Book(dto.isbn, dto.title, dto.author, dto.description, dto.location, dto.price, categories);
+            bookRepository.save(book);
+            allBooks.add(book);
+        }
+        return ResponseEntity.status(HttpStatus.CREATED).body(BasicResponse.ok().data(allBooks.stream().map(Book::getId).collect(Collectors.toList())));
     }
 
     //删除书
@@ -227,6 +246,39 @@ public class LibrarianAPIController {
         User user = new User(username, password, UserType.Reader);
         userRepository.save(user);
         return ResponseEntity.status(HttpStatus.CREATED).body(BasicResponse.ok());
+    }
+
+    //编辑Reader
+    @PutMapping(value = "/user/{userId}", consumes = "application/json")
+    public ResponseEntity editReader(@PathVariable("userId") Integer id,
+                                     @RequestParam(required = false) String username,
+                                     @RequestParam(required = false) String password) {
+        User user = userRepository.findById(id).orElse(null);
+        if (user == null) {
+            throw new APIException("No such user");
+        }
+        if (username != null && username.length() > 0) {
+            user.setUsername(username);
+        }
+        if (password != null && password.length() > 0) {
+            user.setPassword(password);
+        }
+        userRepository.save(user);
+        return ResponseEntity.ok(BasicResponse.ok());
+    }
+
+    //删除Reader
+    @DeleteMapping("/user/{id}")
+    public ResponseEntity deleteReader(@PathVariable Integer id) {
+        User user = userRepository.findById(id).orElse(null);
+        if (user == null) {
+            throw new APIException("Reader does not exist");
+        } else if (bookService.checkBorrowedBookNumber(user) > 0) {
+            throw new APIException("There are still outstanding books");
+        }
+        //TODO: 罚金
+        userRepository.deleteById(id);
+        return ResponseEntity.ok(BasicResponse.ok());
     }
 
     //编辑书

@@ -29,6 +29,7 @@
     import UserView from "./UserView.vue";
     import BookEditor from "./BookEditor.vue";
     import LendReturnView from "./LendReturnView.vue";
+    import UserHistoryView from "./UserHistoryView.vue";
     import VueRouter from 'vue-router';
 
     const routes = [
@@ -60,6 +61,10 @@
         {
             path: '/users',
             component: UserView
+        },
+        {
+            path: '/user/:id/history',
+            component: UserHistoryView
         }
     ];
 

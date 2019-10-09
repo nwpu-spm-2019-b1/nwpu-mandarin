@@ -3,9 +3,12 @@ package mandarin.controllers.api;
 import mandarin.controllers.api.dto.BookDetailDTO;
 import mandarin.dao.BookRepository;
 import mandarin.dao.LendingLogRepository;
+import mandarin.dao.UserRepository;
 import mandarin.entities.Book;
+import mandarin.entities.User;
 import mandarin.exceptions.APIException;
 import mandarin.utils.BasicResponse;
+import mandarin.utils.CryptoUtils;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -24,6 +27,8 @@ public class GeneralAPIController {
     BookRepository bookRepository;
     @Resource
     LendingLogRepository lendingLogRepository;
+    @Resource
+    UserRepository userRepository;
 
     @GetMapping("/book/{bookId}")
     public ResponseEntity getBook(@PathVariable Integer bookId) {
@@ -58,5 +63,23 @@ public class GeneralAPIController {
         }
         BasicResponse response = BasicResponse.ok().data(books.stream().map(BookDetailDTO::toDTO).collect(Collectors.toList()));
         return ResponseEntity.ok(response);
+    }
+
+    //修改密码
+    @PostMapping("/changePassword")
+    public ResponseEntity changePassword(@RequestParam("username") String username,
+                                         @RequestParam("password") String password){
+        User user = userRepository.findByUsername(username).orElse(null);
+        if (user == null ){
+            return ResponseEntity.ok(BasicResponse.fail().message("User not exits"));
+        }else if (CryptoUtils.verifyPassword(password, user.getPasswordHash())){
+            return ResponseEntity.ok(BasicResponse.fail().message("Password and original password cannot be the same"));
+        }else if(password.length()<8 || password.length()>16){
+            return ResponseEntity.ok(BasicResponse.fail().message("Password must be 8-16 characters"));
+        }
+
+        user.setPassword(password);
+        userRepository.save(user);
+        return ResponseEntity.ok(BasicResponse.ok().message("Password successfully changed"));
     }
 }

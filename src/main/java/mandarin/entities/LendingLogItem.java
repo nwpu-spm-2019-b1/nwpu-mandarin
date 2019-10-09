@@ -53,6 +53,10 @@ public class LendingLogItem {
         return startTime;
     }
 
+    public void setStartTime(Instant startTime) {
+        this.startTime = startTime;
+    }
+
     public Instant getEndTime() {
         return endTime;
     }

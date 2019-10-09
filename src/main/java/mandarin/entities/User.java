@@ -1,5 +1,6 @@
 package mandarin.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import mandarin.auth.UserType;
 import mandarin.utils.CryptoUtils;
 
@@ -13,6 +14,7 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     private String username;
+    @JsonIgnore
     @Column(name = "password_hash")
     private String passwordHash;
     @Enumerated(EnumType.STRING)

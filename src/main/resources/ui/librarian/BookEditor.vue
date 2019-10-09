@@ -39,7 +39,6 @@
 </template>
 <script>
     export default {
-        name: "BookEditor",
         data: function () {
             return {
                 book_id: this.$route.name !== "add-book" ? (this.$route.params.id) : null,

@@ -97,7 +97,7 @@
         </table>
         <div class="pager-container" v-if="pager.total > 0">
             <nav aria-label="Page selector">
-                <ul class="pagination">
+                <ul class="pagination justify-content-center">
                     <li class="page-item" v-bind:class="{'disabled':pager.current===1}">
                         <a class="page-link"
                            href="javascript:void(0);"
@@ -128,29 +128,28 @@
     </div>
 </template>
 <script>
+    import {urlWithParams} from "../js/common";
+
     require('bootstrap/js/src/modal.js');
 
     export default {
         methods: {
             loadBooks() {
                 let vm = this;
-                $.ajax(
-                    {
-                        url: "/api/librarian/book/search",
-                        type: "GET",
-                        dataType: "json",
-                        data: {
-                            type: vm.search.type,
-                            query: vm.search.query,
-                            page: vm.pager.current
-                        },
-                        success: function (resp) {
-                            vm.books = resp.data.books;
-                            vm.pager.total = resp.data.total;
-                            vm.pager.count = resp.data.count;
-                        }
-                    }
-                );
+                fetch(urlWithParams("/api/librarian/book/search", {
+                    type: vm.search.type,
+                    query: vm.search.query,
+                    page: vm.pager.current
+                }), {
+                    method: "GET",
+                    credentials: "same-origin"
+                }).then(resp => resp.json()).then(resp => {
+                    this.books = resp.data.books;
+                    this.pager.total = resp.data.total;
+                    this.pager.count = resp.data.count;
+                }).catch(err => {
+                    alert(err);
+                });
             },
             showDescription(event) {
                 let element = $(event.target);
@@ -199,6 +198,25 @@
             },
             deleteBooks(event) {
                 let vm = this;
+                fetch("/api/librarian/book", {
+                    method: "DELETE",
+                    headers: {
+                        "content-type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        id_list: vm.deletion.id_list
+                    }),
+                    credentials: "same-origin"
+                }).then(resp => {
+                    if (!resp.ok) {
+                        throw new Error(resp.message);
+                    }
+                    vm.loadBooks();
+                    $("#delete-warning-modal").modal("hide");
+                }).catch(err => {
+                    alert(err);
+                });
+                /*
                 $.ajax(
                     {
                         url: "/api/librarian/book",
@@ -218,6 +236,7 @@
                         }
                     }
                 );
+                */
             }
         },
         mounted() {

@@ -1,4 +1,5 @@
 import $ from 'jquery';
+import queryString from 'query-string';
 
 function ajax(o) {
     return new Promise((resolve, reject) => {
@@ -12,5 +13,8 @@ function ajax(o) {
     });
 }
 
-function copyProperties() {
+function urlWithParams(url, params) {
+    return url + "?" + queryString.stringify(params);
 }
+
+export {ajax, urlWithParams};

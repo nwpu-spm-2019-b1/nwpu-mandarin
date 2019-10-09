@@ -1,24 +1,23 @@
 package mandarin.services;
 
 import mandarin.auth.SessionHelper;
+import mandarin.auth.UserType;
 import mandarin.dao.ActionLogRepository;
 import mandarin.dao.BookRepository;
 import mandarin.dao.LendingLogRepository;
 import mandarin.dao.ReservationRepository;
 import mandarin.entities.*;
 import mandarin.utils.ObjectUtils;
-import org.hibernate.SessionFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import javax.swing.*;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Transactional
@@ -45,6 +44,7 @@ public class BookService {
     @Resource
     ActionLogRepository actionLogRepository;
 
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
     public boolean checkAvailability(Integer bookId) {
         Book book = bookRepository.findById(bookId).orElse(null);
         if (book == null) {
@@ -66,6 +66,25 @@ public class BookService {
         }
     }
 
+    @Transactional(isolation = Isolation.SERIALIZABLE)
+    public LendingLogItem lendBook(User borrower, Book book) {
+        if (!borrower.getType().equals(UserType.Reader)) {
+            throw new RuntimeException("User is not a reader");
+        }
+        BookStatus status = getBookStatus(book);
+        if (status.equals(BookStatus.Reserved) && book.getReservation().getUser().getId().equals(borrower.getId())) {
+            reservationRepository.delete(book.getReservation());
+            status = BookStatus.Available;
+        }
+        if (status.equals(BookStatus.Available)) {
+            LendingLogItem item = new LendingLogItem(book, borrower);
+            lendingLogRepository.save(item);
+            return item;
+        } else {
+            throw new RuntimeException("Book not available");
+        }
+    }
+
     @Transactional(isolation = Isolation.REPEATABLE_READ)
     public boolean checkAvailability(Book book) {
         Reservation reservation = reservationRepository.findByBookId(book.getId()).orElse(null);
@@ -77,7 +96,7 @@ public class BookService {
         return lendingLogRepository.findByBookId(book.getId()).stream().noneMatch((LendingLogItem item) -> item.getEndTime() != null);
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public int deleteBook(Book book) {
         return deleteBook(book.getId());
     }
@@ -103,4 +122,16 @@ public class BookService {
         actionLogRepository.save(new ActionLogItem(sessionHelper.getCurrentUser(), "DeleteBook", actionInfo));
         return bookRepository.deleteBookById(bookId);
     }
+
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
+    public Integer checkBorrowedBookNumber(User user) {
+        List<LendingLogItem> lendingLogItems = lendingLogRepository.findByUserId(user.getId());
+        Integer count = 0;
+        for (LendingLogItem lendingLogItem : lendingLogItems) {
+            if (lendingLogItem.getEndTime() == null)
+                count++;
+        }
+        return count;
+    }
+
 }

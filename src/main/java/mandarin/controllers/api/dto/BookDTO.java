@@ -7,7 +7,7 @@ import java.util.List;
 
 public class BookDTO {
     @Nullable
-    public Integer id;
+    public Integer id=null;
     public String isbn;
     public String title;
     public String author;
@@ -15,4 +15,6 @@ public class BookDTO {
     public String description;
     public BigDecimal price;
     public List<Integer> category_ids;
+    @Nullable
+    public Integer count = null;
 }
