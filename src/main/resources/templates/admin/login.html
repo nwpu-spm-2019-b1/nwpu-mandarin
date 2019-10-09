@@ -4,73 +4,117 @@
     <title>Login</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-    <link th:href="@{/static/css/bootstrap.min.css}" rel='stylesheet' type='text/css'/>
-    <script th:src="@{/static/js/jquery-3.4.1.js}"></script>
-    <style>
-        body {
-            background-color: rgb(238, 245, 249);
-            font-family: 'Source Sans Pro', 'Roboto', sans-serif;
-        }
+    <meta name="keywords" content=""/>
+    <script type="application/x-javascript"> addEventListener("load", function () {
+        setTimeout(hideURLbar, 0);
+    }, false);
 
-        .login-form {
-            margin-left: auto;
-            margin-right: auto;
-            width: 60%;
-            padding: 1.5rem;
-            margin-top: 3rem;
-            background-color: #FFFFFF;
-            border-radius: 0.75rem;
-        }
-    </style>
+    function hideURLbar() {
+        window.scrollTo(0, 1);
+    } </script>
+    <!-- Bootstrap Core CSS -->
+    <link th:href="@{/static/css/bootstrap.min.css}" rel='stylesheet' type='text/css'/>
+    <!-- Custom CSS -->
+    <link th:href="@{/static/css/style.css}" rel='stylesheet' type='text/css'/>
+    <!-- //lined-icons -->
+    <script th:src="@{/static/js/jquery-3.4.1.min.js}"></script>
+    <!--clock init-->
 </head>
 <body>
-<div class="container">
-    <h2 style="text-align: center;" class="mt-5">Mandarin</h2>
-    <div class="login-form">
-        <div class="mb-3 ml-auto mr-auto" style="width: 100%; font-size: 2em; text-align: center;">
-            Admin Login
-        </div>
-        <div>
-            <form id="login-form" action="#" class="form">
-                <div class="form-group">
-                    <input type="text" placeholder="Username" id="username" name="username" class="form-control">
-                </div>
-                <div class="form-group">
-                    <input type="password" placeholder="Password" name="password" id="password" class="form-control">
-                </div>
-                <div class="error"></div>
-                <div class="form-group">
-                    <button type="submit" id="submit" class="btn btn-success btn-block">Login</button>
-                </div>
-            </form>
-        </div>
-        <div class="mt-1 ml-auto mr-auto" style="text-align: center;">
-            <a href="/">Return to front page</a>
+<!--/login-->
+
+<div class="error_page">
+    <!--/login-top-->
+
+    <div class="error-top">
+        <h2 class="inner-tittle page">Mandarin</h2>
+        <div class="login">
+            <h3 class="inner-tittle t-inner">Admin Login</h3>
+                <input type="text" placeholder="Admin name" id="username" onfocus="restore()" onblur="checkName()" class="text" >
+                <input type="password" placeholder="password" onfocus="restore()" onblur="checkPass()" id="password" >
+                <span class="error" style="color:#F00; font-size:15px"></span>
+                <div class="submit"><input type="submit" onclick="try_login()" value="Login"></div>
         </div>
     </div>
+    <!--//login-top-->
 </div>
+
+<!--//login-->
+<!--footer section start-->
 <div class="footer">
     <div class="error-btn">
-
+        <a class="read fourth" href="/">Return to Home</a>
     </div>
 </div>
-<th:block th:replace="admin/common::scripts"></th:block>
+
+<!--js -->
 <script>
-    $("#login-form").bind("submit", function (e) {
-        e.preventDefault();
+    function checkName() {
+        let flag;
+
+        if($("#username").val() === ""){
+            setError("Enter admin name!");
+            flag = false;
+        }else {
+            flag = true;
+        }
+        return flag;
+    }
+
+    //check whether pass is empty
+    function checkPass() {
+
+        let flag = true;
+
+        if($("#password").val() === ""){
+            flag = false;
+            setError("Enter password!");
+        }
+        return flag;
+    }
+
+    function try_login() {
+        if(!(checkName()&&checkPass())){
+            return false;
+        }
         $.ajax({
-            url: "/admin/login",
-            type: "POST",
+            url: "login",
             dataType: "json",
+            type: "post",
             data: {
-                username: $("#username").val(),
-                password: $("#password").val()
+                "username": $("#username").val(),
+                "password": $("#password").val(),
             },
-            success: function (resp) {
-                window.location.href = "/admin";
-            }
+
+            statusCode: {
+                201: function (result) {
+                    window.location.href = "/admin";
+                },
+                404: function (result) {
+                    setError(result.responseJSON.message);
+                },
+                400: function (result) {
+                    setError(result.responseJSON.message);
+                },
+            },
         });
+    }
+    //clear error info
+    function restore() {
+        $(".error").text("");
+    }
+
+    //set error info
+    function setError(info) {
+        $(".error").text(info);
+    }
+
+    $(document).keydown(function (event) {
+        if (event.keyCode == "13"){
+            try_login();
+        }
     });
 </script>
+
 </body>
 </html>
