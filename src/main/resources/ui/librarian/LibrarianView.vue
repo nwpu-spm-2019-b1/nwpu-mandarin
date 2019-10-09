@@ -16,7 +16,7 @@
                     </ul>
                 </nav>
             </div>
-            <div class="col main-column">
+            <div class="col-10 col-xl-11 main-column">
                 <div class="p-3">
                     <router-view></router-view>
                 </div>
