@@ -12,7 +12,6 @@ import mandarin.services.BookService;
 import mandarin.utils.BasicResponse;
 import mandarin.utils.FormatUtils;
 import mandarin.utils.ObjectUtils;
-import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -86,6 +85,9 @@ public class LibrarianAPIController {
         }).collect(Collectors.toList()));
         data.put("total", books.getTotalPages());
         data.put("count", books.getTotalElements());
+        if (true) {
+            throw new APIException("Test error");
+        }
         return ResponseEntity.ok(BasicResponse.ok().data(data));
     }
 

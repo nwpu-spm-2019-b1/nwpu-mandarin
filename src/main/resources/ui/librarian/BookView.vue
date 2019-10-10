@@ -135,24 +135,31 @@
     export default {
         methods: {
             loadBooks() {
-                let vm = this;
                 fetch(urlWithParams("/api/librarian/book/search", {
-                    type: vm.search.type,
-                    query: vm.search.query,
-                    page: vm.pager.current
+                    type: this.search.type,
+                    query: this.search.query,
+                    page: this.pager.current
                 }), {
                     method: "GET",
                     credentials: "same-origin"
-                }).then(resp => resp.json()).then(resp => {
-                    this.books = resp.data.books;
-                    this.pager.total = resp.data.total;
-                    this.pager.count = resp.data.count;
+                }).then(async resp => {
+                    let body = await resp.json();
+                    if (!resp.ok) {
+                        throw new Error(body.message);
+                    }
+                    this.books = body.data.books;
+                    this.pager.total = body.data.total;
+                    this.pager.count = body.data.count;
                 }).catch(err => {
-                    alert(err);
+                    console.log(err.message);
+                    this.onError({error: err.message});
                 });
             },
             showDescription(event) {
                 let element = $(event.target);
+                if (element.hasClass("row-checkbox")) {
+                    return;
+                }
                 while (!element.hasClass("book-main-row")) {
                     element = element.parent();
                 }
@@ -214,7 +221,7 @@
                     vm.loadBooks();
                     $("#delete-warning-modal").modal("hide");
                 }).catch(err => {
-                    alert(err);
+                    this.$emit("error", {error: err});
                 });
                 /*
                 $.ajax(

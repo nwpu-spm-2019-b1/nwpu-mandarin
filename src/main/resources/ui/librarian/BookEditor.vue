@@ -38,6 +38,8 @@
     </div>
 </template>
 <script>
+    import {pickProperties} from '../js/common.js'
+
     export default {
         data: function () {
             return {
@@ -78,16 +80,11 @@
         methods: {
             submit(event) {
                 event.preventDefault();
-                let data = {
-                    isbn: this.book.isbn,
-                    title: this.book.title,
-                    author: this.book.author,
-                    description: this.book.description,
-                    location: this.book.location,
-                    price: this.book.price,
+                let data = pickProperties(this.book, ["isbn", "title", "author", "description", "location", "price", "count"]);
+                Object.assign(data, {
                     category_ids: []
-                };
-                console.log(data);
+                });
+                console.log(JSON.stringify(data));
                 let vm = this;
                 let url, method;
                 if (this.book_id !== null) {

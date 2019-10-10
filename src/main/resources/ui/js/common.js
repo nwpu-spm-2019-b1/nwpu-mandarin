@@ -17,4 +17,19 @@ function urlWithParams(url, params) {
     return url + "?" + queryString.stringify(params);
 }
 
-export {ajax, urlWithParams};
+function pickProperties(obj, keys) {
+    let dest = {};
+    for (let key of keys) {
+        dest[key] = obj[key]
+    }
+    return dest;
+}
+
+function escapeToHTML(s) {
+    let element = document.createElement("div");
+    let child = document.createTextNode(s);
+    element.appendChild(child);
+    return element.innerText;
+}
+
+export {ajax, urlWithParams, pickProperties};

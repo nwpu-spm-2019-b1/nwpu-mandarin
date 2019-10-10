@@ -23,13 +23,22 @@
             justify-content: center;
             align-items: center;
         }
+
+        .logo {
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .logo img {
+            width: 50%;
+        }
     </style>
 </head>
 <body>
 <th:block th:replace="reader/common :: navbar"></th:block>
 <div class="container main">
     <div class="welcome-message">
-        <div>
+        <div class="logo">
             <img src="/static/images/logo.png"/>
         </div>
         <div>
@@ -41,6 +50,7 @@
             <div class="row">
                 <div class="col">
                     <select class="form-control" name="type">
+                        <option value="isbn">ISBN</option>
                         <option value="title">Title</option>
                         <option value="author">Author</option>
                     </select>
