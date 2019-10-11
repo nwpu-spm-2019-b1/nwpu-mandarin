@@ -129,20 +129,22 @@
 </template>
 <script>
     import {urlWithParams} from "../js/common";
+    import {EventBus} from "../js/events";
 
     require('bootstrap/js/src/modal.js');
 
     export default {
         methods: {
-            loadBooks() {
-                fetch(urlWithParams("/api/librarian/book/search", {
-                    type: this.search.type,
-                    query: this.search.query,
-                    page: this.pager.current
-                }), {
-                    method: "GET",
-                    credentials: "same-origin"
-                }).then(async resp => {
+            loadBooks: async function () {
+                try {
+                    let resp = await fetch(urlWithParams("/api/librarian/book/search", {
+                        type: this.search.type,
+                        query: this.search.query,
+                        page: this.pager.current
+                    }), {
+                        method: "GET",
+                        credentials: "same-origin"
+                    });
                     let body = await resp.json();
                     if (!resp.ok) {
                         throw new Error(body.message);
@@ -150,10 +152,10 @@
                     this.books = body.data.books;
                     this.pager.total = body.data.total;
                     this.pager.count = body.data.count;
-                }).catch(err => {
+                } catch (err) {
                     console.log(err.message);
-                    this.onError({error: err.message});
-                });
+                    EventBus.$emit("error", {error: err.message});
+                }
             },
             showDescription(event) {
                 let element = $(event.target);
@@ -203,47 +205,28 @@
                 }
                 this.loadBooks();
             },
-            deleteBooks(event) {
+            deleteBooks: async function (event) {
                 let vm = this;
-                fetch("/api/librarian/book", {
-                    method: "DELETE",
-                    headers: {
-                        "content-type": "application/json"
-                    },
-                    body: JSON.stringify({
-                        id_list: vm.deletion.id_list
-                    }),
-                    credentials: "same-origin"
-                }).then(resp => {
-                    if (!resp.ok) {
-                        throw new Error(resp.message);
-                    }
-                    vm.loadBooks();
-                    $("#delete-warning-modal").modal("hide");
-                }).catch(err => {
-                    this.$emit("error", {error: err});
-                });
-                /*
-                $.ajax(
-                    {
-                        url: "/api/librarian/book",
-                        type: "DELETE",
-                        dataType: "json",
-                        contentType: "application/json",
-                        data: JSON.stringify({
+                try {
+                    let resp = await fetch("/api/librarian/book", {
+                        method: "DELETE",
+                        headers: {
+                            "content-type": "application/json"
+                        },
+                        body: JSON.stringify({
                             id_list: vm.deletion.id_list
                         }),
-                        success: function (resp) {
-                            vm.loadBooks();
-                            $("#delete-warning-modal").modal("hide");
-                        },
-                        error: function (xhr) {
-                            let resp = JSON.parse(xhr.responseText);
-                            vm.deletion.error = resp.message;
-                        }
+                        credentials: "same-origin"
+                    });
+                    let body = await resp.json();
+                    if (!resp.ok) {
+                        throw new Error(body.message);
                     }
-                );
-                */
+                    this.loadBooks();
+                    $("#delete-warning-modal").modal("hide");
+                } catch (err) {
+                    this.deletion.error = err.message;
+                }
             }
         },
         mounted() {
@@ -268,7 +251,8 @@
             };
         },
         components: {}
-    };
+    }
+    ;
 </script>
 <style>
 </style>

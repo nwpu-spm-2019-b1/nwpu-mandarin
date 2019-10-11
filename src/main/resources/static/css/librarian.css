@@ -95,3 +95,20 @@ html, body {
 .book-info-row .info-item {
     margin-bottom: 0.3em;
 }
+
+#toast-container {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 0.7em;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#toast-container .toast-body {
+    padding: 1.6em 2em;
+}

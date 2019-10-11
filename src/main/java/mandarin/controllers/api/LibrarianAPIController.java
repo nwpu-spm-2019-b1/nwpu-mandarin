@@ -85,9 +85,6 @@ public class LibrarianAPIController {
         }).collect(Collectors.toList()));
         data.put("total", books.getTotalPages());
         data.put("count", books.getTotalElements());
-        if (true) {
-            throw new APIException("Test error");
-        }
         return ResponseEntity.ok(BasicResponse.ok().data(data));
     }
 
@@ -303,24 +300,19 @@ public class LibrarianAPIController {
         return ResponseEntity.accepted().body(BasicResponse.ok());
     }
 
-    @GetMapping("/category")
+    @GetMapping("/categories")
     public ResponseEntity listCategories() {
-        List<CategoryDTO> result = categoryRepository.findAll().stream().map((Category c) -> {
-            CategoryDTO dto = new CategoryDTO();
-            ObjectUtils.copyFields(c, dto, "id", "name");
+        List<?> result = categoryRepository.findAll().stream().map((Category c) -> {
+            Map<String, Object> map = ObjectUtils.copyFieldsIntoMap(c, null, "id", "name");
             Category parent = c.getParentCategory();
-            if (parent != null) {
-                dto.parent_category_id = parent.getId();
-            } else {
-                dto.parent_category_id = null;
-            }
-            return dto;
+            map.put("parent_category_id", parent != null ? parent.getId() : null);
+            return map;
         }).collect(Collectors.toList());
         return ResponseEntity.ok(BasicResponse.ok().data(result));
     }
 
     //增加种类
-    @PostMapping("/category")
+    @PostMapping("/categories")
     public ResponseEntity addCategory(@RequestParam String name,
                                       @RequestParam(required = false) Integer parentId) {
         Category category = new Category(name, null);
@@ -336,7 +328,7 @@ public class LibrarianAPIController {
     }
 
     //删除种类
-    @DeleteMapping("/category/{id}")
+    @DeleteMapping("/categories/{id}")
     public ResponseEntity deleteCategory(@PathVariable Integer id) {
         Category target = categoryRepository.findById(id).orElse(null);
         if (target == null)

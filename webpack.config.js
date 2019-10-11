@@ -19,8 +19,11 @@ module.exports = {
                 test: /\.js$/,
                 loader: "babel-loader",
                 options: {presets: ["@babel/env"]}
+            },
+            {
+                test: /\.template$/,
+                loader: 'raw-loader'
             }
-
         ]
     },
     plugins: [
@@ -44,7 +47,8 @@ module.exports = {
         ],
     },
     externals: {
-        jquery: 'jQuery'
+        jquery: 'jQuery',
+        jsbarcode: 'JsBarcode'
     },
     devServer: {
         contentBase: [path.join(__dirname, 'src/main/resources/static/'), path.join(__dirname, "temp/")],

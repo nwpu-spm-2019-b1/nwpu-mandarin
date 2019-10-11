@@ -1,7 +1,7 @@
 <template>
     <div>
-        <h2>{{page_title}}</h2>
-        <form @submit="submit">
+        <h2 class="module-title">{{page_title}}</h2>
+        <form @submit="submit" class="book-editor-form">
             <div class="form-group">
                 <label for="isbn-input">ISBN</label>
                 <input class="form-control" id="isbn-input" name="isbn" v-model="book.isbn"/>
@@ -24,6 +24,16 @@
                 <input class="form-control" id="location-input" name="location" v-model="book.location"/>
             </div>
             <div class="form-group">
+                <label>Categories</label>
+                <div class="category-item" v-for="category in book.categories">
+                    {{category.name}}
+                </div>
+                <datalist id="existing-categories">
+                    <option v-for="category in all_categories" v-bind:value="category.name"></option>
+                </datalist>
+                <input class="form-control" id="new-category-input" type="text" list="existing-categories">
+            </div>
+            <div class="form-group">
                 <label for="price-input">Price</label>
                 <input class="form-control" id="price-input" name="price" v-model="book.price"/>
             </div>
@@ -35,6 +45,10 @@
             <button type="submit" class="btn btn-success btn">{{submit_text}}</button>
             <button class="btn btn-secondary" @click="$router.back()">Go back</button>
         </form>
+        <div class="add-book-success" v-if="add_book.success">
+            <h3>{{add_book.count}} books successfully added:</h3>
+            <svg v-for="book in add_book.books" v-bind:id="'barcode-'+book.id"></svg>
+        </div>
     </div>
 </template>
 <script>
@@ -51,41 +65,69 @@
                     description: '',
                     location: '',
                     price: '',
-                    category_ids: [],
+                    categories: [],
                     count: 1
                 },
+                all_categories: [],
                 error: null,
                 page_title: 'Editor',
-                submit_text: 'Submit'
+                submit_text: 'Submit',
+                add_book: {
+                    success: false,
+                    books: []
+                }
             };
         },
         mounted() {
-            let vm = this;
-            if (this.book_id !== null) {
-                vm.page_title = "Edit book";
-                vm.submit_text = "Save changes";
-                $.ajax({
-                    url: "/api/book/" + this.book_id,
-                    type: "GET",
-                    dataType: "json",
-                    success: function (resp) {
-                        Object.assign(vm.book, resp.data);
-                    }
-                });
-            } else {
-                vm.page_title = "Add books";
-                vm.submit_text = "OK";
-            }
+            (async () => {
+                if (this.book_id !== null) {
+                    this.page_title = "Edit book";
+                    this.submit_text = "Save changes";
+                    await this.loadBookDetails();
+                    await this.loadAllCategories();
+                } else {
+                    this.page_title = "Add books";
+                    this.submit_text = "OK";
+                }
+            })();
         },
         methods: {
-            submit(event) {
+            loadBookDetails: async function () {
+                let resp = await fetch("/api/book/" + this.book_id, {
+                    method: "GET",
+                    credentials: "same-origin"
+                });
+                let body = await resp.json();
+                if (!resp.ok) {
+                    throw new Error(body.message);
+                }
+                console.log(JSON.stringify(body.data));
+                Object.assign(this.book, body.data);
+                console.log(this.book);
+                return body;
+            },
+            loadAllCategories: async function () {
+                try {
+                    let resp = await fetch("/api/librarian/categories", {
+                        method: "GET",
+                        credentials: "same-origin"
+                    });
+                    let body = await resp.json();
+                    if (!resp.ok) {
+                        throw new Error(body.message);
+                    }
+                    this.all_categories = body.data;
+                } catch (err) {
+                    window.showErrorToast(err.message);
+                }
+            },
+            submit: async function (event) {
                 event.preventDefault();
                 let data = pickProperties(this.book, ["isbn", "title", "author", "description", "location", "price", "count"]);
                 Object.assign(data, {
                     category_ids: []
                 });
                 console.log(JSON.stringify(data));
-                let vm = this;
                 let url, method;
                 if (this.book_id !== null) {
                     url = "/api/librarian/book/" + this.book_id;
@@ -94,27 +136,37 @@
                     url = "/api/librarian/book";
                     method = "POST";
                 }
-                $.ajax(
-                    {
-                        url: url,
-                        type: method,
-                        dataType: "json",
-                        data: JSON.stringify(data),
-                        contentType: 'application/json',
-                        success: function (resp) {
-                            console.log(vm.$router.history[vm.$router.history.length - 1]);
-                            if (vm.$router.history.length >= 2) {
-                                vm.$router.history.go(-1);
-                            } else {
-                                vm.$router.push({path: "/books"});
-                            }
+                try {
+                    let resp = await fetch(url, {
+                        method: method,
+                        headers: {
+                            "Content-Type": "application/json"
                         },
-                        error: function (xhr) {
-                            let resp = JSON.parse(xhr.responseText);
-                            vm.error = resp.message;
-                        }
+                        body: JSON.stringify(data),
+                        credentials: "same-origin"
+                    });
+                    let body = await resp.json();
+                    if (!resp.ok) {
+                        throw new Error(body.message);
                     }
-                );
+                    if (this.book_id !== null) {
+                        if (this.$router.history.length >= 2) {
+                            this.$router.history.go(-1);
+                        } else {
+                            this.$router.push({path: "/books"});
+                        }
+                    } else {
+                        this.add_book.success = true;
+                        this.add_book.books = body.data;
+                        this.$nextTick(function () {
+                            this.add_book.books.map((book) => {
+                                $(`#barcode-${}`)
+                            });
+                        });
+                    }
+                } catch (err) {
+                    this.error = err.message;
+                }
             }
         }
     }

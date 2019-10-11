@@ -1,31 +1,24 @@
 <template>
-    <div class="root">
-        <div class="toasts" style="position: relative; top: 0; right: 0;">
-            <toast v-for="toast in toasts" v-bind:title="toast.title">
-                <div v-html="toast.body"></div>
-            </toast>
-        </div>
-        <div class="container-fluid">
-            <div class="row">
-                <div class="col-2 col-xl-1 sidebar">
-                    <nav class="sidebar-nav">
-                        <ul>
-                            <li v-bind:class="{active : router.currentRoute.path === '/'}">
-                                <router-link to="/">Dashboard</router-link>
-                            </li>
-                            <li v-bind:class="{active : router.currentRoute.path === '/books'}">
-                                <router-link to="/books">Manage books</router-link>
-                            </li>
-                            <li v-bind:class="{active : router.currentRoute.path === '/users'}">
-                                <router-link to="/users">Manage users</router-link>
-                            </li>
-                        </ul>
-                    </nav>
-                </div>
-                <div class="col-10 col-xl-11 main-column">
-                    <div class="p-3">
-                        <router-view></router-view>
-                    </div>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-2 col-xl-1 sidebar">
+                <nav class="sidebar-nav">
+                    <ul>
+                        <li v-bind:class="{active : router.currentRoute.path === '/'}">
+                            <router-link to="/">Dashboard</router-link>
+                        </li>
+                        <li v-bind:class="{active : router.currentRoute.path === '/books'}">
+                            <router-link to="/books">Manage books</router-link>
+                        </li>
+                        <li v-bind:class="{active : router.currentRoute.path === '/users'}">
+                            <router-link to="/users">Manage users</router-link>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+            <div class="col-10 col-xl-11 main-column">
+                <div class="p-3">
+                    <router-view></router-view>
                 </div>
             </div>
         </div>
@@ -38,7 +31,8 @@
     import BookEditor from "./BookEditor.vue";
     import LendReturnView from "./LendReturnView.vue";
     import UserHistoryView from "./UserHistoryView.vue";
-    import VueRouter from 'vue-router';
+    import VueRouter from "vue-router";
+    import {EventBus} from "../js/events.js";
 
     const routes = [
         {
@@ -86,22 +80,18 @@
         router,
         data: function () {
             return {
-                router,
-                toasts: []
+                router
             };
         },
-        provide: {
-            on_error: this.onError
+        mounted() {
+            EventBus.$on("error", this.onError);
+        },
+        beforeDestroy() {
+            EventBus.$off("error", this.onError);
         },
         methods: {
             onError(o) {
-                this.toasts.push({
-                    title: "Error",
-                    body: `<b>{o.error}</b>`
-                });
-            },
-            toastClose() {
-                this.error_toast.error = null;
+                showErrorToast(`<b>${o.error}</b>`);
             }
         },
         components: {
