@@ -112,3 +112,13 @@ html, body {
 #toast-container .toast-body {
     padding: 1.6em 2em;
 }
+
+.categories-container{
+    padding: 0.5em;
+}
+
+.category-item {
+    padding: 0.3em 0.6em;
+    border: #b1b1b1 1px solid;
+    display: inline;
+}

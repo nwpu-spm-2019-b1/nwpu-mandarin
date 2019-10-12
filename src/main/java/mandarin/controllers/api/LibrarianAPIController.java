@@ -207,7 +207,12 @@ public class LibrarianAPIController {
             bookRepository.save(book);
             allBooks.add(book);
         }
-        return ResponseEntity.status(HttpStatus.CREATED).body(BasicResponse.ok().data(allBooks.stream().map(Book::getId).collect(Collectors.toList())));
+        return ResponseEntity.status(HttpStatus.CREATED).body(BasicResponse.ok().data(allBooks.stream().map((Book book) -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("id", book.getId());
+            map.put("location", book.getLocation());
+            return map;
+        }).collect(Collectors.toList())));
     }
 
     //删除书

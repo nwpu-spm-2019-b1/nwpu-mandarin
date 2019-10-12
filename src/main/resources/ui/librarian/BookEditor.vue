@@ -1,6 +1,19 @@
 <template>
-    <div>
-        <h2 class="module-title">{{page_title}}</h2>
+    <div class="book-editor">
+        <!--<h2 class="module-title">{{page_title}}</h2>-->
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <router-link to="/">Librarian</router-link>
+                </li>
+                <li class="breadcrumb-item">
+                    <router-link to="/books">Book management</router-link>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">
+                    Book editor
+                </li>
+            </ol>
+        </nav>
         <form @submit="submit" class="book-editor-form">
             <div class="form-group">
                 <label for="isbn-input">ISBN</label>
@@ -25,8 +38,10 @@
             </div>
             <div class="form-group">
                 <label>Categories</label>
-                <div class="category-item" v-for="category in book.categories">
-                    {{category.name}}
+                <div class="categories-container">
+                    <div class="category-item" v-for="category in book.categories">
+                        {{category.name}}
+                    </div>
                 </div>
                 <datalist id="existing-categories">
                     <option v-for="category in all_categories" v-bind:value="category.name"></option>
@@ -43,7 +58,10 @@
             </div>
             <div id="error" class="alert alert-danger" v-if="error!==null">{{error}}</div>
             <button type="submit" class="btn btn-success btn">{{submit_text}}</button>
-            <button class="btn btn-secondary" @click="$router.back()">Go back</button>
+            <button class="btn btn-secondary" @click="(e)=>{e.preventDefault();$router.back();}" type="button">
+                Go back
+            </button>
+            <button class="btn btn-warning" @click="(e)=>{e.preventDefault();clear();}">Clear</button>
         </form>
         <div class="add-book-success" v-if="add_book.success">
             <h3>{{add_book.count}} books successfully added:</h3>
@@ -52,21 +70,33 @@
     </div>
 </template>
 <script>
-    import {pickProperties} from '../js/common.js'
+    import {pickProperties} from '../js/common.js';
+
+    const defaultBookData = {
+        isbn: '',
+        title: '',
+        author: '',
+        description: '',
+        location: '',
+        price: '',
+        categories: [],
+        count: 1
+    };
+
+    function padNumber(num, length) {
+        let s = num.toString();
+        while (length > s.length) {
+            s = "0" + s;
+        }
+        return s;
+    }
 
     export default {
         data: function () {
             return {
                 book_id: this.$route.name !== "add-book" ? (this.$route.params.id) : null,
                 book: {
-                    isbn: '',
-                    title: '',
-                    author: '',
-                    description: '',
-                    location: '',
-                    price: '',
-                    categories: [],
-                    count: 1
+                    ...defaultBookData
                 },
                 all_categories: [],
                 error: null,
@@ -121,6 +151,9 @@
                     window.showErrorToast(err.message);
                 }
             },
+            clear() {
+                this.book = {...defaultBookData};
+            },
             submit: async function (event) {
                 event.preventDefault();
                 let data = pickProperties(this.book, ["isbn", "title", "author", "description", "location", "price", "count"]);
@@ -160,8 +193,9 @@
                         this.add_book.books = body.data;
                         this.$nextTick(function () {
                             this.add_book.books.map((book) => {
-                                $(`#barcode-${}`)
+                                $(`#barcode-${book.id}`).JsBarcode(padNumber(book.id, 10));
                             });
+                            $(".add-book-success")[0].scrollIntoView(true);
                         });
                     }
                 } catch (err) {
@@ -171,5 +205,5 @@
         }
     }
 </script>
-<style scoped>
+<style>
 </style>
