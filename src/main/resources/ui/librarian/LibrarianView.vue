@@ -1,24 +1,33 @@
 <template>
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-2 col-xl-1 sidebar">
-                <nav class="sidebar-nav">
-                    <ul>
-                        <li v-bind:class="{active : router.currentRoute.path === '/'}">
-                            <router-link to="/">Dashboard</router-link>
-                        </li>
-                        <li v-bind:class="{active : router.currentRoute.path === '/books'}">
-                            <router-link to="/books">Manage books</router-link>
-                        </li>
-                        <li v-bind:class="{active : router.currentRoute.path === '/users'}">
-                            <router-link to="/users">Manage users</router-link>
-                        </li>
-                    </ul>
-                </nav>
+    <div>
+        <nav class="navbar navbar-light pt-1 pb-1" style="background-color: #e3f2fd;">
+            <div class="container-fluid pl-0 pr-0">
+                <a href="/" class="navbar-brand">
+                    <img src="/static/images/logo.png" title="Mandarin" alt="Mandarin" class="navbar-logo"/>
+                </a>
             </div>
-            <div class="col-10 col-xl-11 main-column">
-                <div class="p-3">
-                    <router-view></router-view>
+        </nav>
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-2 col-xl-1 sidebar">
+                    <nav class="sidebar-nav">
+                        <ul>
+                            <li v-bind:class="{active : router.currentRoute.path === '/'}">
+                                <router-link to="/">Dashboard</router-link>
+                            </li>
+                            <li v-bind:class="{active : router.currentRoute.path === '/books'}">
+                                <router-link to="/books">Manage books</router-link>
+                            </li>
+                            <li v-bind:class="{active : router.currentRoute.path === '/users'}">
+                                <router-link to="/users">Manage users</router-link>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+                <div class="col-10 col-xl-11 main-column">
+                    <div class="p-3">
+                        <router-view></router-view>
+                    </div>
                 </div>
             </div>
         </div>

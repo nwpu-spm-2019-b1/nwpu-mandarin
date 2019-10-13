@@ -113,7 +113,7 @@ html, body {
     padding: 1.6em 2em;
 }
 
-.categories-container{
+.categories-container {
     padding: 0.5em;
 }
 
@@ -121,4 +121,85 @@ html, body {
     padding: 0.3em 0.6em;
     border: #b1b1b1 1px solid;
     display: inline;
+}
+
+.loading-message {
+    font-size: 2em;
+    padding-top: 3em;
+    padding-bottom: 3em;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+}
+
+.spinner {
+    margin: 100px auto;
+    width: 50px;
+    height: 40px;
+    text-align: center;
+    font-size: 10px;
+}
+
+.error-message {
+    padding-top: 2em;
+    padding-bottom: 2em;
+    margin-left: auto;
+    margin-right: auto;
+    font-size: 1.3em;
+    text-align: center;
+    width: 50vh;
+}
+
+.spinner > div {
+    background-color: #333;
+    height: 100%;
+    width: 6px;
+    display: inline-block;
+
+    -webkit-animation: sk-stretchdelay 1.2s infinite ease-in-out;
+    animation: sk-stretchdelay 1.2s infinite ease-in-out;
+}
+
+.spinner .rect2 {
+    -webkit-animation-delay: -1.1s;
+    animation-delay: -1.1s;
+}
+
+.spinner .rect3 {
+    -webkit-animation-delay: -1.0s;
+    animation-delay: -1.0s;
+}
+
+.spinner .rect4 {
+    -webkit-animation-delay: -0.9s;
+    animation-delay: -0.9s;
+}
+
+.spinner .rect5 {
+    -webkit-animation-delay: -0.8s;
+    animation-delay: -0.8s;
+}
+
+@-webkit-keyframes sk-stretchdelay {
+    0%, 40%, 100% {
+        -webkit-transform: scaleY(0.4)
+    }
+    20% {
+        -webkit-transform: scaleY(1.0)
+    }
+}
+
+@keyframes sk-stretchdelay {
+    0%, 40%, 100% {
+        transform: scaleY(0.4);
+        -webkit-transform: scaleY(0.4);
+    }
+    20% {
+        transform: scaleY(1.0);
+        -webkit-transform: scaleY(1.0);
+    }
+}
+
+.navbar-logo {
+    height: calc(2.5rem * 1.4);
 }

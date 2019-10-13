@@ -51,79 +51,95 @@
                 </div>
             </form>
         </div>
-        <table class="table table-hover">
-            <thead>
-            <tr>
-                <th></th>
-                <th>#</th>
-                <th>ISBN</th>
-                <th>Title</th>
-                <th>Author(s)</th>
-                <th>Location</th>
-                <th>Actions</th>
-            </tr>
-            </thead>
-            <tbody>
-            <template v-for="book in books">
-                <tr v-bind:key="book.id" @click="showDescription" class="book-main-row">
-                    <td>
-                        <input type="checkbox" v-bind:data-id="book.id" class="row-checkbox"/>
-                    </td>
-                    <td>{{book.id}}</td>
-                    <td>{{book.isbn}}</td>
-                    <td>{{book.title}}</td>
-                    <td>{{book.author}}</td>
-                    <td>{{book.location}}</td>
-                    <td>
-                        <a href="javascript:void(0);" @click="editBook" v-bind:data-id="book.id">Edit</a>
-                        <a href="javascript:void(0);" @click="warnDeletingBooks" v-bind:data-id="book.id">Delete</a>
-                    </td>
+        <div class="table-container" v-if="error===null">
+            <table class="table table-hover">
+                <thead>
+                <tr>
+                    <th></th>
+                    <th>#</th>
+                    <th>ISBN</th>
+                    <th>Title</th>
+                    <th>Author(s)</th>
+                    <th>Location</th>
+                    <th>Actions</th>
                 </tr>
-                <tr v-bind:id="'info-'+book.id" v-bind:key="'info-'+book.id" style="display: none;"
-                    class="book-info-row">
-                    <td colspan="7">
-                        <div class="info-item">
-                            <label>Description:</label>
-                            {{book.description}}
-                        </div>
-                        <div class="info-item">
-                            <label>Price:</label>
-                            {{book.price}}
-                        </div>
-                    </td>
-                </tr>
-            </template>
-            </tbody>
-        </table>
-        <div class="pager-container" v-if="pager.total > 0">
-            <nav aria-label="Page selector">
-                <ul class="pagination justify-content-center">
-                    <li class="page-item" v-bind:class="{'disabled':pager.current===1}">
-                        <a class="page-link"
-                           href="javascript:void(0);"
-                           @click="changePage"
-                           data-page="prev">
-                            Previous
-                        </a>
-                    </li>
-                    <li class="page-item" v-for="page in pager.total" v-bind:class="{'active':pager.current===page}">
-                        <a class="page-link"
-                           href="javascript:void(0);"
-                           @click="changePage"
-                           v-bind:data-page="page">
-                            {{page}}
-                        </a>
-                    </li>
-                    <li class="page-item" v-bind:class="{'disabled':pager.current===pager.total}">
-                        <a class="page-link"
-                           href="javascript:void(0);"
-                           @click="changePage"
-                           data-page="next">
-                            Next
-                        </a>
-                    </li>
-                </ul>
-            </nav>
+                </thead>
+                <tbody>
+                <template v-for="book in books" v-if="!loading">
+                    <tr v-bind:key="book.id" @click="showDescription" class="book-main-row">
+                        <td>
+                            <input type="checkbox" v-bind:data-id="book.id" class="row-checkbox"/>
+                        </td>
+                        <td>{{book.id}}</td>
+                        <td>{{book.isbn}}</td>
+                        <td>{{book.title}}</td>
+                        <td>{{book.author}}</td>
+                        <td>{{book.location}}</td>
+                        <td>
+                            <a href="javascript:void(0);" @click="editBook" v-bind:data-id="book.id">Edit</a>
+                            <a href="javascript:void(0);" @click="warnDeletingBooks" v-bind:data-id="book.id">Delete</a>
+                        </td>
+                    </tr>
+                    <tr v-bind:id="'info-'+book.id" v-bind:key="'info-'+book.id" style="display: none;"
+                        class="book-info-row">
+                        <td colspan="7">
+                            <div class="info-item">
+                                <label>Description:</label>
+                                {{book.description}}
+                            </div>
+                            <div class="info-item">
+                                <label>Price:</label>
+                                {{book.price}}
+                            </div>
+                        </td>
+                    </tr>
+                </template>
+                </tbody>
+            </table>
+            <div v-if="loading" class="loading-message">
+                <div class="spinner">
+                    <div class="rect1"></div>
+                    <div class="rect2"></div>
+                    <div class="rect3"></div>
+                    <div class="rect4"></div>
+                    <div class="rect5"></div>
+                </div>
+                Loading books...
+            </div>
+            <div class="pager-container" v-if="pager.total > 0 && !loading">
+                <nav aria-label="Page selector">
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item" v-bind:class="{'disabled':pager.current===1}">
+                            <a class="page-link"
+                               href="javascript:void(0);"
+                               @click="changePage"
+                               data-page="prev">
+                                Previous
+                            </a>
+                        </li>
+                        <li class="page-item" v-for="page in pager.total"
+                            v-bind:class="{'active':pager.current===page}">
+                            <a class="page-link"
+                               href="javascript:void(0);"
+                               @click="changePage"
+                               v-bind:data-page="page">
+                                {{page}}
+                            </a>
+                        </li>
+                        <li class="page-item" v-bind:class="{'disabled':pager.current===pager.total}">
+                            <a class="page-link"
+                               href="javascript:void(0);"
+                               @click="changePage"
+                               data-page="next">
+                                Next
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+        <div class="alert alert-danger error-message" v-else>
+            {{error}}
         </div>
     </div>
 </template>
@@ -137,6 +153,7 @@
         methods: {
             loadBooks: async function () {
                 try {
+                    this.loading = true;
                     let resp = await fetch(urlWithParams("/api/librarian/book/search", {
                         type: this.search.type,
                         query: this.search.query,
@@ -152,9 +169,10 @@
                     this.books = body.data.books;
                     this.pager.total = body.data.total;
                     this.pager.count = body.data.count;
+                    this.loading = false;
                 } catch (err) {
-                    console.log(err.message);
-                    EventBus.$emit("error", {error: err.message});
+                    this.error = err.message;
+                    this.loading = false;
                 }
             },
             showDescription(event) {
@@ -247,12 +265,13 @@
                     current: 1,
                     total: 1,
                     count: 0
-                }
+                },
+                loading: true,
+                error: null
             };
         },
         components: {}
-    }
-    ;
+    };
 </script>
 <style>
 </style>

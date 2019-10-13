@@ -55,7 +55,7 @@ public class LibrarianAPIController {
                                      @RequestParam String query,
                                      @RequestParam(defaultValue = "1") Integer page,
                                      @RequestParam(defaultValue = "20") Integer size) {
-        Page<Book> books = null;
+        Page<Book> books;
         Pageable pageable = PageRequest.of(page - 1, size, Sort.by(Sort.Direction.DESC, "id"));
         if (query.length() > 0) {
             switch (type) {
@@ -72,7 +72,7 @@ public class LibrarianAPIController {
                     books = bookRepository.findAllByDescriptionContaining(query, pageable);
                     break;
                 default:
-                    return ResponseEntity.badRequest().body(BasicResponse.fail().data("Invalid search type"));
+                    throw new APIException("Invalid search type");
             }
         } else {
             books = bookRepository.findAll(pageable);
