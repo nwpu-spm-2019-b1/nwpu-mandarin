@@ -49,7 +49,12 @@ public class LibrarianAPIController {
     CategoryRepository categoryRepository;
 
     @Resource
+    FindPswordTableRepository findPswordTableRepository;
+
+    @Resource
     BookService bookService;
+
+
 
     @GetMapping("/book/search")
     public ResponseEntity searchBook(@RequestParam String type,
@@ -321,6 +326,18 @@ public class LibrarianAPIController {
     @PostMapping("/category")
     public ResponseEntity addCategory(@RequestParam String name,
                                       @RequestParam(required = false) Integer parentId) {
+
+        /********************** 添加了判断name是否只有空格的情况 ***********************/
+        Boolean flag = false;
+        for (int i = 0; i < name.length() && !flag; i++)
+            if (name.charAt(i) != ' ')
+                flag = true;
+
+        if (!flag)
+            throw new APIException("cannot add blank category");
+
+        /*********************** end *********************************/
+
         Category category = new Category(name, null);
         if (parentId != null) {
             Category parent = categoryRepository.findById(parentId).orElse(null);
@@ -343,5 +360,43 @@ public class LibrarianAPIController {
             categoryRepository.delete(target);
             return ResponseEntity.ok(BasicResponse.ok());
         }
+    }
+
+
+    /**
+     *  找回密码的时候应该要先填写信息，由管理员判断他是否是该账号的主人
+     */
+    @GetMapping("/password-find")
+    public ResponseEntity getFindPswordTable(@RequestParam(value = "page", defaultValue = "1") Integer page,
+                                             @RequestParam(value = "size", defaultValue = "10") Integer size)
+    {
+        Map<String, Object> data = new HashMap<>();
+        Pageable pageable = PageRequest.of(page - 1, size, Sort.by(Sort.Direction.DESC, "start_time"));
+        Page<FindPswordTable> findPswordTablePage = findPswordTableRepository.findAll(pageable);
+
+        data.put("users", findPswordTablePage.getContent());
+        data.put("count", findPswordTablePage.getTotalElements());
+        data.put("total", findPswordTablePage.getTotalPages());
+
+        return ResponseEntity.ok(BasicResponse.ok().data(data));
+    }
+
+    /**
+     *  提交找回密码对应表单的信息，等待图书馆管理员审核
+     */
+    @PostMapping("/password-find")
+    public ResponseEntity getUserInformation(@RequestParam("username") String username,
+                                             @RequestParam("description") String description)
+    {
+        User user = userRepository.findByUsername(username).orElse(null);
+
+        if (user == null)
+            throw new APIException("user not found");
+
+        FindPswordTable table = new FindPswordTable(user, description);
+
+        findPswordTableRepository.save(table);
+
+        return ResponseEntity.ok(BasicResponse.ok());
     }
 }
