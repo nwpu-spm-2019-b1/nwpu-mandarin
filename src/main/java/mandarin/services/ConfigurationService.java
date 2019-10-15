@@ -25,8 +25,7 @@ public class ConfigurationService {
     }
 
     public String get(String key) {
-        try {
-            Session session = entityManagerFactory.unwrap(SessionFactory.class).openSession();
+        try (Session session = entityManagerFactory.unwrap(SessionFactory.class).openSession()) {
             ConfigurationItem item = session.get(ConfigurationItem.class, key);
             if (item == null) {
                 Object defaultValue = defaults.getOrDefault(key, null);
@@ -51,16 +50,17 @@ public class ConfigurationService {
     }
 
     public String set(String key, Object value) {
-        try {
-            Session session = entityManagerFactory.unwrap(SessionFactory.class).openSession();
+        try (Session session = entityManagerFactory.unwrap(SessionFactory.class).openSession()) {
             ConfigurationItem item = session.get(ConfigurationItem.class, key);
             if (item == null) {
                 session.save(new ConfigurationItem(key, value));
+                session.getTransaction().commit();
                 return null;
             } else {
                 String oldValue = item.getValue();
                 item.setValue(value.toString());
                 session.update(item);
+                session.getTransaction().commit();
                 return oldValue;
             }
         } catch (Exception e) {
