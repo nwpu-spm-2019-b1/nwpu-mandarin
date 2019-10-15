@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import mandarin.entities.*;
+import mandarin.services.ConfigurationService;
 import org.apache.commons.io.IOUtils;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -34,6 +35,9 @@ public class StartupListener {
 
     @Resource
     private EntityManagerFactory entityManagerFactory;
+
+    @Resource
+    private ConfigurationService configurationService;
 
     public StartupListener(DataSource dataSource) {
         this.dataSource = dataSource;

@@ -5,14 +5,12 @@ import mandarin.auth.NoAuthentication;
 import mandarin.auth.SessionHelper;
 import mandarin.auth.UserType;
 import mandarin.auth.exceptions.AuthenticationException;
-import mandarin.auth.exceptions.UnauthorizedException;
 import mandarin.dao.CategoryRepository;
 import mandarin.dao.LendingLogRepository;
 import mandarin.dao.UserRepository;
 import mandarin.entities.Category;
 import mandarin.entities.LendingLogItem;
 import mandarin.entities.User;
-import mandarin.exceptions.ForbiddenException;
 import mandarin.utils.BasicResponse;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -25,7 +23,6 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.util.List;
-import java.util.Map;
 
 @RequestMapping("/librarian")
 @AuthenticationNeeded(UserType.Librarian)

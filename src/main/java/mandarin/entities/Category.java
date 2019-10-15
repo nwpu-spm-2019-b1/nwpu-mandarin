@@ -1,7 +1,5 @@
 package mandarin.entities;
 
-import org.springframework.lang.Nullable;
-
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;

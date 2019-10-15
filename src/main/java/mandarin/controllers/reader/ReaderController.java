@@ -1,6 +1,5 @@
 package mandarin.controllers.reader;
 
-import mandarin.auth.AuthenticationNeeded;
 import mandarin.auth.SessionHelper;
 import mandarin.auth.UserType;
 import mandarin.auth.exceptions.AuthenticationException;
@@ -8,7 +7,6 @@ import mandarin.auth.exceptions.UnauthorizedException;
 import mandarin.dao.BookRepository;
 import mandarin.dao.LendingLogRepository;
 import mandarin.dao.ReservationRepository;
-import mandarin.dao.UserRepository;
 import mandarin.entities.Book;
 import mandarin.entities.LendingLogItem;
 import mandarin.entities.Reservation;

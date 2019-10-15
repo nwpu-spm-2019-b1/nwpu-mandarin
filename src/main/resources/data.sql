@@ -76,9 +76,12 @@ CREATE TABLE book_copies
     location TEXT NOT NULL,
     book_id INTEGER   NOT NULL REFERENCES books (id)
 );
-CREATE INDEX ON reservations (book_id);
-CREATE INDEX ON reservations (user_id);
-CREATE INDEX ON reservations (time);
+DROP TABLE IF EXISTS configuration;
+CREATE TABLE configuration
+(
+    key      TEXT PRIMARY KEY,
+    value TEXT NOT NULL
+);
 INSERT INTO users (username, password_hash, type, signup_time)
 VALUES ('admin', '$argon2id$v=19$m=65536,t=2,p=1$Awz7DXJOmoT4/DwNauoyjQ$geMYnip4NmWsxe7eukKOpps+bdOc7doefLm0480E0tY',
         'Admin', '2019-09-20 22:29:55.670000');

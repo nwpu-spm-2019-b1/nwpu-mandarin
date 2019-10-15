@@ -7,13 +7,11 @@ import mandarin.dao.UserRepository;
 import mandarin.entities.User;
 import mandarin.utils.CryptoUtils;
 import org.springframework.stereotype.Component;
-import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpSession;
-import java.util.Optional;
 
 @Component
 public class SessionHelper {

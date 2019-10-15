@@ -2,7 +2,6 @@ package mandarin.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import javax.annotation.Resource;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.math.BigDecimal;

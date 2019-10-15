@@ -4,7 +4,6 @@ import mandarin.auth.AuthenticationNeeded;
 import mandarin.auth.UserType;
 import mandarin.controllers.api.dto.BookDTO;
 import mandarin.controllers.api.dto.BookDetailDTO;
-import mandarin.controllers.api.dto.CategoryDTO;
 import mandarin.dao.*;
 import mandarin.entities.*;
 import mandarin.exceptions.APIException;

@@ -1,7 +1,5 @@
 package mandarin.entities;
 
-import org.springframework.util.unit.DataUnit;
-
 import javax.persistence.*;
 import java.time.Duration;
 import java.time.Instant;
