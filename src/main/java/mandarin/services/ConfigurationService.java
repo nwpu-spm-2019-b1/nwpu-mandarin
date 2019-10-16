@@ -51,6 +51,7 @@ public class ConfigurationService {
 
     public String set(String key, Object value) {
         try (Session session = entityManagerFactory.unwrap(SessionFactory.class).openSession()) {
+            session.beginTransaction();
             ConfigurationItem item = session.get(ConfigurationItem.class, key);
             if (item == null) {
                 session.save(new ConfigurationItem(key, value));
