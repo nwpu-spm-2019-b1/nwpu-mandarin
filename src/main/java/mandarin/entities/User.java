@@ -14,7 +14,7 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     private String username;
-    private String email;
+    private String email = "test@example.com";
     @JsonIgnore
     @Column(name = "password_hash")
     private String passwordHash;

@@ -95,14 +95,14 @@ public class LibrarianAPIController {
         Map<String, Object> data = new HashMap<>();
         switch (type) {
             case "username":
-                Page<User> userPage = userRepository.findAllByUsernameContaining(query, PageRequest.of(page - 1, size, Sort.by(Sort.Direction.DESC, "id")));
+                Page<User> userPage = userRepository.findAllByUsernameContainingAndType(query, UserType.Reader, PageRequest.of(page - 1, size, Sort.by(Sort.Direction.DESC, "id")));
                 data.put("users", userPage.getContent());
                 data.put("count", userPage.getTotalElements());
                 data.put("total", userPage.getTotalPages());
                 break;
             case "id":
                 User user = userRepository.findById(Integer.parseInt(query)).orElse(null);
-                if (user != null) {
+                if (user != null && user.getType().equals(UserType.Reader)) {
                     data.put("users", Collections.singletonList(user));
                     data.put("count", 1);
                     data.put("total", 1);
@@ -252,14 +252,15 @@ public class LibrarianAPIController {
     }
 
     //编辑Reader
-    @PutMapping(value = "/user/{userId}", consumes = "application/json")
+    @PutMapping(value = "/user/{userId}")
     public ResponseEntity editReader(@PathVariable("userId") Integer id,
-                                     @RequestParam(required = false) String username,
-                                     @RequestParam(required = false) String password) {
+                                     @RequestBody Map<String, String> body) {
         User user = userRepository.findById(id).orElse(null);
         if (user == null) {
             throw new APIException("No such user");
         }
+        String username = body.getOrDefault("username", "");
+        String password = body.getOrDefault("password", "");
         if (username != null && username.length() > 0) {
             user.setUsername(username);
         }

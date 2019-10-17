@@ -23,6 +23,7 @@ html, body {
     padding-left: 0;
     padding-right: 0;
     background-color: rgba(100, 84, 237, 0.36);
+    min-width: 200px;
 }
 
 .sidebar-nav {

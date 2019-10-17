@@ -213,7 +213,10 @@
                         this.add_book.books = body.data;
                         this.$nextTick(function () {
                             this.add_book.books.map((book) => {
-                                $(`#barcode-${book.id}`).JsBarcode(padNumber(book.id, 10));
+                                let text = padNumber(book.id, 10);
+                                $(`#barcode-${book.id}`).JsBarcode(text, {
+                                    text: text
+                                });
                             });
                             $(".add-book-success")[0].scrollIntoView(true);
                         });

@@ -39,6 +39,39 @@
                 </div>
             </div>
         </div>
+        <div class="modal fade" tabIndex="-1" role="dialog" id="edit-user-modal">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Edit a reader</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true" v-html="'&times;'"></span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form>
+                            <div class="form-group">
+                                <label for="edit-user-modal-username">Username</label>
+                                <input type="text" name="username" id="edit-user-modal-username" class="form-control"
+                                       required v-model="edit_user.username">
+                            </div>
+                            <div class="form-group">
+                                <label for="edit-user-modal-password">
+                                    Password
+                                </label>
+                                <input type="text" name="password" id="edit-user-modal-password" class="form-control"
+                                       v-model="edit_user.password">
+                            </div>
+                            <div class="alert alert-danger" v-if="edit_user.error!==null">{{edit_user.error}}</div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-primary" @click="editUser">OK</button>
+                        <button class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
         <div class="modal fade" tabIndex="-1" role="dialog" id="delete-warning-modal">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
@@ -94,7 +127,8 @@
                     <td>{{user.id}}</td>
                     <td>{{user.username}}</td>
                     <td>
-                        <a href="javascript:void(0);" v-bind:data-id="user.id">Edit</a>
+                        <a href="javascript:void(0);" v-bind:data-id="user.id" v-bind:data-username="user.username"
+                           @click="startEditingUser">Edit</a>
                         <a href="javascript:void(0);" @click="warnDeletingUsers" v-bind:data-id="user.id">Delete</a>
                     </td>
                 </tr>
@@ -212,27 +246,52 @@
                 window.scrollTo(0, 0);
                 this.loadUsers();
             },
-            deleteUsers(event) {
+            startEditingUser(event) {
+                let id = event.target.dataset.id;
+                let username = event.target.dataset.username;
+                this.edit_user.username = username;
+                this.edit_user.user_id = id;
+                $("#edit-user-modal").modal();
+            },
+            editUser() {
                 let vm = this;
                 $.ajax(
                     {
-                        url: "/api/librarian/user",
-                        type: "DELETE",
+                        url: "/api/librarian/user/" + vm.edit_user.user_id,
+                        type: "PUT",
                         dataType: "json",
                         contentType: "application/json",
                         data: JSON.stringify({
-                            id_list: vm.deletion.id_list
+                            username: vm.edit_user.username,
+                            password: vm.edit_user.password
                         }),
                         success: function (resp) {
                             vm.loadUsers();
-                            $("#delete-warning-modal").modal("hide");
+                            $("#edit-user-modal").modal("hide");
                         },
                         error: function (xhr) {
                             let resp = JSON.parse(xhr.responseText);
-                            vm.deletion.error = resp.message;
+                            vm.edit_user.error = resp.message;
                         }
                     }
                 );
+            },
+            deleteUsers: async function (event) {
+                for (let id of this.deletion.id_list) {
+                    let resp = await fetch("/api/librarian/user/" + id,
+                        {
+                            method: "DELETE",
+                            credentials: "same-origin",
+                        }
+                    );
+                    if (resp.ok) {
+                        this.loadUsers();
+                    } else {
+                        let resp = JSON.parse(xhr.responseText);
+                        this.deletion.error = resp.message;
+                    }
+                    $("#delete-warning-modal").modal("hide");
+                }
             }
         },
         mounted() {
@@ -244,6 +303,12 @@
                 users: [],
                 add_user: {
                     error: null,
+                    username: '',
+                    password: ''
+                },
+                edit_user: {
+                    error: null,
+                    user_id: null,
                     username: '',
                     password: ''
                 },

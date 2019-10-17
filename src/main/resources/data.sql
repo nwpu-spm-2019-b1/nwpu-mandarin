@@ -3,7 +3,7 @@ CREATE TABLE users
 (
     id            SERIAL PRIMARY KEY,
     username      TEXT UNIQUE NOT NULL,
-    email         TEXT        NOT NULL,
+    email         TEXT        NOT NULL DEFAULT 'test@example.com',
     password_hash TEXT        NOT NULL,
     type          TEXT        NOT NULL,
     signup_time   TIMESTAMP   NOT NULL

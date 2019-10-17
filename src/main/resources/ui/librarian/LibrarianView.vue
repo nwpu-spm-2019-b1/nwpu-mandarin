@@ -8,7 +8,7 @@
             </div>
         </nav>
         <div class="container-fluid">
-            <div class="row">
+            <div class="row" style="height: 100%; flex-wrap: nowrap; width: 100vw;">
                 <div class="col-2 col-xl-1 sidebar">
                     <nav class="sidebar-nav">
                         <ul>
@@ -27,7 +27,7 @@
                         </ul>
                     </nav>
                 </div>
-                <div class="col-10 col-xl-11 main-column">
+                <div class="col col-xl main-column" style="flex-grow: 1;">
                     <div class="p-3">
                         <router-view></router-view>
                     </div>
