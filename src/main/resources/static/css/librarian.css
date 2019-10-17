@@ -22,7 +22,7 @@ html, body {
     height: 100%;
     padding-left: 0;
     padding-right: 0;
-    background-color: rgba(100, 84, 237, 0.36);
+    background-color: #e3f2fd;
     min-width: 200px;
 }
 
@@ -50,13 +50,9 @@ html, body {
     text-decoration: none;
 }
 
-.sidebar-nav ul li.active a {
-    color: #FFFFFF;
-}
-
 .sidebar-nav ul li.active {
     box-sizing: border-box;
-    background-color: #6454ED;
+    border-right: 4px solid #e6e414;
 }
 
 .search-box {
