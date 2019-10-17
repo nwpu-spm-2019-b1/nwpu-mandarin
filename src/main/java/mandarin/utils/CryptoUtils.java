@@ -6,6 +6,8 @@ import com.sun.jna.NativeLong;
 import com.sun.jna.Platform;
 
 import java.nio.charset.StandardCharsets;
+import java.security.SecureRandom;
+import java.util.Random;
 
 public class CryptoUtils {
     private static SodiumLibrary SODIUM;
@@ -55,8 +57,8 @@ public class CryptoUtils {
 
     public static boolean verifyPassword(String password, String hash) {
         byte[] hashBytes = hash.getBytes(StandardCharsets.US_ASCII);
-        byte[] processedHashBytes=new byte[hashBytes.length+1];
-        System.arraycopy(hashBytes,0,processedHashBytes,0,hashBytes.length);
+        byte[] processedHashBytes = new byte[hashBytes.length + 1];
+        System.arraycopy(hashBytes, 0, processedHashBytes, 0, hashBytes.length);
         byte[] passwordBytes = password.getBytes(StandardCharsets.UTF_8);
         int retcode = SODIUM.crypto_pwhash_str_verify(processedHashBytes, passwordBytes, passwordBytes.length);
         return retcode == 0;
@@ -74,5 +76,15 @@ public class CryptoUtils {
         }
         String outString = new String(out, StandardCharsets.UTF_8);
         return outString.substring(0, outString.indexOf(0));
+    }
+
+    public static String randomString(int length) {
+        String chars = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        SecureRandom random = new SecureRandom();
+        StringBuilder stringBuilder=new StringBuilder();
+        while (stringBuilder.length()<length){
+            stringBuilder.append((char)random.nextInt(chars.length()));
+        }
+        return stringBuilder.toString();
     }
 }

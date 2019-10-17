@@ -7,6 +7,8 @@ import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
@@ -14,6 +16,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import javax.sql.DataSource;
 import java.util.Collections;
+import java.util.Properties;
 
 @Configuration
 @EnableTransactionManagement
@@ -55,6 +58,21 @@ public class AppConfig {
         emf.setJpaVendorAdapter(hibernateJpa);
         emf.setJpaPropertyMap(Collections.singletonMap("javax.persistence.validation.mode", "none"));
         return emf;
+    }
+
+    @Bean
+    public JavaMailSender getJavaMailSender() {
+        JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
+        mailSender.setHost("smtp.163.com");
+        mailSender.setPort(465);
+        mailSender.setUsername("a473407177@163.com");
+        mailSender.setPassword("qwer123");
+        Properties props = mailSender.getJavaMailProperties();
+        props.put("mail.transport.protocol", "smtp");
+        props.put("mail.smtp.auth", "true");
+        props.put("mail.smtp.ssl.enable", "true");
+        props.put("mail.debug", "true");
+        return mailSender;
     }
 
     @Bean

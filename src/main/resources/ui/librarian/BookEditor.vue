@@ -18,6 +18,7 @@
             <div class="form-group">
                 <label for="isbn-input">ISBN</label>
                 <input class="form-control" id="isbn-input" name="isbn" v-model="book.isbn"/>
+                <a href="javascript:void(0);" @click="loadExternal" class="mt-3">Fetch data from Google Books</a>
             </div>
             <div class="form-group">
                 <label for="title-input">Title</label>
@@ -71,6 +72,7 @@
 </template>
 <script>
     import {pickProperties} from '../js/common.js';
+    import {urlWithParams} from "../js/common";
 
     const defaultBookData = {
         isbn: '',
@@ -122,6 +124,24 @@
             })();
         },
         methods: {
+            loadExternal: async function () {
+                let resp = await fetch(urlWithParams("http://106.13.1.40:5000/googleApi", {isbn: this.book.isbn}));
+                let body = await resp.json();
+                if (!resp.ok) {
+                    throw new Error(body.message);
+                }
+                console.log(JSON.stringify(body));
+                if (body.items.length === 0) {
+                    return;
+                }
+                let info = body.items[0].volumeInfo;
+                let book = {};
+                book.title = info.title;
+                book.author = info.authors.join(', ');
+                book.description = info.description;
+                Object.assign(this.book, book);
+
+            },
             loadBookDetails: async function () {
                 let resp = await fetch("/api/book/" + this.book_id, {
                     method: "GET",

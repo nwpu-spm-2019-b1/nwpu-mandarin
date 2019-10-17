@@ -7,6 +7,7 @@ import mandarin.auth.exceptions.UnauthorizedException;
 import mandarin.dao.BookRepository;
 import mandarin.dao.LendingLogRepository;
 import mandarin.dao.ReservationRepository;
+import mandarin.dao.UserRepository;
 import mandarin.entities.Book;
 import mandarin.entities.LendingLogItem;
 import mandarin.entities.Reservation;
@@ -14,11 +15,16 @@ import mandarin.entities.User;
 import mandarin.services.BookService;
 import mandarin.services.UserService;
 import mandarin.utils.BasicResponse;
+import mandarin.utils.CryptoUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.MailSender;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -26,10 +32,14 @@ import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpSession;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 @Controller
 public class ReaderController {
+    @Resource
+    private UserRepository userRepository;
     @Resource
     BookRepository bookRepository;
 
@@ -47,6 +57,9 @@ public class ReaderController {
 
     @Resource
     SessionHelper sessionHelper;
+
+    @Resource
+    JavaMailSender mailSender;
 
     @ModelAttribute("sessionHelper")
     public SessionHelper getSessionHelper() {
@@ -106,6 +119,30 @@ public class ReaderController {
         model.addAttribute("type", type);
         model.addAttribute("query", query);
         return "reader/search";
+    }
+
+    @GetMapping("/recover")
+    public String recoverPassword(Model model) {
+        model.addAttribute("finished", false);
+        return "reader/recover_password";
+    }
+
+    @PostMapping("/recover")
+    public String recoverPassword(@RequestParam String email, Model model) {
+        User user = userRepository.findByEmail(email).orElse(null);
+        if (user != null) {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setTo(user.getEmail());
+            message.setFrom(((JavaMailSenderImpl) mailSender).getUsername());
+            message.setSubject("Password reset - Mandarin");
+            message.setSentDate(new Date());
+            message.setText("Your new password: " + CryptoUtils.randomString(20));
+            mailSender.send(message);
+            model.addAttribute("finished", true);
+        } else {
+            model.addAttribute("finished", true);
+        }
+        return "reader/recover_password";
     }
 
     @PostMapping(value = "/login", produces = "application/json")
