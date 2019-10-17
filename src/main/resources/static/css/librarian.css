@@ -203,3 +203,12 @@ html, body {
 .navbar-logo {
     height: calc(2.5rem * 1.4);
 }
+
+.footer {
+    text-align: center;
+    margin-top: 1em;
+    border-top: 1px #a1a1a1 solid;
+    width: 100%;
+    padding-top: 0.5em;
+    font-size: 80%;
+}

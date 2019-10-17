@@ -3,11 +3,20 @@
         <h1 class="module-title">Lend / return a book</h1>
         <form @submit="submit">
             <div class="form-group form-row">
-                <label for="action-select" class="col-2 col-xl-1">Type of action</label>
-                <select class="form-control col col-xl" id="action-select" name="action" v-model="action">
-                    <option value="lend">Lend</option>
-                    <option value="return">Return</option>
-                </select>
+                <label class="col-2 col-xl-1">Type of action</label>
+                <div class="d-inline col col-xl">
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="action" value="lend" id="radio-action-lend"
+                               v-model="action">
+                        <label class="form-check-label" for="radio-action-lend">Lend</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="action" value="return"
+                               id="radio-action-return"
+                               v-model="action">
+                        <label class="form-check-label" for="radio-action-return">Return</label>
+                    </div>
+                </div>
             </div>
             <div class="form-group form-row">
                 <label for="book-id-input" class="col-2 col-xl-1">Book ID</label>
@@ -49,8 +58,8 @@
                 </table>
             </div>
             <div class="form-group form-row">
-                <label for="username-input" class="col-2 col-xl-1">Username</label>
-                <input class="form-control col" id="username-input" name="username" v-model="username"
+                <label for="userid-input" class="col-2 col-xl-1">User ID</label>
+                <input class="form-control col" id="userid-input" name="userid" v-model="user_id"
                        autocomplete="off"/>
             </div>
             <div id="error-message" class="alert alert-danger" v-if="error!==null">{{error}}</div>
@@ -69,7 +78,7 @@
         data: function () {
             return {
                 book_id: '',
-                username: '',
+                user_id: '',
                 book: null,
                 error: null,
                 ok: false,
@@ -79,7 +88,7 @@
         methods: {
             clear() {
                 this.book_id = '';
-                this.username = '';
+                this.user_id = '';
                 this.book = null;
                 this.error = null;
                 this.ok = false;
@@ -110,7 +119,7 @@
                         type: "POST",
                         dataType: "json",
                         data: {
-                            username: vm.username,
+                            userId: vm.user_id,
                             bookId: vm.book_id
                         },
                         success(resp) {

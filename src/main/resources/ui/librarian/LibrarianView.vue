@@ -28,6 +28,11 @@
                     <div class="p-3">
                         <router-view></router-view>
                     </div>
+                    <div class="footer">
+                        Mandarin Library Automation<br>
+                        NWPU SPM 2019<br>
+                        Group B1
+                    </div>
                 </div>
             </div>
         </div>
