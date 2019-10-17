@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div style="height: 100%;">
         <nav class="navbar navbar-light pt-1 pb-1" style="background-color: #e3f2fd;">
             <div class="container-fluid pl-0 pr-0">
                 <a href="/" class="navbar-brand">
@@ -17,6 +17,9 @@
                             </li>
                             <li v-bind:class="{active : router.currentRoute.path === '/books'}">
                                 <router-link to="/books">Manage books</router-link>
+                            </li>
+                            <li v-bind:class="{active : router.currentRoute.path === '/books/actions'}">
+                                <router-link to="/books/actions">Lend / return books</router-link>
                             </li>
                             <li v-bind:class="{active : router.currentRoute.path === '/users'}">
                                 <router-link to="/users">Manage users</router-link>

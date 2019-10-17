@@ -14,6 +14,9 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.math.BigDecimal;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -32,6 +35,8 @@ public class UserService {
     private ActionLogRepository actionLogRepository;
     @Resource
     private SessionHelper sessionHelper;
+    @Resource
+    private ConfigurationService configurationService;
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public void deleteUser(Integer userId) {
@@ -52,5 +57,17 @@ public class UserService {
         actionInfo.put("user", user);
         actionInfo.put("lending_logs", lendingLogRepository.findAllByUser(user).stream().map((LendingLogItem item) -> ObjectUtils.copyFieldsIntoMap(item, null, "id", "startTime", "endTime", "book")).collect(Collectors.toList()));
         actionLogRepository.save(new ActionLogItem(sessionHelper.getCurrentUser(), "DeleteUser", actionInfo));
+    }
+
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
+    public BigDecimal getFineAmount(User user) {
+        Instant now = Instant.now();
+        return lendingLogRepository.findOutstandingByUser(user).stream().map((LendingLogItem item) -> {
+            long duration = Duration.between(item.getStartTime(), now).toDays() - configurationService.getAsInt("return_period");
+            if (duration <= 0) {
+                return BigDecimal.ZERO;
+            }
+            return configurationService.getAsBigDecimal("fine_rate").multiply(BigDecimal.valueOf(duration));
+        }).reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 }

@@ -54,7 +54,7 @@ public class ReaderAPIController {
         if (!reservation.getUser().getId().equals(sessionHelper.getCurrentUser().getId())) {
             throw new APIException("Do not even try this");
         }
-        reservationRepository.delete(reservation);
+        reservationRepository.deleteById(reservation.getId());
         return ResponseEntity.ok(BasicResponse.ok());
     }
 }

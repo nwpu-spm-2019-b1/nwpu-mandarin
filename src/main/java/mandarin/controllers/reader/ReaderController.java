@@ -12,6 +12,7 @@ import mandarin.entities.LendingLogItem;
 import mandarin.entities.Reservation;
 import mandarin.entities.User;
 import mandarin.services.BookService;
+import mandarin.services.UserService;
 import mandarin.utils.BasicResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -36,6 +37,9 @@ public class ReaderController {
     BookService bookService;
 
     @Resource
+    UserService userService;
+
+    @Resource
     LendingLogRepository lendingLogRepository;
 
     @Resource
@@ -52,6 +56,11 @@ public class ReaderController {
     @ModelAttribute("bookService")
     public BookService getBookService() {
         return bookService;
+    }
+
+    @ModelAttribute("userService")
+    public UserService getUserService() {
+        return userService;
     }
 
     @ExceptionHandler(UnauthorizedException.class)

@@ -7,6 +7,7 @@ import mandarin.dao.BookRepository;
 import mandarin.dao.LendingLogRepository;
 import mandarin.dao.ReservationRepository;
 import mandarin.entities.*;
+import mandarin.exceptions.APIException;
 import mandarin.utils.ObjectUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
@@ -77,6 +78,9 @@ public class BookService {
             status = BookStatus.Available;
         }
         if (status.equals(BookStatus.Available)) {
+            if (lendingLogRepository.findAllByUser(borrower).size() >= 3) {
+                throw new RuntimeException("Number of book borrowed by the user exceeded the limit");
+            }
             LendingLogItem item = new LendingLogItem(book, borrower);
             lendingLogRepository.save(item);
             return item;

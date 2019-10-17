@@ -24,7 +24,7 @@ public class Book implements Serializable {
     @JoinTable(name = "book_category_rel", joinColumns = {@JoinColumn(name = "book_id")}, inverseJoinColumns = {@JoinColumn(name = "category_id")})
     private List<Category> categories;
     @JsonIgnore
-    @OneToOne(cascade = {CascadeType.ALL}, orphanRemoval = true, mappedBy = "book")
+    @OneToOne(cascade = {CascadeType.REMOVE}, orphanRemoval = true, mappedBy = "book")
     private Reservation reservation;
     @JsonIgnore
     @OneToMany(cascade = {CascadeType.REMOVE}, orphanRemoval = true, mappedBy = "book")

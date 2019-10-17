@@ -150,9 +150,9 @@ public class LibrarianAPIController {
     //借书
     @PostMapping("/book/lend")
     @Transactional(isolation = Isolation.SERIALIZABLE)
-    public ResponseEntity lendBook(@RequestParam String username,
+    public ResponseEntity lendBook(@RequestParam Integer userId,
                                    @RequestParam Integer bookId) {
-        User user = userRepository.findByUsername(username).orElse(null);
+        User user = userRepository.findById(userId).orElse(null);
         Book book = bookRepository.findById(bookId).orElse(null);
         if (user == null || book == null) {
             throw new APIException("Invalid ID(s)");
@@ -168,9 +168,9 @@ public class LibrarianAPIController {
     //还书
     @PostMapping("/book/return")
     @Transactional(isolation = Isolation.SERIALIZABLE)
-    public ResponseEntity returnBook(@RequestParam String username,
+    public ResponseEntity returnBook(@RequestParam Integer userId,
                                      @RequestParam Integer bookId) {
-        User user = userRepository.findByUsername(username).orElse(null);
+        User user = userRepository.findById(userId).orElse(null);
         Book book = bookRepository.findById(bookId).orElse(null);
         if (user == null) {
             throw new APIException("No such user");

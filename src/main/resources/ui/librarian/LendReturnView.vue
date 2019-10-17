@@ -23,8 +23,8 @@
                 <input class="form-control col col-xl" id="book-id-input" name="book-id" v-model="book_id"
                        autocomplete="off"/>
                 <button @click="loadBook"
-                        class="btn btn-primary btn-block col-1 col-xl-1"
-                        style="margin-left: 0.3em;"
+                        class="btn btn-primary btn-block col-2 col-xl-2"
+                        style="margin-left: 0.3em; white-space: nowrap;"
                         type="button">
                     View book detail
                 </button>
