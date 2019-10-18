@@ -66,7 +66,7 @@
         </form>
         <div class="add-book-success" v-if="add_book.success">
             <h3>{{add_book.count}} books successfully added:</h3>
-            <svg v-for="book in add_book.books" v-bind:id="'barcode-'+book.id"></svg>
+            <canvas v-for="book in add_book.books" v-bind:id="'barcode-'+book.id" width="8vw"></canvas>
         </div>
     </div>
 </template>
@@ -214,9 +214,18 @@
                         this.$nextTick(function () {
                             this.add_book.books.map((book) => {
                                 let text = padNumber(book.id, 10);
-                                $(`#barcode-${book.id}`).JsBarcode(text, {
-                                    text: text
-                                });
+                                let canvas = document.createElement("canvas");
+                                // let canvas = $(`#barcode-${book.id}`);
+                                JsBarcode(canvas, text);
+                                let out = $(`#barcode-${book.id}`)[0];
+                                out.height = canvas.height + 30;
+                                out.width = canvas.width;
+                                let context = out.getContext("2d");
+                                context.drawImage(canvas, 0, 0);
+                                context.font = '12pt monospace';
+                                context.textAlign = 'center';
+                                context.fillStyle = 'black';
+                                context.fillText("Location: " + book.location, out.width / 2, out.height - 10);
                             });
                             $(".add-book-success")[0].scrollIntoView(true);
                         });
