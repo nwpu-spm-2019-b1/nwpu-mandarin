@@ -16,6 +16,8 @@ import mandarin.services.BookService;
 import mandarin.services.UserService;
 import mandarin.utils.BasicResponse;
 import mandarin.utils.CryptoUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -38,8 +40,11 @@ import java.util.Optional;
 
 @Controller
 public class ReaderController {
+    private Logger logger = LoggerFactory.getLogger(ReaderController.class);
+
     @Resource
     private UserRepository userRepository;
+
     @Resource
     BookRepository bookRepository;
 
@@ -136,10 +141,13 @@ public class ReaderController {
             message.setFrom(((JavaMailSenderImpl) mailSender).getUsername());
             message.setSubject("Password reset - Mandarin");
             message.setSentDate(new Date());
-            message.setText("Your new password: " + CryptoUtils.randomString(20));
+            String password = CryptoUtils.randomString(20);
+            message.setText("Your new password: " + password);
+            logger.info("New password: {}", password);
             mailSender.send(message);
             model.addAttribute("finished", true);
         } else {
+            logger.warn("Invalid email submitted for password reset");
             model.addAttribute("finished", true);
         }
         return "reader/recover_password";
