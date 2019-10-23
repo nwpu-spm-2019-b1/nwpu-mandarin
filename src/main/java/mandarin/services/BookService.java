@@ -85,7 +85,7 @@ public class BookService {
             status = BookStatus.Available;
         }
         if (status.equals(BookStatus.Available)) {
-            if (lendingLogRepository.findAllByUser(borrower).size() >= 3) {
+            if (lendingLogRepository.findOutstandingByUser(borrower).size() >= 3) {
                 throw new RuntimeException("Number of book borrowed by the user exceeded the limit");
             }
             LendingLogItem item = new LendingLogItem(book, borrower);

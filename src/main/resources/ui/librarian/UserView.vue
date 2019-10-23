@@ -125,7 +125,11 @@
                         <input type="checkbox" v-bind:data-id="user.id" class="row-checkbox"/>
                     </td>
                     <td>{{user.id}}</td>
-                    <td>{{user.username}}</td>
+                    <td>
+                        <a href="javascript:void(0);" @click="viewUserHistory" v-bind:data-id="user.id">
+                            {{user.username}}
+                        </a>
+                    </td>
                     <td>
                         <a href="javascript:void(0);" v-bind:data-id="user.id" v-bind:data-username="user.username"
                            @click="startEditingUser">Edit</a>
@@ -292,6 +296,9 @@
                     }
                     $("#delete-warning-modal").modal("hide");
                 }
+            },
+            viewUserHistory(event) {
+                this.$router.push({name: 'user-history', params: {id: event.target.dataset.id}});
             }
         },
         mounted() {

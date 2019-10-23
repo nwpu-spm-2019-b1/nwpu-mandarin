@@ -14,7 +14,6 @@ import mandarin.utils.BasicResponse;
 import mandarin.utils.CryptoUtils;
 import mandarin.utils.FormatUtils;
 import mandarin.utils.ObjectUtils;
-import org.omg.SendingContext.RunTime;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -29,7 +28,6 @@ import javax.annotation.Resource;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
-import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -187,42 +185,73 @@ public class LibrarianAPIController {
         return ResponseEntity.ok(BasicResponse.ok().data(items));
     }
 
+    static class LendOrReturnRequest {
+        public Integer user_id = null;
+        public List<Integer> book_id_list = new ArrayList<>();
+
+        public LendOrReturnRequest() {
+        }
+
+        public LendOrReturnRequest(Integer user_id, List<Integer> book_id_list) {
+            this.user_id = user_id;
+            this.book_id_list = book_id_list;
+        }
+    }
+
+    static class LendOrReturnResultItem {
+        public Integer book_id = null;
+        public boolean success = false;
+        public String message = null;
+
+        public LendOrReturnResultItem() {
+        }
+
+        public LendOrReturnResultItem(Integer bookId, boolean success, String message) {
+            this.book_id = bookId;
+            this.success = success;
+            this.message = message;
+        }
+    }
+
     //借书
     @PostMapping("/book/lend")
-    @Transactional(isolation = Isolation.SERIALIZABLE)
-    public ResponseEntity lendBook(@RequestParam Integer userId,
-                                   @RequestParam Integer bookId) {
-        User user = userRepository.findById(userId).orElse(null);
-        Book book = bookRepository.findById(bookId).orElse(null);
-        if (user == null || book == null) {
-            throw new APIException("Invalid ID(s)");
+    public ResponseEntity lendBook(@RequestBody LendOrReturnRequest request) {
+        User user = userRepository.findById(request.user_id).orElse(null);
+        List<Book> books = request.book_id_list.stream().map(id -> bookRepository.findById(id).orElseThrow(() -> new APIException("No such book"))).collect(Collectors.toList());
+        if (user == null || books.size() == 0) {
+            throw new APIException("Invalid input");
         }
-        try {
-            LendingLogItem item = bookService.lendBook(user, book);
-            return ResponseEntity.ok(BasicResponse.ok().data(item.getId()));
-        } catch (RuntimeException e) {
-            throw new APIException(e.getMessage());
+        List<LendOrReturnResultItem> results = new ArrayList<>();
+        for (Book book : books) {
+            try {
+                LendingLogItem item = bookService.lendBook(user, book);
+                results.add(new LendOrReturnResultItem(book.getId(), true,"Lended successfully"));
+            } catch (RuntimeException e) {
+                results.add(new LendOrReturnResultItem(book.getId(), false, e.getMessage()));
+            }
         }
+        return ResponseEntity.ok(BasicResponse.ok().data(results));
     }
 
     //还书
     @PostMapping("/book/return")
-    @Transactional(isolation = Isolation.SERIALIZABLE)
-    public ResponseEntity returnBook(@RequestParam Integer userId,
-                                     @RequestParam Integer bookId) {
-        User user = userRepository.findById(userId).orElse(null);
-        Book book = bookRepository.findById(bookId).orElse(null);
+    public ResponseEntity returnBook(@RequestBody LendOrReturnRequest request) {
+        User user = userRepository.findById(request.user_id).orElse(null);
+        Set<Book> books = request.book_id_list.stream().map(id -> bookRepository.findById(id).orElseThrow(() -> new APIException("No such book"))).collect(Collectors.toSet());
         if (user == null) {
             throw new APIException("No such user");
-        } else if (book == null) {
-            throw new APIException("No such book");
+        } else if (books.size() == 0) {
+            throw new APIException("No books to return");
         }
-        try {
-            bookService.returnBook(user, book);
-            return ResponseEntity.ok(BasicResponse.ok().message("Returned book successfully"));
-        } catch (RuntimeException e) {
-            throw new APIException(e.getMessage());
-        }
+        List<LendOrReturnResultItem> results = books.stream().map(book -> {
+            try {
+                bookService.returnBook(user, book);
+                return new LendOrReturnResultItem(book.getId(), true, "Returned successfully");
+            } catch (RuntimeException e) {
+                return new LendOrReturnResultItem(book.getId(), false, e.getMessage());
+            }
+        }).collect(Collectors.toList());
+        return ResponseEntity.ok(BasicResponse.ok().data(results));
     }
 
     //添加书

@@ -13,15 +13,15 @@
         <div class="profile-container">
             <form action="#" method="post" id="change-profile-form">
                 <div class="form-group">
-                    <label for="username-input">Username:</label>
+                    <label for="username-input">Username</label>
                     <input id="username-input" class="form-control" type="text" th:value="${user.username}">
                 </div>
                 <div class="form-group">
-                    <label for="old-password-input">Old password:</label>
+                    <label for="old-password-input">Old password</label>
                     <input id="old-password-input" class="form-control" type="password"/>
                 </div>
-                <div>
-                    <label for="password-input">New password:</label>
+                <div class="form-group">
+                    <label for="password-input">New password</label>
                     <input id="password-input" class="form-control" type="password"/>
                 </div>
                 <button type="submit" class="btn btn-primary">Save changes</button>
@@ -57,7 +57,7 @@
             }),
             contentType: "application/json",
             success: function (resp) {
-                $("#alert").removeClass("alert-danger").addClass("alert-success").text("Personal information successfully changed").show();
+                $("#alert").removeClass("alert-danger").addClass("alert-success").text("Personal information successfully changed.").show();
             },
             error: function (xhr) {
                 var resp = JSON.parse(xhr.responseText);

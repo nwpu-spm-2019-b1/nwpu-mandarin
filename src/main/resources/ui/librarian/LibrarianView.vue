@@ -86,6 +86,7 @@
             component: UserView
         },
         {
+            name: 'user-history',
             path: '/user/:id/history',
             component: UserHistoryView
         },
@@ -104,9 +105,12 @@
     export default {
         router,
         data: function () {
-            return {
-                router
-            };
+            return {};
+        },
+        computed: {
+            router() {
+                return router;
+            }
         },
         mounted() {
             EventBus.$on("error", this.onError);

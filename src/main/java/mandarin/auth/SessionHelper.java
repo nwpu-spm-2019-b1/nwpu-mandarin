@@ -61,4 +61,9 @@ public class SessionHelper {
             throw new WrongUserTypeException();
         }
     }
+
+    public void logout() {
+        HttpSession session = getSession();
+        session.invalidate();
+    }
 }

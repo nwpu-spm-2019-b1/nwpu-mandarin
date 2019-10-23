@@ -13,6 +13,7 @@ import mandarin.entities.User;
 import mandarin.exceptions.APIException;
 import mandarin.utils.BasicResponse;
 import mandarin.utils.CryptoUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -91,17 +92,19 @@ public class GeneralAPIController {
         String username = (String) map.get("username");
         String oldPassword = (String) map.get("old_password");
         String password = (String) map.get("password");
-        if (username == null || oldPassword == null || password == null) {
-            throw new APIException("Bad request");
+
+        if (StringUtils.isNotBlank(username)) {
+            user.setUsername(username);
         }
-        if (!CryptoUtils.verifyPassword(oldPassword, user.getPasswordHash())) {
-            throw new APIException("Wrong password");
+        if (StringUtils.isNotBlank(oldPassword) && StringUtils.isNotBlank(password)) {
+            if (!CryptoUtils.verifyPassword(oldPassword, user.getPasswordHash())) {
+                throw new APIException("Wrong password");
+            }
+            if (password.length() < 8) {
+                throw new APIException("Password must longer than 8 characters");
+            }
+            user.setPassword(password);
         }
-        if (password.length() < 8) {
-            throw new APIException("Password must longer than 8 characters");
-        }
-        user.setUsername(username);
-        user.setPassword(password);
         userRepository.save(user);
         return ResponseEntity.ok(BasicResponse.ok().message("Profile successfully changed"));
     }
