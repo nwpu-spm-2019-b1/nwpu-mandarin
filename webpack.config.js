@@ -4,7 +4,8 @@ const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 const VueLoaderPlugin = require('vue-loader/lib/plugin');
 module.exports = {
     entry: {
-        librarian: "./src/main/resources/ui/js/librarian.js"
+        librarian: "./src/main/resources/ui/js/librarian.js",
+        reader: "./src/main/resources/ui/js/reader.js"
     },
     mode: "development",
     module: {

@@ -19,6 +19,8 @@
                 <label for="isbn-input">ISBN</label>
                 <input class="form-control" id="isbn-input" name="isbn" v-model="book.isbn"/>
                 <a href="javascript:void(0);" @click="loadExternal" class="mt-3">Fetch data from Google Books</a>
+                <br>
+                <a href="javascript:void(0);" @click="onNoISBN" class="mt-3">This book does not have an ISBN</a>
             </div>
             <div class="form-group">
                 <label for="title-input">Title</label>
@@ -40,14 +42,19 @@
             <div class="form-group">
                 <label>Categories</label>
                 <div class="categories-container">
-                    <div class="category-item" v-for="category in book.categories">
-                        {{category.name}}
+                    <div class="category-item" v-for="category in book.categories" v-bind:data-name="category">
+                        {{category}}
+                        <a href="javascript:void(0);" @click="removeCategory" v-html="'&times;'"></a>
+                    </div>
+                    <div v-if="book.categories.length===0">
+                        No categories.
                     </div>
                 </div>
                 <datalist id="existing-categories">
                     <option v-for="category in all_categories" v-bind:value="category.name"></option>
                 </datalist>
                 <input class="form-control" id="new-category-input" type="text" list="existing-categories">
+                <button type="button" @click="addCategory" class="btn btn-primary">Add</button>
             </div>
             <div class="form-group">
                 <label for="price-input">Price</label>
@@ -65,7 +72,7 @@
             <button class="btn btn-warning" @click="(e)=>{e.preventDefault();clear();}">Clear</button>
         </form>
         <div class="add-book-success" v-if="add_book.success">
-            <h3>{{add_book.count}} books successfully added:</h3>
+            <h3>{{add_book.books.length}} books successfully added:</h3>
             <canvas v-for="book in add_book.books" v-bind:id="'barcode-'+book.id" width="8vw"></canvas>
         </div>
     </div>
@@ -116,14 +123,34 @@
                     this.page_title = "Edit book";
                     this.submit_text = "Save changes";
                     await this.loadBookDetails();
-                    await this.loadAllCategories();
+
                 } else {
                     this.page_title = "Add books";
                     this.submit_text = "OK";
                 }
+                await this.loadAllCategories();
             })();
         },
         methods: {
+            addCategory(e) {
+                let category_name = $("#new-category-input").val();
+                if (!this.book.categories.includes(category_name)) {
+                    this.book.categories.push(category_name);
+                }
+            },
+            removeCategory(e) {
+                this.book.categories.splice(this.book.categories.indexOf(e.target.dataset.name), 1);
+            },
+            onNoISBN: async function (e) {
+                let resp = await fetch("/api/librarian/generate?type=synth_isbn", {
+                    credentials: "same-origin"
+                });
+                let body = await resp.json();
+                if (!resp.ok) {
+                    throw new Error(body.message);
+                }
+                this.book.isbn = body.data;
+            },
             loadExternal: async function () {
                 let resp = await fetch(urlWithParams("http://106.13.1.40:5000/googleApi", {isbn: this.book.isbn}));
                 let body = await resp.json();
@@ -153,6 +180,7 @@
                 }
                 console.log(JSON.stringify(body.data));
                 Object.assign(this.book, body.data);
+                this.book.categories = this.book.categories.map(item => item.name);
                 console.log(this.book);
                 return body;
             },
@@ -176,10 +204,7 @@
             },
             submit: async function (event) {
                 event.preventDefault();
-                let data = pickProperties(this.book, ["isbn", "title", "author", "description", "location", "price", "count"]);
-                Object.assign(data, {
-                    category_ids: []
-                });
+                let data = pickProperties(this.book, ["isbn", "title", "author", "description", "categories", "location", "price", "count"]);
                 console.log(JSON.stringify(data));
                 let url, method;
                 if (this.book_id !== null) {
@@ -202,6 +227,7 @@
                     if (!resp.ok) {
                         throw new Error(body.message);
                     }
+                    this.error = null;
                     if (this.book_id !== null) {
                         if (this.$router.history.length >= 2) {
                             this.$router.history.go(-1);

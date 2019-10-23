@@ -16,49 +16,90 @@
         Search
     </h2>
     <th:block th:replace="reader/index :: search-box"></th:block>
-    <div>
-        <table class="table">
-            <thead>
-            <tr>
-                <th>Book ID</th>
-                <th>ISBN</th>
-                <th>Book title</th>
-                <th>Author(s)</th>
-                <th>Location</th>
-                <th>Actions</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr class="lineItem" th:each="book : ${books}">
-                <td th:text="${book.id}"></td>
-                <td th:text="${book.ISBN}"></td>
-                <td th:text="${book.title}"></td>
-                <td th:text="${book.author}"></td>
-                <td th:text="${book.location}"></td>
-                <td>
-                    <ul class="actions-list" style="display: flex; list-style: none; padding: 0;">
-                        <li>
-                            <th:block th:switch="${bookService.checkAvailability(book)}">
-                                <th:block th:case="true">
-                                    <a href="javascript:void(0);" th:data-id="${book.id}"
-                                       onclick="reserve_book(this)">
-                                        Reserve
-                                    </a>
+    <div th:if="${books.size()==0}">No results.</div>
+    <th:block th:if="${books.size()>0}">
+    <span class="pagination-info">
+        [[${page.totalElements}]] results, page [[${page.pageable.pageNumber+1}]] of [[${page.totalPages}]]
+    </span>
+        <div>
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>Book ID</th>
+                    <th>ISBN</th>
+                    <th>Book title</th>
+                    <th>Author(s)</th>
+                    <th>Location</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr class="lineItem" th:each="book : ${books}">
+                    <td th:text="${book.id}"></td>
+                    <td th:text="${book.ISBN}"></td>
+                    <td th:text="${book.title}"></td>
+                    <td th:text="${book.author}"></td>
+                    <td th:text="${book.location}"></td>
+                    <td>
+                        <ul class="actions-list" style="display: flex; list-style: none; padding: 0;">
+                            <li>
+                                <th:block th:switch="${bookService.checkAvailability(book)}">
+                                    <th:block th:case="true">
+                                        <a href="javascript:void(0);" th:data-id="${book.id}"
+                                           onclick="reserve_book(this)">
+                                            Reserve
+                                        </a>
+                                    </th:block>
+                                    <th:block th:case="false">
+                                        Not available
+                                    </th:block>
                                 </th:block>
-                                <th:block th:case="false">
-                                    Not available
-                                </th:block>
-                            </th:block>
-                        </li>
-                    </ul>
-                </td>
-            </tr>
-            </tbody>
-        </table>
-    </div>
+                            </li>
+                        </ul>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center">
+                <li class="page-item">
+                    <a class="page-link"
+                       href="javascript:void(0);"
+                       data-page="first">
+                        &#8676;
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link"
+                       href="javascript:void(0);"
+                       data-page="prev">
+                        &laquo;
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link"
+                       href="javascript:void(0);"
+                       data-page="next"
+                       onclick="change_page(this)">
+                        &raquo;
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link"
+                       href="javascript:void(0);"
+                       data-page="last">
+                        &#8677;
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </th:block>
 </div>
 <th:block th:replace="reader/common :: scripts"></th:block>
 <script th:inline="javascript">
+    var total_pages = [[${page.totalPages}]];
+
     function reserve_book(e) {
         $.ajax({
             url: "/api/reader/reserve",
@@ -81,7 +122,49 @@
         $(".search-box [name=query]").val([[${query}]]);
         var type = [[${type}]];
         $(".search-box select[name=type]").val(type).change();
-    })
+
+        var parsed = queryString.parseUrl(window.location.href);
+        var current_page = parsed.query.page;
+        if (typeof current_page === "undefined") {
+            current_page = 1;
+        }
+        console.log(current_page);
+
+        function page_url(page_number) {
+            return parsed.url + "?" + queryString.stringify(Object.assign({}, parsed.query, {page: page_number}));
+        }
+
+        $("a.page-link").each(function () {
+            var link = $(this);
+            console.log(link.data("page"));
+            if (link.data("page") === "prev") {
+                if (current_page > 1) {
+                    link.prop("href", page_url(current_page - 1));
+                } else {
+                    link.parent().addClass("disabled");
+                }
+            } else if (link.data("page") === "next") {
+                if (current_page < total_pages) {
+                    link.prop("href", page_url(current_page + 1));
+                } else {
+                    link.parent().addClass("disabled");
+                }
+            } else if (link.data("page") === "first") {
+                if (current_page > 1) {
+                    link.prop("href", page_url(1));
+                } else {
+                    link.parent().addClass("disabled");
+                }
+            } else if (link.data("page") === "last") {
+                if (current_page < total_pages) {
+                    link.prop("href", page_url(total_pages));
+                } else {
+                    link.parent().addClass("disabled");
+                }
+            }
+        });
+    });
+
 </script>
 </body>
 </html>

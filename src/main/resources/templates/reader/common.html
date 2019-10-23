@@ -6,6 +6,7 @@
     <th:block th:fragment="head">
         <meta content="width=device-width, initial-scale=1" name="viewport">
         <meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
+        <script th:src="@{/static/js/jquery-3.4.1.js}"></script>
         <link rel='stylesheet' th:href="@{/static/css/bootstrap.min.css}" type='text/css'/>
         <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.10.2/css/all.min.css" rel="stylesheet">
         <link rel="stylesheet" href="/static/reader/main.css">
@@ -20,6 +21,15 @@
 
             .nav-link .fas {
                 margin-right: 0.3em;
+            }
+
+            .footer {
+                text-align: center;
+                margin-top: 3em;
+                border-top: 1px #a1a1a1 solid;
+                width: 100%;
+                padding-top: 0.5em;
+                font-size: 80%;
             }
         </style>
     </th:block>
@@ -36,7 +46,9 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <form action="#" id="login-modal-form">
+                    <div class="alert alert-danger" id="error-message" style="display: none;">
+                    </div>
+                    <form id="login-modal-form">
                         <div class="form-group">
                             <label for="login-modal-username">Username:</label>
                             <input id="login-modal-username" name="username" type="text" class="form-control">
@@ -45,6 +57,7 @@
                             <label for="login-modal-password">Password:</label>
                             <input id="login-modal-password" name="password" type="password" class="form-control">
                         </div>
+                        <input style="display: none;" type="submit">
                     </form>
                     <div class="forgot-password-message"><a href="/recover">Forgot password?</a></div>
                 </div>
@@ -98,14 +111,15 @@
     </nav>
 </th:block>
 <th:block th:fragment="scripts">
-    <script th:src="@{/static/js/jquery-3.4.1.js}"></script>
     <script th:src="@{/static/js/bootstrap.min.js}"></script>
+    <script th:src="@{/static/dist/reader-bundle.js}"></script>
     <script>
         function show_login() {
             $("#login-modal").modal();
         }
 
         function do_login() {
+            $("#error-message").hide();
             $.ajax({
                 url: "/login",
                 type: "POST",
@@ -119,7 +133,7 @@
                 },
                 error: function (xhr) {
                     var resp = JSON.parse(xhr.responseText);
-                    alert(resp.message);
+                    $("#error-message").text(resp.message).show();
                 }
             });
         }
@@ -138,6 +152,10 @@
                 }
             });
         }
+
+        $("#login-modal-form").bind("submit", function () {
+            do_login();
+        })
     </script>
 </th:block>
 </body>

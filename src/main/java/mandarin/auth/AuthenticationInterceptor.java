@@ -49,9 +49,13 @@ public class AuthenticationInterceptor extends HandlerInterceptorAdapter {
         }
         if (annotation != null) {
             if (session != null && session.getAttribute("userId") != null) {
-                for (UserType userType : annotation.value()) {
-                    if (userType.equals(session.getAttribute("userType"))) {
-                        return true;
+                if (annotation.value().length == 0) {
+                    return true;
+                } else {
+                    for (UserType userType : annotation.value()) {
+                        if (userType.equals(session.getAttribute("userType"))) {
+                            return true;
+                        }
                     }
                 }
             }

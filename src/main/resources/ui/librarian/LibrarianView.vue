@@ -24,6 +24,9 @@
                             <li v-bind:class="{active : router.currentRoute.path === '/users'}">
                                 <router-link to="/users">Manage users</router-link>
                             </li>
+                            <li v-bind:class="{active: router.currentRoute.path==='/income/history'}">
+                                <router-link to="/income/history">View income history</router-link>
+                            </li>
                         </ul>
                     </nav>
                 </div>
@@ -48,6 +51,7 @@
     import BookEditor from "./BookEditor.vue";
     import LendReturnView from "./LendReturnView.vue";
     import UserHistoryView from "./UserHistoryView.vue";
+    import IncomeHistoryView from "./IncomeHistoryView.vue";
     import VueRouter from "vue-router";
     import {EventBus} from "../js/events.js";
 
@@ -84,6 +88,10 @@
         {
             path: '/user/:id/history',
             component: UserHistoryView
+        },
+        {
+            path: '/income/history',
+            component: IncomeHistoryView
         }
     ];
 
@@ -116,6 +124,7 @@
             UserView,
             LendReturnView,
             BookEditor,
+            IncomeHistoryView,
             Toast
         }
     };

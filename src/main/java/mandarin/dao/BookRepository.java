@@ -1,6 +1,7 @@
 package mandarin.dao;
 
 import mandarin.entities.Book;
+import mandarin.entities.Category;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -17,12 +18,16 @@ public interface BookRepository extends JpaRepository<Book, Integer> {
 
     Page<Book> findAllByAuthorContaining(String param, Pageable pageable);
 
-    Page<Book> findAllByDescriptionContaining(String query,Pageable pageable);
+    Page<Book> findAllByDescriptionContaining(String query, Pageable pageable);
+
+    Page<Book> findALlByAuthorContainingIgnoreCase(String query, Pageable pageable);
 
     @Query("SELECT book FROM Book book WHERE book.isbn=?1")
     Page<Book> findAllByISBN(String isbn, Pageable pageable);
 
     Page<Book> findAllByTitleContainsIgnoreCase(String param, Pageable pageable);
+
+    Page<Book> findAllByCategoriesContaining(Category category, Pageable pageable);
 
     @Transactional
     @Modifying(clearAutomatically = true)

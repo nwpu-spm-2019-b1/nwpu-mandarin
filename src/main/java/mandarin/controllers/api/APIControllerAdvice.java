@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 @ControllerAdvice("mandarin.controllers.api")
 public class APIControllerAdvice {
@@ -20,6 +21,10 @@ public class APIControllerAdvice {
         if (e instanceof AuthenticationException) {
             status = HttpStatus.UNAUTHORIZED;
         }
-        return ResponseEntity.status(status).body(BasicResponse.fail().message(e.getMessage()));
+        String message = e.getMessage();
+        if (e instanceof MethodArgumentTypeMismatchException) {
+            message = "The data you have entered is invalid. Please check again.";
+        }
+        return ResponseEntity.status(status).body(BasicResponse.fail().message(message));
     }
 }

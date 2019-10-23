@@ -8,12 +8,16 @@ import mandarin.dao.LendingLogRepository;
 import mandarin.dao.ReservationRepository;
 import mandarin.entities.*;
 import mandarin.exceptions.APIException;
+import mandarin.utils.BasicResponse;
 import mandarin.utils.ObjectUtils;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import javax.security.auth.login.Configuration;
+import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.HashMap;
@@ -44,6 +48,9 @@ public class BookService {
 
     @Resource
     ActionLogRepository actionLogRepository;
+
+    @Resource
+    ConfigurationService configurationService;
 
     @Transactional(isolation = Isolation.REPEATABLE_READ)
     public boolean checkAvailability(Integer bookId) {
@@ -98,6 +105,28 @@ public class BookService {
             }
         }
         return lendingLogRepository.findByBookId(book.getId()).stream().noneMatch((LendingLogItem item) -> item.getEndTime() != null);
+    }
+
+    @Transactional(isolation = Isolation.SERIALIZABLE)
+    public void returnBook(User user, Book book) {
+        LendingLogItem lendingLogItem = lendingLogRepository.findOutstandingByUserAndBook(user, book).orElse(null);
+        if (lendingLogItem == null) {
+            throw new RuntimeException("No matching lending record");
+        }
+        if (!lendingLogItem.getUser().getId().equals(user.getId())) {
+            throw new RuntimeException("User not the original borrower");
+        }
+        lendingLogItem.setEndTime(Instant.now());
+        Duration duration = Duration.between(lendingLogItem.getStartTime(), lendingLogItem.getEndTime());
+        long daysOverdue = duration.toDays() - configurationService.getAsInt("return_period");
+        if (daysOverdue > 0) {
+            Map<String, Object> info = new HashMap<>();
+            info.put("duration", duration.toDays());
+            info.put("fine", configurationService.getAsBigDecimal("fine_rate").multiply(BigDecimal.valueOf(daysOverdue)));
+            ActionLogItem actionLogItem = new ActionLogItem(user, "PaidFine", info);
+            actionLogRepository.save(actionLogItem);
+        }
+        lendingLogRepository.save(lendingLogItem);
     }
 
     @Transactional(isolation = Isolation.SERIALIZABLE)

@@ -124,6 +124,7 @@ html, body {
     padding: 0.3em 0.6em;
     border: #b1b1b1 1px solid;
     display: inline;
+    border-radius: 0.2rem;
 }
 
 .loading-message {

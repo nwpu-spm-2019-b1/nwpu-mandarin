@@ -3,6 +3,7 @@
 <head>
     <title>Mandarin</title>
     <th:block th:replace="reader/common :: head"></th:block>
+    <link rel="stylesheet" href="/static/css/animate.css">
     <style>
         .welcome-message {
             font-weight: bold;
@@ -30,13 +31,51 @@
         }
 
         .logo img {
-            width: 50%;
+            width: 40%;
+        }
+
+        .news-item {
+            position: relative;
+            display: block;
+            top: auto;
+            bottom: auto;
+            left: auto;
+            right: auto;
+            animation-duration: 300ms;
+        }
+
+        .news-item .modal-dialog {
+            margin-top: 0;
+            margin-bottom: 0;
+            max-width: none;
+        }
+
+        .news-item .modal-dialog .modal-header {
+            padding-top: 0.5rem;
+            padding-bottom: 0.5rem;
         }
     </style>
 </head>
 <body>
 <th:block th:replace="reader/common :: navbar"></th:block>
 <div class="container main">
+    <div class="news-container">
+        <div class="modal news-item" th:each="item: ${news}">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">[[${item.title}]]</h5>
+                        <button type="button" class="close" aria-label="Close" onclick="hide_news(this)">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        [[${item.content}]]
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="welcome-message">
         <div class="logo">
             <img src="/static/images/logo.png"/>
@@ -68,5 +107,18 @@
     </div>
 </div>
 <th:block th:replace="reader/common :: scripts"></th:block>
+<script>
+    function hide_news(e) {
+        e = $(e);
+        while (!e.hasClass("news-item")) {
+            e = e.parent();
+        }
+        e.addClass("fadeOut");
+        setTimeout(function () {
+            e.hide();
+            e.removeClass("fadeOut");
+        },300);
+    }
+</script>
 </body>
 </html>

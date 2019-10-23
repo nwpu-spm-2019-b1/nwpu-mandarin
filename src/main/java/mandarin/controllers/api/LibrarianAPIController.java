@@ -2,15 +2,19 @@ package mandarin.controllers.api;
 
 import mandarin.auth.AuthenticationNeeded;
 import mandarin.auth.UserType;
-import mandarin.controllers.api.dto.BookDTO;
+import mandarin.controllers.api.dto.AddBookDTO;
 import mandarin.controllers.api.dto.BookDetailDTO;
+import mandarin.controllers.api.dto.EditBookDTO;
 import mandarin.dao.*;
 import mandarin.entities.*;
 import mandarin.exceptions.APIException;
 import mandarin.services.BookService;
+import mandarin.services.ConfigurationService;
 import mandarin.utils.BasicResponse;
+import mandarin.utils.CryptoUtils;
 import mandarin.utils.FormatUtils;
 import mandarin.utils.ObjectUtils;
+import org.omg.SendingContext.RunTime;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -22,10 +26,13 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
-import java.math.BigDecimal;
+import javax.validation.ConstraintViolation;
+import javax.validation.Validation;
+import javax.validation.Validator;
 import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @RestController
 @RequestMapping("/api/librarian")
@@ -47,13 +54,46 @@ public class LibrarianAPIController {
     CategoryRepository categoryRepository;
 
     @Resource
+    ActionLogRepository actionLogRepository;
+
+    @Resource
     BookService bookService;
+
+    @Resource
+    ConfigurationService configurationService;
+
+    private Validator validator;
+
+    public LibrarianAPIController() {
+        validator = Validation.buildDefaultValidatorFactory().getValidator();
+    }
+
+    private List<Category> resolveCategoryNames(List<String> category_names) {
+        return category_names.stream().map(category_name -> {
+            Category category = categoryRepository.findByName(category_name);
+            if (category == null) {
+                category = new Category(category_name, null);
+                categoryRepository.save(category);
+                categoryRepository.flush();
+            }
+            return category;
+        }).collect(Collectors.toList());
+    }
+
+    @GetMapping("/generate")
+    public ResponseEntity generateData(@RequestParam String type) {
+        if ("synth_isbn".equals(type)) {
+            return ResponseEntity.ok(BasicResponse.ok().data("X" + CryptoUtils.randomString("0123456789", 16)));
+        } else {
+            return ResponseEntity.badRequest().body(BasicResponse.fail().message("Bad data type"));
+        }
+    }
 
     @GetMapping("/book/search")
     public ResponseEntity searchBook(@RequestParam String type,
                                      @RequestParam String query,
                                      @RequestParam(defaultValue = "1") Integer page,
-                                     @RequestParam(defaultValue = "20") Integer size) {
+                                     @RequestParam(defaultValue = "15") Integer size) {
         Page<Book> books;
         Pageable pageable = PageRequest.of(page - 1, size, Sort.by(Sort.Direction.DESC, "id"));
         if (query.length() > 0) {
@@ -177,29 +217,22 @@ public class LibrarianAPIController {
         } else if (book == null) {
             throw new APIException("No such book");
         }
-        LendingLogItem lendingLogItem = lendingLogRepository.findOutstandingByUserAndBook(user, book).orElse(null);
-        if (lendingLogItem == null) {
-            throw new APIException("No outstanding lending record");
+        try {
+            bookService.returnBook(user, book);
+            return ResponseEntity.ok(BasicResponse.ok().message("Returned book successfully"));
+        } catch (RuntimeException e) {
+            throw new APIException(e.getMessage());
         }
-        lendingLogItem.setEndTime(Instant.now());
-        lendingLogRepository.save(lendingLogItem);
-        return ResponseEntity.ok().body(BasicResponse.ok().data(lendingLogItem.getEndTime()));
     }
 
     //添加书
     @PostMapping(value = "/book", consumes = "application/json")
-    public ResponseEntity addBook(@RequestBody BookDTO dto) {
-        List<Category> categories = new ArrayList<>();
-        for (Integer category_id : dto.category_ids) {
-            Optional<Category> category = categoryRepository.findById(category_id);
-            if (!category.isPresent()) {
-                throw new APIException("Invalid category id");
-            }
-            categories.add(category.get());
+    public ResponseEntity addBook(@RequestBody AddBookDTO dto) {
+        Set<ConstraintViolation<AddBookDTO>> violations = validator.validate(dto);
+        if (violations.size() > 0) {
+            return ResponseEntity.badRequest().body(BasicResponse.fail().message(violations.stream().map(ConstraintViolation::getMessage).collect(Collectors.joining("; "))));
         }
-        if (dto.isbn.length() == 0 || dto.title.length() == 0 || dto.author.length() == 0 || dto.location.length() == 0 || dto.price.compareTo(BigDecimal.ZERO) < 0 || dto.count == null || dto.count <= 0) {
-            throw new APIException("Invalid input");
-        }
+        List<Category> categories = resolveCategoryNames(dto.categories);
         List<Book> allBooks = new ArrayList<>();
         for (int i = 0; i < dto.count; i++) {
             Book book = new Book(dto.isbn, dto.title, dto.author, dto.description, dto.location, dto.price, categories);
@@ -248,7 +281,34 @@ public class LibrarianAPIController {
         }
         User user = new User(username, password, UserType.Reader);
         userRepository.save(user);
+        {
+            Map<String, Object> info = new HashMap<>();
+            info.put("amount", configurationService.getAsBigDecimal("reader_deposit"));
+            ActionLogItem actionLogItem = new ActionLogItem(user, "PaidDeposit", info);
+            actionLogRepository.save(actionLogItem);
+        }
         return ResponseEntity.status(HttpStatus.CREATED).body(BasicResponse.ok());
+    }
+
+    @GetMapping("/income/history")
+    public ResponseEntity incomeHistory() {
+        Set<String> types = Stream.of("PaidFine", "PaidDeposit").collect(Collectors.toSet());
+        List<Map<String, Object>> list = actionLogRepository.findAllByTypeInOrderByTimeDesc(types).stream().map(item -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("user", item.getUser());
+            switch (item.getType()) {
+                case "PaidFine":
+                    map.put("type", "Paid overdue fines");
+                    map.put("amount", item.getInfo().get("fine"));
+                    break;
+                case "PaidDeposit":
+                    map.put("type", "Paid reader deposit");
+                    map.put("amount", item.getInfo().get("amount"));
+                    break;
+            }
+            return map;
+        }).collect(Collectors.toList());
+        return ResponseEntity.ok(BasicResponse.ok().data(list));
     }
 
     //编辑Reader
@@ -287,20 +347,18 @@ public class LibrarianAPIController {
 
     //编辑书
     @PutMapping(value = "/book/{id}", consumes = "application/json")
-    public ResponseEntity editBook(@PathVariable Integer id, @RequestBody BookDTO dto) {
+    public ResponseEntity editBook(@PathVariable Integer id, @RequestBody EditBookDTO dto) {
+        Set<ConstraintViolation<EditBookDTO>> violations = validator.validate(dto);
+        if (violations.size() > 0) {
+            return ResponseEntity.badRequest().body(BasicResponse.fail().message(violations.stream().map(ConstraintViolation::getMessage).collect(Collectors.joining("; "))));
+        }
         Book book = bookRepository.findById(id).orElse(null);
         if (book == null) {
             throw new APIException("No such book");
         }
         ObjectUtils.copyFields(dto, book, "isbn", "title", "author", "location", "price", "description");
         book.getCategories().clear();
-        book.getCategories().addAll(dto.category_ids.stream().map((Integer cid) -> {
-            Optional<Category> category = categoryRepository.findById(cid);
-            if (!category.isPresent()) {
-                throw new APIException("Invalid category ID");
-            }
-            return category.get();
-        }).collect(Collectors.toList()));
+        book.getCategories().addAll(resolveCategoryNames(dto.categories));
         bookRepository.save(book);
         return ResponseEntity.accepted().body(BasicResponse.ok());
     }
@@ -334,12 +392,19 @@ public class LibrarianAPIController {
 
     //删除种类
     @DeleteMapping("/categories/{id}")
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public ResponseEntity deleteCategory(@PathVariable Integer id) {
         Category target = categoryRepository.findById(id).orElse(null);
         if (target == null)
             return ResponseEntity.ok(BasicResponse.fail().message("Category does not exist"));
         else {
+            for (Book book : target.getBooks()) {
+                book.getCategories().remove(target);
+                bookRepository.save(book);
+                bookRepository.flush();
+            }
             categoryRepository.delete(target);
+            categoryRepository.flush();
             return ResponseEntity.ok(BasicResponse.ok());
         }
     }

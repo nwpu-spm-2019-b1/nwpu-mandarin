@@ -4,18 +4,13 @@ import mandarin.auth.SessionHelper;
 import mandarin.auth.UserType;
 import mandarin.auth.exceptions.AuthenticationException;
 import mandarin.auth.exceptions.UnauthorizedException;
-import mandarin.dao.BookRepository;
-import mandarin.dao.LendingLogRepository;
-import mandarin.dao.ReservationRepository;
-import mandarin.dao.UserRepository;
-import mandarin.entities.Book;
-import mandarin.entities.LendingLogItem;
-import mandarin.entities.Reservation;
-import mandarin.entities.User;
+import mandarin.dao.*;
+import mandarin.entities.*;
 import mandarin.services.BookService;
 import mandarin.services.UserService;
 import mandarin.utils.BasicResponse;
 import mandarin.utils.CryptoUtils;
+import mandarin.utils.URLUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -37,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 @Controller
 public class ReaderController {
@@ -61,6 +57,9 @@ public class ReaderController {
     ReservationRepository reservationRepository;
 
     @Resource
+    NewsRepository newsRepository;
+
+    @Resource
     SessionHelper sessionHelper;
 
     @Resource
@@ -69,6 +68,11 @@ public class ReaderController {
     @ModelAttribute("sessionHelper")
     public SessionHelper getSessionHelper() {
         return sessionHelper;
+    }
+
+    @ModelAttribute("news")
+    public List<NewsItem> getNews() {
+        return newsRepository.findAll();
     }
 
     @ModelAttribute("bookService")
@@ -105,24 +109,27 @@ public class ReaderController {
 
     @GetMapping("/search")
     public String searchBook(@RequestParam String query,
-                             @RequestParam(defaultValue = "0") Integer page,
+                             @RequestParam(defaultValue = "1") Integer page,
                              @RequestParam(defaultValue = "10") Integer size,
                              @RequestParam("type") String type,
                              Model model) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("id"));
-        List<Book> books = new ArrayList<>();
-        String fullQuery = "%" + query + "%";
+        Pageable pageable = PageRequest.of(page - 1, size, Sort.by("id"));
+        Page<Book> books = Page.empty();
         switch (type) {
+            case "isbn":
+                books = bookRepository.findAllByISBN(query, pageable);
+                break;
             case "title":
-                books = bookRepository.findByTitleLike(fullQuery, pageable).getContent();
+                books = bookRepository.findAllByTitleContainsIgnoreCase(query, pageable);
                 break;
             case "author":
-                books = bookRepository.findByAuthorLike(fullQuery, pageable).getContent();
+                books = bookRepository.findALlByAuthorContainingIgnoreCase(query, pageable);
                 break;
         }
-        model.addAttribute("books", books);
+        model.addAttribute("books", books.getContent());
         model.addAttribute("type", type);
         model.addAttribute("query", query);
+        model.addAttribute("page", books);
         return "reader/search";
     }
 
@@ -151,6 +158,11 @@ public class ReaderController {
             model.addAttribute("finished", true);
         }
         return "reader/recover_password";
+    }
+
+    @GetMapping("/profile")
+    public String profilePage() {
+        return "reader/profile";
     }
 
     @PostMapping(value = "/login", produces = "application/json")

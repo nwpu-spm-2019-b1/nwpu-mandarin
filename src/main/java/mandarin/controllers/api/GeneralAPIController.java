@@ -1,10 +1,14 @@
 package mandarin.controllers.api;
 
+import mandarin.auth.AuthenticationNeeded;
+import mandarin.auth.SessionHelper;
 import mandarin.controllers.api.dto.BookDetailDTO;
 import mandarin.dao.BookRepository;
+import mandarin.dao.CategoryRepository;
 import mandarin.dao.LendingLogRepository;
 import mandarin.dao.UserRepository;
 import mandarin.entities.Book;
+import mandarin.entities.Category;
 import mandarin.entities.User;
 import mandarin.exceptions.APIException;
 import mandarin.utils.BasicResponse;
@@ -13,6 +17,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -26,9 +32,13 @@ public class GeneralAPIController {
     @Resource
     BookRepository bookRepository;
     @Resource
+    CategoryRepository categoryRepository;
+    @Resource
     LendingLogRepository lendingLogRepository;
     @Resource
     UserRepository userRepository;
+    @Resource
+    SessionHelper sessionHelper;
 
     @GetMapping("/book/{bookId}")
     public ResponseEntity getBook(@PathVariable Integer bookId) {
@@ -39,47 +49,48 @@ public class GeneralAPIController {
         return ResponseEntity.ok(BasicResponse.ok().data(BookDetailDTO.toDTO(book)));
     }
 
+    /*
     //搜索书(By title/author/categories)
     @GetMapping("/book/search/{cond}")
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
     public ResponseEntity searchBook(@RequestParam String param,
                                      @RequestParam(defaultValue = "0") Integer page,
                                      @RequestParam(defaultValue = "10") Integer size,
                                      @PathVariable("cond") String condition) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("id"));
         List<Book> books = new ArrayList<>();
-        param = "%" + param + "%";
         switch (condition) {
             case "title":
-                books = bookRepository.findByTitleLike(param, pageable).getContent();
+                books = bookRepository.findAllByTitleContainsIgnoreCase(param, pageable).getContent();
                 break;
             case "author":
-                books = bookRepository.findByAuthorLike(param, pageable).getContent();
+                books = bookRepository.findAllByAuthorContaining(param, pageable).getContent();
                 break;
-                /*
             case "categories":
-                books = bookRepository.findByCategoriesIsContaining(param, pageable).getContent();
+                Category category = categoryRepository.findByName(param);
+                books = bookRepository.findAllByCategoriesContaining(category, pageable).getContent();
                 break;
-                 */
+            default:
+                throw new APIException("Invalid search type");
         }
         BasicResponse response = BasicResponse.ok().data(books.stream().map(BookDetailDTO::toDTO).collect(Collectors.toList()));
         return ResponseEntity.ok(response);
     }
+    */
 
-    //修改密码
-    @PostMapping("/changePassword")
-    public ResponseEntity changePassword(@RequestParam("username") String username,
-                                         @RequestParam("password") String password){
-        User user = userRepository.findByUsername(username).orElse(null);
-        if (user == null ){
-            return ResponseEntity.ok(BasicResponse.fail().message("User not exits"));
-        }else if (CryptoUtils.verifyPassword(password, user.getPasswordHash())){
-            return ResponseEntity.ok(BasicResponse.fail().message("Password and original password cannot be the same"));
-        }else if(password.length()<8 || password.length()>16){
-            return ResponseEntity.ok(BasicResponse.fail().message("Password must be 8-16 characters"));
+    @AuthenticationNeeded
+    @PutMapping("/profile")
+    public ResponseEntity changeProfile(@RequestParam String username,
+                                        @RequestParam String password) {
+        User user = sessionHelper.getCurrentUser();
+        if (user == null) {
+            throw new APIException("User does not exist");
+        } else if (password.length() < 8) {
+            throw new APIException("Password must longer than 8 characters");
         }
-
+        user.setUsername(username);
         user.setPassword(password);
         userRepository.save(user);
-        return ResponseEntity.ok(BasicResponse.ok().message("Password successfully changed"));
+        return ResponseEntity.ok(BasicResponse.ok().message("Profile successfully changed"));
     }
 }

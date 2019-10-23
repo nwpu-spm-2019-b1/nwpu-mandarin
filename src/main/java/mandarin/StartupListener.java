@@ -96,6 +96,7 @@ public class StartupListener {
             Reservation reservation = new Reservation(session.get(Book.class, 4), reader);
             reservation.setTime(reservation.getTime().minus(Duration.ofHours(1)));
             session.save(reservation);
+            session.save(new NewsItem("News title", "News content", session.get(User.class, 3)));
             session.flush();
             tx.commit();
             session.close();

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="zh-hans en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Mandarin</title>
+    <th:block th:replace="reader/common :: head"></th:block>
+    <link rel="stylesheet" href="/static/css/animate.css">
+</head>
+<body>
+<th:block th:replace="reader/common :: navbar"></th:block>
+<div class="container main" th:with="user=${sessionHelper.currentUser}">
+    <th:block th:if="${user!=null}">
+        <div class="alert" style="display: none;" id="alert"></div>
+        <div class="profile-container">
+            <table>
+                <tr>
+                    <td><label for="username-input">Username:</label></td>
+                    <td><input id="username-input" class="form-control-inline" type="text" th:value="${user.username}">
+                    </td>
+                </tr>
+                <tr>
+                    <td><label for="password-input">Password:</label></td>
+                    <td><input id="password-input" class="form-control-inline" type="password" value="password"/></td>
+                </tr>
+            </table>
+            <button type="button" class="btn btn-primary" onclick="saveChanges()">Save changes</button>
+        </div>
+    </th:block>
+    <div th:if="${user==null}" style="text-align: center;">
+        Please login first.
+        <script>
+            $(document).ready(function () {
+                show_login();
+            });
+        </script>
+    </div>
+</div>
+<th:block th:replace="reader/common :: scripts"></th:block>
+<script>
+    function saveChanges() {
+        $.ajax("/api/profile", {
+            type: "PUT",
+            dataType: "json",
+            data: {
+                username: $("#username-input").val(),
+                password: $("#password-input").val()
+            },
+            success: function (resp) {
+                $("#alert").removeClass("alert-danger").addClass("alert-success").text("Personal information successfully changed");
+            },
+            error: function (xhr) {
+                var resp = JSON.parse(xhr.responseText);
+                $("#alert").removeClass("alert-success").addClass("alert-danger").text(resp.message);
+            }
+        })
+    }
+</script>
+</body>
+</html>

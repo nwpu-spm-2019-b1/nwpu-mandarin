@@ -70,18 +70,20 @@ CREATE TABLE reservations
 CREATE INDEX ON reservations (book_id);
 CREATE INDEX ON reservations (user_id);
 CREATE INDEX ON reservations (time);
-DROP TABLE IF EXISTS book_copies;
-CREATE TABLE book_copies
-(
-    id       SERIAL PRIMARY KEY,
-    location TEXT    NOT NULL,
-    book_id  INTEGER NOT NULL REFERENCES books (id)
-);
 DROP TABLE IF EXISTS configuration;
 CREATE TABLE configuration
 (
     key   TEXT PRIMARY KEY,
     value TEXT NOT NULL
+);
+DROP TABLE IF EXISTS news;
+CREATE TABLE news
+(
+id SERIAL PRIMARY KEY,
+title TEXT NOT NULL,
+content TEXT NOT NULL,
+time    TIMESTAMP NOT NULL DEFAULT now(),
+poster_id INTEGER NOT NULL REFERENCES users(id)
 );
 INSERT INTO users (username, email, password_hash, type, signup_time)
 VALUES ('admin', 'admin@local.invalid',

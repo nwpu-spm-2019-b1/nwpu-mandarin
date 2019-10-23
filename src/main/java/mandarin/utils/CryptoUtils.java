@@ -79,11 +79,14 @@ public class CryptoUtils {
     }
 
     public static String randomString(int length) {
-        String chars = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        return randomString("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ", length);
+    }
+
+    public static String randomString(String chars, int length) {
         SecureRandom random = new SecureRandom();
-        StringBuilder stringBuilder=new StringBuilder();
-        while (stringBuilder.length()<length){
-            stringBuilder.append((char)random.nextInt(chars.length()));
+        StringBuilder stringBuilder = new StringBuilder();
+        while (stringBuilder.length() < length) {
+            stringBuilder.append(chars.charAt(random.nextInt(chars.length())));
         }
         return stringBuilder.toString();
     }

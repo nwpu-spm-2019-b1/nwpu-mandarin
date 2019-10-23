@@ -23,7 +23,7 @@
 <div class="container main">
     <div th:if="${sessionHelper.getCurrentUser()!=null}">
         <span class="mb-1" style="font-weight: bold; font-size: 1.5em;">Outstanding amount of fine:</span>
-        <span class="mb-5" style="font-size: 1.5em;">$[[${userService.getFineAmount(sessionHelper.getCurrentUser())}]]</span>
+        <span class="mb-5" style="font-size: 1.5em;">¥[[${userService.getFineAmount(sessionHelper.getCurrentUser())}]]</span>
         <h2 class="mb-3">
             Your reservations
         </h2>
