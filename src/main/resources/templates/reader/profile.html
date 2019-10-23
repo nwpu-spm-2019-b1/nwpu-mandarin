@@ -11,18 +11,21 @@
     <th:block th:if="${user!=null}">
         <div class="alert" style="display: none;" id="alert"></div>
         <div class="profile-container">
-            <table>
-                <tr>
-                    <td><label for="username-input">Username:</label></td>
-                    <td><input id="username-input" class="form-control-inline" type="text" th:value="${user.username}">
-                    </td>
-                </tr>
-                <tr>
-                    <td><label for="password-input">Password:</label></td>
-                    <td><input id="password-input" class="form-control-inline" type="password" value="password"/></td>
-                </tr>
-            </table>
-            <button type="button" class="btn btn-primary" onclick="saveChanges()">Save changes</button>
+            <form action="#" method="post" id="change-profile-form">
+                <div class="form-group">
+                    <label for="username-input">Username:</label>
+                    <input id="username-input" class="form-control" type="text" th:value="${user.username}">
+                </div>
+                <div class="form-group">
+                    <label for="old-password-input">Old password:</label>
+                    <input id="old-password-input" class="form-control" type="password"/>
+                </div>
+                <div>
+                    <label for="password-input">New password:</label>
+                    <input id="password-input" class="form-control" type="password"/>
+                </div>
+                <button type="submit" class="btn btn-primary">Save changes</button>
+            </form>
         </div>
     </th:block>
     <div th:if="${user==null}" style="text-align: center;">
@@ -36,20 +39,29 @@
 </div>
 <th:block th:replace="reader/common :: scripts"></th:block>
 <script>
+    $(document).ready(function () {
+        $("#change-profile-form").bind("submit", function (e) {
+            e.preventDefault();
+            saveChanges();
+        })
+    });
+
     function saveChanges() {
         $.ajax("/api/profile", {
             type: "PUT",
             dataType: "json",
-            data: {
+            data: JSON.stringify({
                 username: $("#username-input").val(),
+                old_password: $("#old-password-input").val(),
                 password: $("#password-input").val()
-            },
+            }),
+            contentType: "application/json",
             success: function (resp) {
-                $("#alert").removeClass("alert-danger").addClass("alert-success").text("Personal information successfully changed");
+                $("#alert").removeClass("alert-danger").addClass("alert-success").text("Personal information successfully changed").show();
             },
             error: function (xhr) {
                 var resp = JSON.parse(xhr.responseText);
-                $("#alert").removeClass("alert-success").addClass("alert-danger").text(resp.message);
+                $("#alert").removeClass("alert-success").addClass("alert-danger").text(resp.message).show();
             }
         })
     }

@@ -48,7 +48,7 @@
                 <div class="modal-body">
                     <div class="alert alert-danger" id="error-message" style="display: none;">
                     </div>
-                    <form id="login-modal-form">
+                    <form id="login-modal-form" action="#" method="post">
                         <div class="form-group">
                             <label for="login-modal-username">Username:</label>
                             <input id="login-modal-username" name="username" type="text" class="form-control">
@@ -153,7 +153,8 @@
             });
         }
 
-        $("#login-modal-form").bind("submit", function () {
+        $("#login-modal-form").bind("submit", function (e) {
+            e.preventDefault();
             do_login();
         })
     </script>

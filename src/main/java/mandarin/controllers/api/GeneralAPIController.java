@@ -20,10 +20,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -80,12 +83,21 @@ public class GeneralAPIController {
 
     @AuthenticationNeeded
     @PutMapping("/profile")
-    public ResponseEntity changeProfile(@RequestParam String username,
-                                        @RequestParam String password) {
+    public ResponseEntity changeProfile(@RequestBody Map<String, Object> map) {
         User user = sessionHelper.getCurrentUser();
         if (user == null) {
             throw new APIException("User does not exist");
-        } else if (password.length() < 8) {
+        }
+        String username = (String) map.get("username");
+        String oldPassword = (String) map.get("old_password");
+        String password = (String) map.get("password");
+        if (username == null || oldPassword == null || password == null) {
+            throw new APIException("Bad request");
+        }
+        if (!CryptoUtils.verifyPassword(oldPassword, user.getPasswordHash())) {
+            throw new APIException("Wrong password");
+        }
+        if (password.length() < 8) {
             throw new APIException("Password must longer than 8 characters");
         }
         user.setUsername(username);
