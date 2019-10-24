@@ -102,9 +102,9 @@ public class LibrarianAPIController {
 
     static class PostNewsRequest {
         @NotBlank
-        String title;
+        public String title;
         @NotNull
-        String content;
+        public String content;
     }
 
     @PostMapping("/news")

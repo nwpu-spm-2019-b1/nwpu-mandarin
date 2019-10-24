@@ -4,7 +4,7 @@
         <div>
             <div class="card" v-for="item in list">
                 <div class="card-header">{{item.title}}</div>
-                <div class="card-text">
+                <div class="card-body">
                     {{item.content}}
                 </div>
             </div>
@@ -18,6 +18,9 @@
             return {
                 list: []
             }
+        },
+        mounted() {
+            this.loadNews();
         },
         methods: {
             loadNews: async function () {

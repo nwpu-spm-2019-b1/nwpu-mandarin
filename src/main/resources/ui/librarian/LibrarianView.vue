@@ -31,8 +31,8 @@
                             <li v-bind:class="{active: router.currentRoute.path==='/categories'}">
                                 <router-link to="/categories">Manage categories</router-link>
                             </li>
-                            <li v-bind:class="{active: router.currentRoute.path==='/categories'}">
-                                <router-link to="/categories">Manage categories</router-link>
+                            <li v-bind:class="{active: router.currentRoute.path==='/news'}">
+                                <router-link to="/news">Manage news</router-link>
                             </li>
                         </ul>
                     </nav>
