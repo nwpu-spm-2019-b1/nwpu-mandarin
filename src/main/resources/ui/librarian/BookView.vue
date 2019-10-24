@@ -107,8 +107,21 @@
                 Loading books...
             </div>
             <div class="pager-container" v-if="pager.total > 0 && !loading">
+                <div style="text-align: center; width: 100%;">
+                    Page {{pager.current}} of {{pager.total}}
+                    <br>
+                    {{pager.count}} results.
+                </div>
                 <nav aria-label="Page selector">
                     <ul class="pagination justify-content-center">
+                        <li class="page-item" v-bind:class="{'disabled':pager.current===1}">
+                            <a class="page-link"
+                               href="javascript:void(0);"
+                               @click="changePage"
+                               data-page="first">
+                                First
+                            </a>
+                        </li>
                         <li class="page-item" v-bind:class="{'disabled':pager.current===1}">
                             <a class="page-link"
                                href="javascript:void(0);"
@@ -117,21 +130,20 @@
                                 Previous
                             </a>
                         </li>
-                        <li class="page-item" v-for="page in pager.total"
-                            v-bind:class="{'active':pager.current===page}">
-                            <a class="page-link"
-                               href="javascript:void(0);"
-                               @click="changePage"
-                               v-bind:data-page="page">
-                                {{page}}
-                            </a>
-                        </li>
                         <li class="page-item" v-bind:class="{'disabled':pager.current===pager.total}">
                             <a class="page-link"
                                href="javascript:void(0);"
                                @click="changePage"
                                data-page="next">
                                 Next
+                            </a>
+                        </li>
+                        <li class="page-item" v-bind:class="{'disabled':pager.current===pager.total}">
+                            <a class="page-link"
+                               href="javascript:void(0);"
+                               @click="changePage"
+                               data-page="last">
+                                Last
                             </a>
                         </li>
                     </ul>
@@ -218,6 +230,10 @@
                     this.pager.current--;
                 } else if (page === "next" && this.pager.current !== this.pager.total) {
                     this.pager.current++;
+                } else if (page === "first") {
+                    this.pager.current = 1;
+                } else if (page === "last") {
+                    this.pager.current = this.pager.total;
                 } else {
                     this.pager.current = Number.parseInt(page);
                 }

@@ -28,6 +28,8 @@ import javax.annotation.Resource;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -186,7 +188,9 @@ public class LibrarianAPIController {
     }
 
     static class LendOrReturnRequest {
+        @NotNull(message="No such user")
         public Integer user_id = null;
+        @NotEmpty(message="No book to lend")
         public List<Integer> book_id_list = new ArrayList<>();
 
         public LendOrReturnRequest() {
@@ -213,19 +217,28 @@ public class LibrarianAPIController {
         }
     }
 
+    public <T> Set<ConstraintViolation<T>> validate(T object) {
+        return validator.validate(object);
+    }
+
     //借书
     @PostMapping("/book/lend")
     public ResponseEntity lendBook(@RequestBody LendOrReturnRequest request) {
+        if (request.user_id == null || request.book_id_list == null) {
+            throw new APIException("Bad request");
+        }
         User user = userRepository.findById(request.user_id).orElse(null);
         List<Book> books = request.book_id_list.stream().map(id -> bookRepository.findById(id).orElseThrow(() -> new APIException("No such book"))).collect(Collectors.toList());
-        if (user == null || books.size() == 0) {
-            throw new APIException("Invalid input");
+        if (user == null) {
+            throw new APIException("No such user");
+        } else if (books.size() == 0) {
+            throw new APIException("No books to lend");
         }
         List<LendOrReturnResultItem> results = new ArrayList<>();
         for (Book book : books) {
             try {
                 LendingLogItem item = bookService.lendBook(user, book);
-                results.add(new LendOrReturnResultItem(book.getId(), true,"Lended successfully"));
+                results.add(new LendOrReturnResultItem(book.getId(), true, "Lended successfully"));
             } catch (RuntimeException e) {
                 results.add(new LendOrReturnResultItem(book.getId(), false, e.getMessage()));
             }
@@ -236,8 +249,11 @@ public class LibrarianAPIController {
     //还书
     @PostMapping("/book/return")
     public ResponseEntity returnBook(@RequestBody LendOrReturnRequest request) {
+        if (request.user_id == null || request.book_id_list == null) {
+            throw new APIException("Bad request");
+        }
         User user = userRepository.findById(request.user_id).orElse(null);
-        Set<Book> books = request.book_id_list.stream().map(id -> bookRepository.findById(id).orElseThrow(() -> new APIException("No such book"))).collect(Collectors.toSet());
+        List<Book> books = request.book_id_list.stream().map(id -> bookRepository.findById(id).orElseThrow(() -> new APIException("No such book"))).collect(Collectors.toList());
         if (user == null) {
             throw new APIException("No such user");
         } else if (books.size() == 0) {

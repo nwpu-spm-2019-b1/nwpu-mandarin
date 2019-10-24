@@ -1,15 +1,15 @@
 <template>
     <div style="height: 100%;">
-        <nav class="navbar navbar-light pt-1 pb-1" style="background-color: #e3f2fd;">
-            <div class="container-fluid pl-0 pr-0">
+        <nav class="librarian-header" style="background-color: #e3f2fd;">
+            <div class="container-fluid">
                 <a href="/" class="navbar-brand">
                     <img src="/static/images/logo.png" title="Mandarin" alt="Mandarin" class="navbar-logo"/>
                 </a>
             </div>
         </nav>
-        <div class="container-fluid">
-            <div class="row" style="height: 100%; flex-wrap: nowrap; width: 100vw;">
-                <div class="col-2 col-xl-1 sidebar">
+        <div class="container-fluid librarian-content">
+            <div style="height: 100%;">
+                <div class="sidebar">
                     <nav class="sidebar-nav">
                         <ul>
                             <li v-bind:class="{active : router.currentRoute.path === '/'}">
@@ -27,11 +27,14 @@
                             <li v-bind:class="{active: router.currentRoute.path==='/income/history'}">
                                 <router-link to="/income/history">View income history</router-link>
                             </li>
+                            <li v-bind:class="{active: router.currentRoute.path==='/categories'}">
+                                <router-link to="/categories">Manage categories</router-link>
+                            </li>
                         </ul>
                     </nav>
                 </div>
-                <div class="col col-xl main-column" style="flex-grow: 1;">
-                    <div class="p-3">
+                <div class="main-column">
+                    <div class="pt-3 pl-3 pr-3">
                         <router-view></router-view>
                     </div>
                     <div class="footer">
@@ -52,6 +55,7 @@
     import LendReturnView from "./LendReturnView.vue";
     import UserHistoryView from "./UserHistoryView.vue";
     import IncomeHistoryView from "./IncomeHistoryView.vue";
+    import CategoriesView from "./CategoriesView.vue";
     import VueRouter from "vue-router";
     import {EventBus} from "../js/events.js";
 
@@ -93,6 +97,10 @@
         {
             path: '/income/history',
             component: IncomeHistoryView
+        },
+        {
+            path: '/categories',
+            component: CategoriesView
         }
     ];
 
@@ -129,6 +137,7 @@
             LendReturnView,
             BookEditor,
             IncomeHistoryView,
+            CategoriesView,
             Toast
         }
     };

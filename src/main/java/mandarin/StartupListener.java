@@ -52,9 +52,9 @@ public class StartupListener {
             Category c1 = new Category("Programming", null);
             session.save(c1);
             session.flush();
-            Category c2 = new Category("Algorithms", c1);
+            Category c2 = new Category("Algorithms", null);
             session.save(c2);
-            Category c3 = new Category("Cryptography", c1);
+            Category c3 = new Category("Cryptography", null);
             session.save(c3);
             /*
             session.save(new Book("9781617294945", "Spring in Action", "Craig Walls", "Shelf 1", BigDecimal.ONE, Collections.singletonList(c1)));

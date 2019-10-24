@@ -70,7 +70,7 @@
             <div class="alert"
                  v-for="message in messages"
                  v-bind:class="message.success ? 'alert-success' : 'alert-danger'">
-                Book #{{message.book_id}}:<br>
+                <template v-if="message.book_id!==null">Book #{{message.book_id}}:<br></template>
                 {{message.message}}
             </div>
             <button type="submit" class="btn btn-success btn">OK</button>
@@ -131,16 +131,15 @@
                     },
                     body: JSON.stringify({
                         user_id: this.user_id,
-                        book_id_list: this.book_id_list.map(item => item.value)
+                        book_id_list: this.book_id_list.map(item => item.value).filter(item => item.length > 0)
                     })
                 });
                 let body = await resp.json();
                 if (resp.ok) {
                     this.messages = body.data;
                 } else {
-                    alert(body.message);
+                    this.messages = [{book_id: null, message: body.message, success: false}];
                 }
-
             }
         }
     }

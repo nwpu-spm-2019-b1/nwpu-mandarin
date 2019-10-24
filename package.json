@@ -4,7 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "css:build": "node-sass -o src/main/resources/static/dist/css/ src/main/resources/ui/scss/",
+    "css:watch": "npm run css:build && node-sass -w -r -o src/main/resources/static/dist/css/ src/main/resources/ui/scss/"
   },
   "repository": {
     "type": "git",
@@ -24,6 +26,8 @@
     "babel-loader": "^8.0.6",
     "bootstrap": "^4.3.1",
     "css-loader": "^3.2.0",
+    "node-sass": "^4.13.0",
+    "npm-run-all": "^4.1.5",
     "uglifyjs-webpack-plugin": "^2.2.0",
     "vue-loader": "^15.7.1",
     "vue-template-compiler": "^2.6.10",
