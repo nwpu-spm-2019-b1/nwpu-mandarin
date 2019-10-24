@@ -1,10 +1,11 @@
 <template>
     <div style="height: 100%;">
         <nav class="librarian-header" style="background-color: #e3f2fd;">
-            <div class="container-fluid">
-                <a href="/" class="navbar-brand">
+            <div class="container-fluid d-flex flex-row" style="justify-content: space-between; align-items: center;">
+                <a href="/">
                     <img src="/static/images/logo.png" title="Mandarin" alt="Mandarin" class="navbar-logo"/>
                 </a>
+                <a href="javascript:void(0);" v-if="user!==null"><i class="fas fa-user mr-1"></i>{{user.username}}</a>
             </div>
         </nav>
         <div class="container-fluid librarian-content">
@@ -56,15 +57,14 @@
     import UserHistoryView from "./UserHistoryView.vue";
     import IncomeHistoryView from "./IncomeHistoryView.vue";
     import CategoriesView from "./CategoriesView.vue";
+    import DashboardView from "./DashboardView.vue";
     import VueRouter from "vue-router";
     import {EventBus} from "../js/events.js";
 
     const routes = [
         {
             path: '/',
-            component: {
-                template: `<h1 class="module-title">Dashboard</h1>`
-            }
+            component: DashboardView
         },
         {
             path: '/books',
@@ -113,7 +113,9 @@
     export default {
         router,
         data: function () {
-            return {};
+            return {
+                user: null
+            };
         },
         computed: {
             router() {
@@ -122,6 +124,7 @@
         },
         mounted() {
             EventBus.$on("error", this.onError);
+            this.loadUserInfo();
         },
         beforeDestroy() {
             EventBus.$off("error", this.onError);
@@ -129,6 +132,15 @@
         methods: {
             onError(o) {
                 showErrorToast(`<b>${o.error}</b>`);
+            },
+            loadUserInfo: async function () {
+                let resp = await fetch("/api/librarian/user/current");
+                let body = await resp.json();
+                if (!resp.ok) {
+                    alert(body.message);
+                    return;
+                }
+                this.user = body.data;
             }
         },
         components: {

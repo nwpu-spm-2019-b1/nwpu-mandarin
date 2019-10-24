@@ -5,6 +5,14 @@
     <th:block th:replace="reader/common :: head"></th:block>
     <link rel="stylesheet" href="/static/css/animate.css">
     <style>
+        body {
+            background-image: url("/static/images/background.jpg");
+        }
+
+        .container.main {
+            background-color: rgba(255, 255, 255, 0.75);
+        }
+
         .welcome-message {
             font-weight: bold;
             font-size: 2em;
@@ -58,24 +66,20 @@
 </head>
 <body>
 <th:block th:replace="reader/common :: navbar"></th:block>
-<div class="container main">
-    <div class="news-container">
-        <div class="modal news-item" th:each="item: ${news}">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">[[${item.title}]]</h5>
-                        <button type="button" class="close" aria-label="Close" onclick="hide_news(this)">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        [[${item.content}]]
-                    </div>
-                </div>
-            </div>
+<div class="news-container mb-5 mt-5 pl-3 pr-3 container">
+    <div class="card news-item" th:each="item: ${news}">
+        <div class="card-header d-flex flex-row" style="justify-content: space-between; align-items: center;">
+            <h5 style="margin-bottom: 0;">[[${item.title}]]</h5>
+            <button type="button" class="close" aria-label="Close" onclick="hide_news(this)">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <div class="card-body">
+            [[${item.content}]]
         </div>
     </div>
+</div>
+<div class="container main">
     <div class="welcome-message">
         <div class="logo">
             <img src="/static/images/logo.png"/>
@@ -117,7 +121,7 @@
         setTimeout(function () {
             e.hide();
             e.removeClass("fadeOut");
-        },300);
+        }, 300);
     }
 </script>
 </body>

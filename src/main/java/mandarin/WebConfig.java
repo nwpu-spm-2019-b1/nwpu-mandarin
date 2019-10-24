@@ -53,6 +53,7 @@ public class WebConfig implements WebMvcConfigurer {
     public ViewResolver viewResolver() {
         ThymeleafViewResolver viewResolver = new ThymeleafViewResolver();
         viewResolver.setTemplateEngine(templateEngine());
+        viewResolver.setCharacterEncoding("utf-8");
         viewResolver.setOrder(1);
         return viewResolver;
     }

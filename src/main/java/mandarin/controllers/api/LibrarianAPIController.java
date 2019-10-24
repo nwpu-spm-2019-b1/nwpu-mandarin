@@ -1,6 +1,7 @@
 package mandarin.controllers.api;
 
 import mandarin.auth.AuthenticationNeeded;
+import mandarin.auth.SessionHelper;
 import mandarin.auth.UserType;
 import mandarin.controllers.api.dto.AddBookDTO;
 import mandarin.controllers.api.dto.BookDetailDTO;
@@ -62,6 +63,9 @@ public class LibrarianAPIController {
     @Resource
     ConfigurationService configurationService;
 
+    @Resource
+    SessionHelper sessionHelper;
+
     private Validator validator;
 
     public LibrarianAPIController() {
@@ -78,6 +82,12 @@ public class LibrarianAPIController {
             }
             return category;
         }).collect(Collectors.toList());
+    }
+
+    @GetMapping("/user/current")
+    public ResponseEntity currentUser() {
+        User currentUser = sessionHelper.getCurrentUser();
+        return ResponseEntity.ok(BasicResponse.ok().data(currentUser));
     }
 
     @GetMapping("/generate")
@@ -188,9 +198,9 @@ public class LibrarianAPIController {
     }
 
     static class LendOrReturnRequest {
-        @NotNull(message="No such user")
+        @NotNull(message = "No such user")
         public Integer user_id = null;
-        @NotEmpty(message="No book to lend")
+        @NotEmpty(message = "No book to lend")
         public List<Integer> book_id_list = new ArrayList<>();
 
         public LendOrReturnRequest() {

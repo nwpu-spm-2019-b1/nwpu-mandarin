@@ -16,6 +16,13 @@ html, body {
   margin-left: $sidebar-width;
 }
 
+.dashboard-welcome-message {
+  text-align: center;
+  padding-top: 10%;
+  padding-bottom: 10%;
+  font-size: 120%;
+}
+
 .librarian-header {
   position: fixed;
   top: 0;
@@ -216,7 +223,7 @@ html, body {
 }
 
 .navbar-logo {
-  height: calc($header-height * 80%);
+  height: calc(#{$header-height} * 0.8);
 }
 
 .footer {
