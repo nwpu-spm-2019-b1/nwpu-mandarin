@@ -1,6 +1,6 @@
 .idea
 .gradle
 build
-src/main/resources/static/dist
+#src/main/resources/static/dist
 node_modules
 out
