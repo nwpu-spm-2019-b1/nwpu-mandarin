@@ -10,6 +10,7 @@ import mandarin.services.BookService;
 import mandarin.services.UserService;
 import mandarin.utils.BasicResponse;
 import mandarin.utils.CryptoUtils;
+import mandarin.utils.MiscUtils;
 import mandarin.utils.URLUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -143,20 +144,13 @@ public class ReaderController {
     public String recoverPassword(@RequestParam String email, Model model) {
         User user = userRepository.findByEmail(email).orElse(null);
         if (user != null) {
-            SimpleMailMessage message = new SimpleMailMessage();
-            message.setTo(user.getEmail());
-            message.setFrom(((JavaMailSenderImpl) mailSender).getUsername());
-            message.setSubject("Password reset - Mandarin");
-            message.setSentDate(new Date());
             String password = CryptoUtils.randomString(20);
-            message.setText("Your new password: " + password);
+            MiscUtils.sendMail("Password reset - Mandarin", "Your new password: " + password);
             logger.info("New password: {}", password);
-            mailSender.send(message);
-            model.addAttribute("finished", true);
         } else {
             logger.warn("Invalid email submitted for password reset");
-            model.addAttribute("finished", true);
         }
+        model.addAttribute("finished", true);
         return "reader/recover_password";
     }
 

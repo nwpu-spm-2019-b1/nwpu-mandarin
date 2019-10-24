@@ -3,16 +3,28 @@ html, body {
 }
 
 body {
-    background-color: rgb(238, 245, 249);
+    background-image: url("/static/images/background.jpg");
+    background-size: cover;
 }
 
 .main.container {
+    background-color: rgba(255, 255, 255, 0.78);
+    margin-top: 3em;
     padding-top: 3em;
     padding-bottom: 3em;
     padding-left: 3em;
     padding-right: 3em;
+    border-radius: 0.5rem;
 }
 
 tr th {
     white-space: nowrap;
+}
+
+.no-results-message {
+    text-align: center;
+    font-size: 135%;
+    font-weight: bold;
+    padding-top: 5em;
+    padding-bottom: 5em;
 }

@@ -104,7 +104,7 @@ public class BookService {
                 return false;
             }
         }
-        return lendingLogRepository.findByBookId(book.getId()).stream().noneMatch((LendingLogItem item) -> item.getEndTime() != null);
+        return !lendingLogRepository.findOutstandingByBook(book).isPresent();
     }
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
