@@ -19,9 +19,10 @@ public class MiscUtils {
         MiscUtils.mailSender = mailSender;
     }
 
-    public static void sendMail(String title, String content) {
+    public static void sendMail(String recipient, String title, String content) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom(((JavaMailSenderImpl) mailSender).getUsername());
+        message.setTo(recipient);
         message.setSubject(title);
         message.setText(content);
         message.setSentDate(new Date());

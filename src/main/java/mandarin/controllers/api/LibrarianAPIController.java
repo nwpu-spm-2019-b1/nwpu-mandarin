@@ -23,12 +23,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.util.*;
@@ -56,6 +58,9 @@ public class LibrarianAPIController {
 
     @Resource
     ActionLogRepository actionLogRepository;
+
+    @Resource
+    NewsRepository newsRepository;
 
     @Resource
     BookService bookService;
@@ -88,6 +93,25 @@ public class LibrarianAPIController {
     public ResponseEntity currentUser() {
         User currentUser = sessionHelper.getCurrentUser();
         return ResponseEntity.ok(BasicResponse.ok().data(currentUser));
+    }
+
+    @GetMapping("/news")
+    public ResponseEntity getNews() {
+        return ResponseEntity.ok(BasicResponse.ok().data(newsRepository.findAll()));
+    }
+
+    static class PostNewsRequest {
+        @NotBlank
+        String title;
+        @NotNull
+        String content;
+    }
+
+    @PostMapping("/news")
+    public ResponseEntity postNews(@RequestBody PostNewsRequest request) {
+        NewsItem item = new NewsItem(request.title, request.content, sessionHelper.getCurrentUser());
+        newsRepository.save(item);
+        return ResponseEntity.ok(BasicResponse.ok().data(item.getId()));
     }
 
     @GetMapping("/generate")
@@ -429,13 +453,18 @@ public class LibrarianAPIController {
         return ResponseEntity.ok(BasicResponse.ok().data(result));
     }
 
+    static class AddCategoryRequest {
+        @NotBlank
+        public String name;
+        public Integer parentId;
+    }
+
     //增加种类
     @PostMapping("/categories")
-    public ResponseEntity addCategory(@RequestParam String name,
-                                      @RequestParam(required = false) Integer parentId) {
-        Category category = new Category(name, null);
-        if (parentId != null) {
-            Category parent = categoryRepository.findById(parentId).orElse(null);
+    public ResponseEntity addCategory(@RequestBody AddCategoryRequest request) {
+        Category category = new Category(request.name, null);
+        if (request.parentId != null) {
+            Category parent = categoryRepository.findById(request.parentId).orElse(null);
             if (parent == null) {
                 throw new APIException("Could not found parent category by ID");
             }

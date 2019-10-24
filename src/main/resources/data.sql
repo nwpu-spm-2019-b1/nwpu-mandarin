@@ -90,7 +90,7 @@ VALUES ('admin', 'admin@local.invalid',
         '$argon2id$v=19$m=65536,t=2,p=1$Awz7DXJOmoT4/DwNauoyjQ$geMYnip4NmWsxe7eukKOpps+bdOc7doefLm0480E0tY',
         'Admin', '2019-09-20 22:29:55.670000');
 INSERT INTO users (username, email, password_hash, type, signup_time)
-VALUES ('reader', 'reader@local.invalid',
+VALUES ('reader', 'user@localhost',
         '$argon2id$v=19$m=65536,t=2,p=1$M3j4icn1Le+EB6IeZ/7y7Q$T688ZmXe7nwkdULHMrYehB2vjTsOfU1nLGHa4sa0PUw', 'Reader',
         '2019-09-20 22:30:06.591000');
 INSERT INTO users (username, email, password_hash, type, signup_time)

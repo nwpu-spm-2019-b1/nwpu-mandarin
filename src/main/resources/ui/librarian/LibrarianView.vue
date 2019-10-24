@@ -31,6 +31,9 @@
                             <li v-bind:class="{active: router.currentRoute.path==='/categories'}">
                                 <router-link to="/categories">Manage categories</router-link>
                             </li>
+                            <li v-bind:class="{active: router.currentRoute.path==='/categories'}">
+                                <router-link to="/categories">Manage categories</router-link>
+                            </li>
                         </ul>
                     </nav>
                 </div>
@@ -58,6 +61,7 @@
     import IncomeHistoryView from "./IncomeHistoryView.vue";
     import CategoriesView from "./CategoriesView.vue";
     import DashboardView from "./DashboardView.vue";
+    import NewsView from "./NewsView.vue";
     import VueRouter from "vue-router";
     import {EventBus} from "../js/events.js";
 
@@ -101,6 +105,10 @@
         {
             path: '/categories',
             component: CategoriesView
+        },
+        {
+            path: '/news',
+            component: NewsView
         }
     ];
 
@@ -150,6 +158,7 @@
             BookEditor,
             IncomeHistoryView,
             CategoriesView,
+            NewsView,
             Toast
         }
     };

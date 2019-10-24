@@ -145,8 +145,10 @@ public class ReaderController {
         User user = userRepository.findByEmail(email).orElse(null);
         if (user != null) {
             String password = CryptoUtils.randomString(20);
-            MiscUtils.sendMail("Password reset - Mandarin", "Your new password: " + password);
+            user.setPassword(password);
+            MiscUtils.sendMail(user.getEmail(),"Password reset - Mandarin", "Your new password: " + password);
             logger.info("New password: {}", password);
+            userRepository.save(user);
         } else {
             logger.warn("Invalid email submitted for password reset");
         }

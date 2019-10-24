@@ -21,6 +21,8 @@
     </div>
 </template>
 <script>
+    import {queryString} from "../js/reader";
+
     export default {
         data: function () {
             return {
@@ -46,12 +48,13 @@
             },
             addCategory: async function (event) {
                 event.preventDefault();
-                let data = new FormData();
-                data.append("name", this.new_category_name);
                 let resp = await fetch("/api/librarian/categories", {
                     method: "POST",
                     credentials: "same-origin",
-                    body: data
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({name: this.new_category_name})
                 });
                 let body = await resp.json();
                 if (!resp.ok) {

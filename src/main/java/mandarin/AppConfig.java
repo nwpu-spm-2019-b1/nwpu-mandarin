@@ -63,14 +63,12 @@ public class AppConfig {
     @Bean
     public JavaMailSender getJavaMailSender() {
         JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
-        mailSender.setHost("smtp.163.com");
-        mailSender.setPort(465);
-        mailSender.setUsername("a473407177@163.com");
-        mailSender.setPassword("qwer123");
+        mailSender.setHost("localhost");
+        mailSender.setPort(25);
+        mailSender.setUsername("no-reply@localhost");
         Properties props = mailSender.getJavaMailProperties();
         props.put("mail.transport.protocol", "smtp");
-        props.put("mail.smtp.auth", "true");
-        props.put("mail.smtp.ssl.enable", "true");
+        //props.put("mail.smtp.auth", "true");
         props.put("mail.debug", "true");
         return mailSender;
     }
