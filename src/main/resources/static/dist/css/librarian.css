@@ -189,3 +189,12 @@ html, body {
   width: 100%;
   padding-top: 0.5em;
   font-size: 80%; }
+
+.post-news-form-container {
+  margin-bottom: 1em;
+  padding: 1.2em;
+  border-radius: 1rem;
+  border: 1px #e1e1e1 solid; }
+
+.news-list .card {
+  margin-bottom: 1em; }

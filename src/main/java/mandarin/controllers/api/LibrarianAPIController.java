@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.validation.ConstraintViolation;
+import javax.validation.Valid;
 import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.constraints.NotBlank;
@@ -461,7 +462,7 @@ public class LibrarianAPIController {
 
     //增加种类
     @PostMapping("/categories")
-    public ResponseEntity addCategory(@RequestBody AddCategoryRequest request) {
+    public ResponseEntity addCategory(@Valid @RequestBody AddCategoryRequest request) {
         Category category = new Category(request.name, null);
         if (request.parentId != null) {
             Category parent = categoryRepository.findById(request.parentId).orElse(null);
@@ -492,4 +493,5 @@ public class LibrarianAPIController {
             return ResponseEntity.ok(BasicResponse.ok());
         }
     }
+
 }

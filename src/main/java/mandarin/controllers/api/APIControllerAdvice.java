@@ -6,6 +6,7 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -24,6 +25,8 @@ public class APIControllerAdvice {
         String message = e.getMessage();
         if (e instanceof MethodArgumentTypeMismatchException) {
             message = "The data you have entered is invalid. Please check again.";
+        } else if (e instanceof MethodArgumentNotValidException) {
+            message = "Your input is invalid";
         }
         return ResponseEntity.status(status).body(BasicResponse.fail().message(message));
     }

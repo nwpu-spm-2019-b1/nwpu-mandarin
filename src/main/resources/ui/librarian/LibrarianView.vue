@@ -149,6 +149,9 @@
                     return;
                 }
                 this.user = body.data;
+                if (this.user === null) {
+                    window.location = "/librarian/login";
+                }
             }
         },
         components: {
