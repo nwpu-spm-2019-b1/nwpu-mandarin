@@ -8,6 +8,7 @@
                     <th>User ID</th>
                     <th>Username</th>
                     <th>Action</th>
+                    <th>Time</th>
                     <th>Amount</th>
                 </tr>
                 </thead>
@@ -16,6 +17,7 @@
                     <td>{{item.user.id}}</td>
                     <td>{{item.user.username}}</td>
                     <td>{{item.type}}</td>
+                    <td>{{item.time}}</td>
                     <td>¥{{item.amount}}</td>
                 </tr>
                 </tbody>

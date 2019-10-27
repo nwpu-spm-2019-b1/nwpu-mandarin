@@ -178,7 +178,7 @@ public class ReaderController {
     @ResponseBody
     public ResponseEntity logout(HttpSession session) {
         try {
-            sessionHelper.logout(UserType.Reader);
+            sessionHelper.logout();
             return ResponseEntity.ok().body(BasicResponse.ok().message("logged out"));
         } catch (AuthenticationException e) {
             return ResponseEntity.badRequest().body(BasicResponse.fail().message(e.getMessage()));

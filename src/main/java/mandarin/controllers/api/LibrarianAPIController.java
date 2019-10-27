@@ -109,7 +109,7 @@ public class LibrarianAPIController {
     }
 
     @PostMapping("/news")
-    public ResponseEntity postNews(@RequestBody PostNewsRequest request) {
+    public ResponseEntity postNews(@Validated @RequestBody PostNewsRequest request) {
         NewsItem item = new NewsItem(request.title, request.content, sessionHelper.getCurrentUser());
         newsRepository.save(item);
         return ResponseEntity.ok(BasicResponse.ok().data(item.getId()));
@@ -376,6 +376,7 @@ public class LibrarianAPIController {
         List<Map<String, Object>> list = actionLogRepository.findAllByTypeInOrderByTimeDesc(types).stream().map(item -> {
             Map<String, Object> map = new HashMap<>();
             map.put("user", item.getUser());
+            map.put("time", FormatUtils.formatInstant(item.getTime()).orElseThrow(() -> new RuntimeException("Error unwrapping result")));
             switch (item.getType()) {
                 case "PaidFine":
                     map.put("type", "Paid overdue fines");

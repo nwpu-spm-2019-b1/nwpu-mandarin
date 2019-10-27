@@ -1,5 +1,5 @@
 <template>
-    <div style="height: 100%;">
+    <div style="height: 100%;" v-bind:style="{display: user !== null ? 'block' : 'none'}">
         <nav class="librarian-header" style="background-color: #e3f2fd;">
             <div class="container-fluid d-flex flex-row" style="justify-content: space-between; align-items: center;">
                 <a href="/">
@@ -130,12 +130,8 @@
                 return router;
             }
         },
-        mounted() {
-            EventBus.$on("error", this.onError);
+        beforeMount() {
             this.loadUserInfo();
-        },
-        beforeDestroy() {
-            EventBus.$off("error", this.onError);
         },
         methods: {
             onError(o) {
