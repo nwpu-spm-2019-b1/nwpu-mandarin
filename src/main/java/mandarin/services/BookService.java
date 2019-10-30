@@ -161,10 +161,16 @@ public class BookService {
         List<LendingLogItem> lendingLogItems = lendingLogRepository.findByUserId(user.getId());
         Integer count = 0;
         for (LendingLogItem lendingLogItem : lendingLogItems) {
-            if (lendingLogItem.getEndTime() == null)
+            if (lendingLogItem.getEndTime() == null) {
                 count++;
+            }
         }
         return count;
+    }
+
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
+    public List<LendingLogItem> getAllOverdueLogs() {
+        return lendingLogRepository.findAllOutstanding().stream().filter(item -> Duration.between(item.getStartTime(), Instant.now()).compareTo(Duration.ofDays(configurationService.getAsInt("return_period"))) > 0).collect(Collectors.toList());
     }
 
 }

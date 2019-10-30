@@ -5,7 +5,11 @@
                 <a href="/">
                     <img src="/static/images/logo.png" title="Mandarin" alt="Mandarin" class="navbar-logo"/>
                 </a>
-                <a href="javascript:void(0);" v-if="user!==null"><i class="fas fa-user mr-1"></i>{{user.username}}</a>
+                <div v-if="user!==null">
+                    <a href="javascript:void(0);"><i class="fas fa-user mr-1"></i>{{user.username}}</a>
+                    &nbsp;
+                    <a href="javascript:void(0);" @click="logout"><i class="fas fa-sign-out-alt"></i>Logout</a>
+                </div>
             </div>
         </nav>
         <div class="container-fluid librarian-content">
@@ -138,7 +142,9 @@
                 showErrorToast(`<b>${o.error}</b>`);
             },
             loadUserInfo: async function () {
-                let resp = await fetch("/api/librarian/user/current");
+                let resp = await fetch("/api/librarian/user/current",{
+                    credentials: "same-origin"
+                });
                 let body = await resp.json();
                 if (!resp.ok) {
                     alert(body.message);
@@ -147,6 +153,22 @@
                 this.user = body.data;
                 if (this.user === null) {
                     window.location = "/librarian/login";
+                }
+            },
+            logout: async function () {
+                let resp = await fetch("/librarian/logout",{
+                    credentials: "same-origin",
+                    method: "POST"
+                });
+                if (resp.ok) {
+                    window.location.reload();
+                } else {
+                    try {
+                        let body = await resp.json();
+                        throw new Error(body.message);
+                    } catch (e) {
+                        alert(e);
+                    }
                 }
             }
         },

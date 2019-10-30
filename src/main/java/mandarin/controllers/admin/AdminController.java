@@ -9,6 +9,7 @@ import mandarin.auth.exceptions.UnauthorizedException;
 import mandarin.dao.UserRepository;
 import mandarin.entities.User;
 import mandarin.exceptions.ForbiddenException;
+import mandarin.services.ConfigurationService;
 import mandarin.utils.BasicResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,6 +31,9 @@ public class AdminController {
 
     @Resource
     private SessionHelper sessionHelper;
+
+    @Resource
+    private ConfigurationService configurationService;
 
     @ExceptionHandler(UnauthorizedException.class)
     @NoAuthentication
@@ -91,5 +95,15 @@ public class AdminController {
         }
         model.addAttribute("user", user);
         return "admin/profile";
+    }
+
+    @ModelAttribute("configurationService")
+    public ConfigurationService getConfigurationService() {
+        return configurationService;
+    }
+
+    @GetMapping("/settings")
+    public String settingsPage() {
+        return "admin/settings";
     }
 }

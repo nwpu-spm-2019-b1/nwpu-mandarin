@@ -46,7 +46,7 @@ DROP TABLE IF EXISTS categories CASCADE;
 CREATE TABLE categories
 (
     id                 SERIAL PRIMARY KEY,
-    name               TEXT NOT NULL,
+    name               TEXT UNIQUE NOT NULL,
     parent_category_id INTEGER REFERENCES categories (id)
 );
 CREATE INDEX ON categories (name);

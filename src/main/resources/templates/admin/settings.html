@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="zh-hans en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Admin Settings</title>
+    <style>
+        .search-box {
+            margin-bottom: 0.7em;
+        }
+    </style>
+    <link href="/static/css/bootstrap-grid.css" rel="stylesheet"/>
+    <link href="/static/css/bootstrap-reboot.css" rel="stylesheet"/>
+    <link href="/static/css/bootstrap-reboot.css.map" rel="stylesheet"/>
+
+    <link href="/static/css/bootstrap.min.css" rel="stylesheet"/>
+    <link href="/static/admin/css/main.css" rel="stylesheet"/>
+    <script src="/static/js/jquery-3.4.1.min.js"></script>
+    <script src="/static/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.10.2/css/all.min.css">
+
+</head>
+<body>
+<nav class="navbar bg-dark" style="height:7%">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <img alt="Brand" src="/static/images/logo.png" style="height: 3em;">
+        </div>
+    </div>
+</nav>
+<!--
+<div class="modal" tabindex="-1" role="dialog" id="edit-fineRate-model">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit book fineRate</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div>
+                    <div class="form-group">
+                        <label for="newFineRate">fineRate</label>
+                        <input type="text" name="fineRate" id="newFineRate" class="form-control">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-success" onclick="save_fineRate()">Save</button>
+                <button class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal" tabindex="-1" role="dialog" id="edit-lendingPeriod-model">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit book lendingPeriod</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div>
+                    <div class="form-group">
+                        <label for="newLendingPeirod">lendingPeriod</label>
+                        <input type="text" name="lendingPeirod" id="newLendingPeirod" class="form-control">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-success" onclick="save_lendingPeriod()">Save</button>
+                <button class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+-->
+<div class="container-fluid" style="height:93%">
+    <div class="row">
+        <div class="col-2 col-xl-1 sidebar">
+            <nav class="sidebar-nav">
+                <div class="sidebar-item">
+                    <a href="/admin/profile">
+                        <i class="fas fa-user"></i>
+                        <span>[[${session.username}]]</span>
+                    </a>
+                </div>
+
+                <div class="sidebar-item">
+                    <a href="/admin">
+                        <i class="fas fa-home"></i>
+                        <span>Home</span>
+                    </a>
+                </div>
+
+                <div class="sidebar-item">
+                    <a href="/admin/settings">
+                        <i class="fas fa-edit"></i>
+                        <span>Settings</span>
+                    </a>
+                </div>
+
+                <div class="sidebar-item">
+                    <a href="/admin/logout">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Logout</span>
+                    </a>
+                </div>
+            </nav>
+        </div>
+
+
+        <div class="col-10 col-xl-11 main" style="background-color: rgb(238, 245, 249);">
+            <div class="content">
+                <h2 class="mb-3">Settings</h2>
+                <div class="alert" id="error-message" style="display: none;"></div>
+                <form id="settings-form" action="#" method="post">
+                    <div class="form-group">
+                        <label for="return-period-input">Return period</label>
+                        <input id="return-period-input" th:value="${configurationService.returnPeriod}" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="fine-rate-input">Fine rate</label>
+                        <input id="fine-rate-input" th:value="${configurationService.fineRate}" class="form-control">
+                    </div>
+                    <button type="submit" class="btn btn-success">Save</button>
+                </form>
+                <!--
+                <div class="grid-1 graph-2 general">
+                    <div>
+                        <label class="col-2 control-label">Current fine rate</label>
+                        <div class="row">
+                            <div class="input-group">
+                                <input disabled="" type="text" class="form-control col-2" id="OldFine" th:value="${fineRate}">
+                                <span class="input-group-text" style="padding-left: 25px; width: 60px">¥</span>
+                                <button class="btn btn-success col-1" onclick="start_edit_fineRate()">Reset</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <br>
+                    <br>
+                    <div >
+                        <label class="col-2 control-label">Current lending period</label>
+                        <div class="row ">
+                            <input disabled="" type="text" class="form-control col-2"  id="OldLendingPeriod" th:value="${lendingPeriod}">
+                            <span class="input-group-text" style="width: 60px; text-align: center">Days</span>
+                            <button class="btn btn-success col-1" onclick="start_edit_lendingPeriod()">Reset</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            -->
+
+                <div class="footer">
+                    Mandarin Library Automation<br>
+                    NWPU SPM 2019<br>
+                    Group B1
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $("#settings-form").bind("submit", function (e) {
+        e.preventDefault();
+        $.ajax({
+            url: "/api/admin/settings",
+            type: "PUT",
+            dataType: "json",
+            contentType: "application/json",
+            data: JSON.stringify({
+                fine_rate: $("#fine-rate-input").val(),
+                return_period: $("#return-period-input").val()
+            }),
+            success: function (resp) {
+                window.location.reload();
+            },
+            error: function (xhr) {
+                var resp = JSON.parse(xhr.responseText);
+                $("#error-message").removeClass("alert-success").addClass("alert-danger").text(resp.message).show();
+            }
+        });
+    });
+</script>
+</body>
+</html>

@@ -1,5 +1,6 @@
 package mandarin.controllers.api;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import mandarin.auth.AuthenticationNeeded;
 import mandarin.auth.SessionHelper;
 import mandarin.controllers.api.dto.BookDetailDTO;
@@ -82,28 +83,35 @@ public class GeneralAPIController {
     }
     */
 
+    static class ChangeProfileRequest {
+        public String username;
+        public String email;
+        @JsonProperty("old_password")
+        public String oldPassword;
+        public String password;
+    }
+
     @AuthenticationNeeded
     @PutMapping("/profile")
-    public ResponseEntity changeProfile(@RequestBody Map<String, Object> map) {
+    public ResponseEntity changeProfile(@RequestBody ChangeProfileRequest request) {
         User user = sessionHelper.getCurrentUser();
         if (user == null) {
             throw new APIException("User does not exist");
         }
-        String username = (String) map.get("username");
-        String oldPassword = (String) map.get("old_password");
-        String password = (String) map.get("password");
-
-        if (StringUtils.isNotBlank(username)) {
-            user.setUsername(username);
+        if (StringUtils.isNotBlank(request.username)) {
+            user.setUsername(request.username);
         }
-        if (StringUtils.isNotBlank(oldPassword) && StringUtils.isNotBlank(password)) {
-            if (!CryptoUtils.verifyPassword(oldPassword, user.getPasswordHash())) {
+        if (StringUtils.isNotBlank(request.email)) {
+            user.setEmail(request.email);
+        }
+        if (StringUtils.isNotBlank(request.oldPassword) && StringUtils.isNotBlank(request.password)) {
+            if (!CryptoUtils.verifyPassword(request.oldPassword, user.getPasswordHash())) {
                 throw new APIException("Wrong password");
             }
-            if (password.length() < 8) {
+            if (request.password.length() < 8) {
                 throw new APIException("Password must longer than 8 characters");
             }
-            user.setPassword(password);
+            user.setPassword(request.password);
         }
         userRepository.save(user);
         return ResponseEntity.ok(BasicResponse.ok().message("Profile successfully changed"));

@@ -24,7 +24,7 @@ import java.util.List;
 
 @Configuration
 @EnableWebMvc
-@ComponentScan(basePackages = {"mandarin", "mandarin.controllers"})
+@ComponentScan(basePackages = {"mandarin", "mandarin.controllers", "mandarin.utils"})
 public class WebConfig implements WebMvcConfigurer {
 
     @Override

@@ -68,4 +68,12 @@ public class ConfigurationService {
             throw new RuntimeException(e);
         }
     }
+
+    public BigDecimal getFineRate(){
+        return this.getAsBigDecimal("fine_rate");
+    }
+
+    public Integer getReturnPeriod(){
+        return this.getAsInt("return_period");
+    }
 }

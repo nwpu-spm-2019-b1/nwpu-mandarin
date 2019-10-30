@@ -10,6 +10,13 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.10.2/css/all.min.css">
 </head>
 <body>
+<nav class="navbar bg-dark" style="height:7%">
+    <div class="container-fluid">
+        <div class="navbar-header">
+                <img alt="Brand" src="/static/images/logo.png" style="height: 3em;">
+        </div>
+    </div>
+</nav>
 <div class="modal" tabindex="-1" role="dialog" id="add-user-modal">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -58,7 +65,7 @@
         </div>
     </div>
 </div>
-<div class="container-fluid">
+<div class="container-fluid" style="height:93%">
     <div class="row">
         <div class="col-2 col-xl-1 sidebar">
             <nav class="sidebar-nav">
@@ -66,6 +73,19 @@
                     <a href="/admin/profile">
                         <i class="fas fa-user"></i>
                         <span>[[${session.username}]]</span>
+                    </a>
+                </div>
+                <div class="sidebar-item">
+                    <a href="/admin">
+                        <i class="fas fa-home"></i>
+                        <span>Home</span>
+                    </a>
+                </div>
+
+                <div class="sidebar-item">
+                    <a href="/admin/settings">
+                        <i class="fas fa-edit"></i>
+                        <span>Settings</span>
                     </a>
                 </div>
                 <div class="sidebar-item">
@@ -82,6 +102,15 @@
                 <button class="btn btn-success mb-3" data-toggle="modal" data-target="#add-user-modal">
                     Add new librarian
                 </button>
+                <form class="form-inline" id="form" action="/admin/search">
+                    <select class="form-control" id="type" name="type">
+                        <option value="name">Admin Name</option>
+                        <option value="id">Admin Id</option>
+                    </select>
+                    <input type="text" class="form-control" id="keyWord" name="keyword" onfocus="restore()" onblur="checkId()" placeholder="Type search KeyWord">
+                    <button style="margin-right: 3em" type="submit"  class="btn btn-primary">Search</button>
+                    <div class="my-alert-warning" id="error" role="alert" style="display: none"><span class="error"></span></div>
+                </form><br>
                 <table class="table">
                     <thead>
                     <tr>
@@ -114,6 +143,11 @@
                     </tbody>
                 </table>
             </div>
+            <div class="footer">
+                Mandarin Library Automation<br>
+                NWPU SPM 2019<br>
+                Group B1
+            </div>
         </div>
     </div>
 </div>
@@ -137,6 +171,11 @@
         });
     }
 
+    $("#form").submit(function(e){
+        if (!checkId())
+            return false;
+    });
+
     function delete_user(e) {
         $.ajax({
             url: "/api/admin/user/" + e.dataset.id,
@@ -150,6 +189,26 @@
                 alert(resp.message);
             }
         });
+    }
+
+    function checkId() {
+        if($("#type").val() == "name")
+            return  true;
+        var flag;
+        var reg1 = new RegExp("^\\d{0,5}$");
+        var reg2 = new RegExp("^[0-9]*$");
+        var keyWord =  $("#keyWord").val();
+        if (!reg2.test(keyWord)){
+            setError("Id must be a non-negative integer!");
+            return false;
+        }
+        if(!reg1.test(keyWord)){
+            setError("Id exceeds the range!");
+            flag = false;
+        }else {
+            flag = true;
+        }
+        return flag;
     }
 
     var userId = null;
@@ -177,6 +236,20 @@
             }
         });
     }
+
+    //clear error info
+    function restore() {
+        $(".error").text("123");
+        $("#error").attr("style","display:none;");
+
+    }
+
+    //set error info
+    function setError(info) {
+        $(".error").text(info);
+        $("#error").attr("style","display:block;");
+    }
+
 </script>
 <!--
 <div class="page-container">
@@ -252,6 +325,5 @@
     </div>
 </div>
 -->
-<script th:src="@{/static/admin/js/scripts.js}"></script>
 </body>
 </html>

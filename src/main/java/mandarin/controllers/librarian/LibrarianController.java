@@ -5,6 +5,7 @@ import mandarin.auth.NoAuthentication;
 import mandarin.auth.SessionHelper;
 import mandarin.auth.UserType;
 import mandarin.auth.exceptions.AuthenticationException;
+import mandarin.auth.exceptions.UnauthorizedException;
 import mandarin.dao.CategoryRepository;
 import mandarin.dao.LendingLogRepository;
 import mandarin.dao.UserRepository;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.util.List;
 
@@ -44,6 +46,11 @@ public class LibrarianController {
     @Resource
     HistoryResult historyResult;
 
+    @ExceptionHandler(UnauthorizedException.class)
+    public String loginRedirect(){
+        return "redirect:/librarian/login";
+    }
+
     @GetMapping({"","/","/**"})
     public String index() {
         return "librarian-new/main";
@@ -53,7 +60,6 @@ public class LibrarianController {
     @GetMapping("/login")
     @NoAuthentication
     public String loginPage(HttpServletRequest request) throws RuntimeException {
-        HttpSession session = request.getSession(false);
         User user = sessionHelper.getCurrentUser();
         if (user == null) {
             return "librarian-new/login";
@@ -79,7 +85,7 @@ public class LibrarianController {
     @ResponseBody
     @PostMapping("/logout")
     @AuthenticationNeeded(UserType.Librarian)
-    public ResponseEntity<BasicResponse> logout(HttpSession session) {
+    public ResponseEntity<BasicResponse> logout() {
         try {
             sessionHelper.logout(UserType.Librarian);
             return ResponseEntity.ok().body(BasicResponse.ok().message("Logged out"));

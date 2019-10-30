@@ -209,7 +209,7 @@ public class LibrarianAPIController {
     public ResponseEntity viewHistory(@RequestParam("id") Integer userId,
                                       @RequestParam(defaultValue = "1") Integer page,
                                       @RequestParam(defaultValue = "10") Integer size) {
-        Pageable pageable = PageRequest.of(page - 1, size, Sort.by("startTime"));
+        Pageable pageable = PageRequest.of(page - 1, size, Sort.by(Sort.Direction.DESC,"id"));
         List<?> items = lendingLogRepository.findByUserId(userId, pageable).getContent().stream().map((LendingLogItem item) -> {
             Map<String, Object> map = new HashMap<>();
             map.put("id", item.getId());
@@ -258,10 +258,7 @@ public class LibrarianAPIController {
 
     //借书
     @PostMapping("/book/lend")
-    public ResponseEntity lendBook(@RequestBody LendOrReturnRequest request) {
-        if (request.user_id == null || request.book_id_list == null) {
-            throw new APIException("Bad request");
-        }
+    public ResponseEntity lendBook(@Validated @RequestBody LendOrReturnRequest request) {
         User user = userRepository.findById(request.user_id).orElse(null);
         List<Book> books = request.book_id_list.stream().map(id -> bookRepository.findById(id).orElseThrow(() -> new APIException("No such book"))).collect(Collectors.toList());
         if (user == null) {
@@ -283,10 +280,7 @@ public class LibrarianAPIController {
 
     //还书
     @PostMapping("/book/return")
-    public ResponseEntity returnBook(@RequestBody LendOrReturnRequest request) {
-        if (request.user_id == null || request.book_id_list == null) {
-            throw new APIException("Bad request");
-        }
+    public ResponseEntity returnBook(@Validated @RequestBody LendOrReturnRequest request) {
         User user = userRepository.findById(request.user_id).orElse(null);
         List<Book> books = request.book_id_list.stream().map(id -> bookRepository.findById(id).orElseThrow(() -> new APIException("No such book"))).collect(Collectors.toList());
         if (user == null) {
@@ -307,11 +301,7 @@ public class LibrarianAPIController {
 
     //添加书
     @PostMapping(value = "/book", consumes = "application/json")
-    public ResponseEntity addBook(@RequestBody AddBookDTO dto) {
-        Set<ConstraintViolation<AddBookDTO>> violations = validator.validate(dto);
-        if (violations.size() > 0) {
-            return ResponseEntity.badRequest().body(BasicResponse.fail().message(violations.stream().map(ConstraintViolation::getMessage).collect(Collectors.joining("; "))));
-        }
+    public ResponseEntity addBook(@Validated @RequestBody AddBookDTO dto) {
         List<Category> categories = resolveCategoryNames(dto.categories);
         List<Book> allBooks = new ArrayList<>();
         for (int i = 0; i < dto.count; i++) {
@@ -428,11 +418,7 @@ public class LibrarianAPIController {
 
     //编辑书
     @PutMapping(value = "/book/{id}", consumes = "application/json")
-    public ResponseEntity editBook(@PathVariable Integer id, @RequestBody EditBookDTO dto) {
-        Set<ConstraintViolation<EditBookDTO>> violations = validator.validate(dto);
-        if (violations.size() > 0) {
-            return ResponseEntity.badRequest().body(BasicResponse.fail().message(violations.stream().map(ConstraintViolation::getMessage).collect(Collectors.joining("; "))));
-        }
+    public ResponseEntity editBook(@PathVariable Integer id, @Validated @RequestBody EditBookDTO dto) {
         Book book = bookRepository.findById(id).orElse(null);
         if (book == null) {
             throw new APIException("No such book");

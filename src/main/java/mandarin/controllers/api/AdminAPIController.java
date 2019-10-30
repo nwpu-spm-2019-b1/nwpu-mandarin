@@ -1,12 +1,15 @@
 package mandarin.controllers.api;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import mandarin.auth.AuthenticationNeeded;
 import mandarin.auth.UserType;
 import mandarin.dao.UserRepository;
 import mandarin.entities.User;
 import mandarin.exceptions.APIException;
+import mandarin.services.ConfigurationService;
 import mandarin.utils.BasicResponse;
 import mandarin.utils.CryptoUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,6 +23,9 @@ import java.util.Map;
 public class AdminAPIController {
     @Resource
     private UserRepository userRepository;
+
+    @Resource
+    private ConfigurationService configurationService;
 
     @ResponseBody
     @PostMapping("/profile/change/password")
@@ -76,5 +82,23 @@ public class AdminAPIController {
         user.setUsername((String) body.get("username"));
         userRepository.save(user);
         return ResponseEntity.ok(BasicResponse.ok().message("Changed username successfully"));
+    }
+
+    static class SettingsUpdateRequest {
+        @JsonProperty("return_period")
+        public String returnPeriod;
+        @JsonProperty("fine_rate")
+        public String fineRate;
+    }
+
+    @PutMapping(value = "/settings", consumes = "application/json")
+    public ResponseEntity updateSettings(@RequestBody SettingsUpdateRequest request) {
+        if(StringUtils.isNotBlank(request.returnPeriod)) {
+            configurationService.set("return_period",request.returnPeriod);
+        }
+        if(StringUtils.isNotBlank(request.fineRate)){
+            configurationService.set("fine_rate",request.fineRate);
+        }
+        return ResponseEntity.ok(BasicResponse.ok().message("Changed settings successfully"));
     }
 }

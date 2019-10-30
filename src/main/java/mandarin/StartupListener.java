@@ -5,6 +5,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import mandarin.entities.*;
 import mandarin.services.ConfigurationService;
+import mandarin.utils.PollingThread;
 import org.apache.commons.io.IOUtils;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -26,6 +27,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.Duration;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Component
@@ -38,6 +40,9 @@ public class StartupListener {
 
     @Resource
     private ConfigurationService configurationService;
+
+    @Resource
+    private PollingThread pollingThread;
 
     public StartupListener(DataSource dataSource) {
         this.dataSource = dataSource;
@@ -69,6 +74,10 @@ public class StartupListener {
             IOUtils.copy(this.getClass().getClassLoader().getResourceAsStream("books.json"), writer, StandardCharsets.UTF_8);
             List<Map<String, Object>> items = gson.fromJson(writer.toString(), mapType);
             Map<String, Category> categories = new HashMap<>();
+            session.createQuery("FROM Category").list().stream().forEach((Object o) -> {
+                Category c = (Category) o;
+                categories.put(c.getName(), c);
+            });
             Random random = new Random();
             for (Map<String, Object> item : items) {
                 String location = String.format("Floor %s, shelf %s", random.nextInt(5) + 1, random.nextInt(16) + 1);
@@ -100,6 +109,7 @@ public class StartupListener {
             session.flush();
             tx.commit();
             session.close();
+            pollingThread.start();
         }
     }
 
