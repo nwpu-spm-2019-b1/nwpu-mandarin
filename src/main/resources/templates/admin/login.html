@@ -7,26 +7,49 @@
     <link th:href="@{/static/css/bootstrap.min.css}" rel='stylesheet' type='text/css'/>
     <link th:href="@{/static/admin/css/main.css}" rel='stylesheet' type='text/css'/>
     <link th:href="@{/static/admin/css/login.css}" rel='stylesheet' type='text/css'/>
+    <link th:href="@{/static/css/animate.css}" rel="stylesheet"/>
     <script th:src="@{/static/js/jquery-3.4.1.min.js}"></script>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-y: hidden;
+        }
+
+        .return-link-container {
+            margin-top: 100px;
+            text-align: center;
+        }
+
+        .login-page {
+            margin-top: 8vh;
+            margin-bottom: 8vh;
+            margin-left: auto;
+            margin-right: auto;
+        }
+    </style>
 </head>
 <body>
-<div class="container login-page">
-    <div class="admin-login-logo">
-        <img th:src="@{/static/images/logo.png}">
-    </div>
-    <h2 class="mt-3 mb-3">Admin Login</h2>
-    <div class="alert alert-danger" id="error" role="alert" style="display: none;"></div>
-    <form id="login-form" action="#" method="post">
-        <div class="form-group">
-            <input type="text" placeholder="Username" id="username" onfocus="hideAlert()" class="form-control">
+<div class="container" style="flex-grow: 1;">
+    <div class="login-page flipInX" style="animation-duration: 0.8s;">
+        <div class="admin-login-logo">
+            <img th:src="@{/static/images/logo.png}">
         </div>
-        <div class="form-group">
-            <input type="password" placeholder="Password" id="password" onfocus="hideAlert()" class="form-control">
+        <h2 class="mt-3 mb-3">Log in as admin</h2>
+        <div class="alert alert-danger" id="error" role="alert" style="display: none;"></div>
+        <form id="login-form" action="#" method="post">
+            <div class="form-group">
+                <input type="text" placeholder="Username" id="username" onfocus="hideAlert()" class="form-control">
+            </div>
+            <div class="form-group">
+                <input type="password" placeholder="Password" id="password" onfocus="hideAlert()" class="form-control">
+            </div>
+            <input type="submit" value="Login" class="btn btn-success btn-block">
+        </form>
+        <div class="return-link-container">
+            <a class="return-link btn btn-outline-secondary" href="/">Return to Home</a>
         </div>
-        <input type="submit" value="Login" class="btn btn-success btn-block">
-    </form>
-    <div class="return-link-container" style="text-align: center;">
-        <a class="return-link" href="/">Return to Home</a>
     </div>
 </div>
 <div class="footer">

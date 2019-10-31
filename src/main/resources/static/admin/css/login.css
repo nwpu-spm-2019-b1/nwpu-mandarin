@@ -26,3 +26,8 @@ html, body {
 .admin-login-logo img {
     width: 70%;
 }
+
+.footer {
+    position: relative;
+    bottom: auto;
+}
