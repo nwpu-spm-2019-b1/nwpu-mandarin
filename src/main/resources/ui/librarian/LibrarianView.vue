@@ -38,6 +38,9 @@
                             <li v-bind:class="{active: router.currentRoute.path==='/news'}">
                                 <router-link to="/news">Manage news</router-link>
                             </li>
+                            <li v-bind:class="{active: router.currentRoute.path==='/actions/history'}">
+                                <router-link to="/actions/history">View delete history</router-link>
+                            </li>
                         </ul>
                     </nav>
                 </div>
@@ -66,8 +69,8 @@
     import CategoriesView from "./CategoriesView.vue";
     import DashboardView from "./DashboardView.vue";
     import NewsView from "./NewsView.vue";
+    import ActionHistory from "./ActionHistory.vue";
     import VueRouter from "vue-router";
-    import {EventBus} from "../js/events.js";
 
     const routes = [
         {
@@ -113,6 +116,10 @@
         {
             path: '/news',
             component: NewsView
+        },
+        {
+            path: '/actions/history',
+            component: ActionHistory
         }
     ];
 

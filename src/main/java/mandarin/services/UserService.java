@@ -54,9 +54,11 @@ public class UserService {
         }
         reservationRepository.deleteAllByUser(user);
         Map<String, Object> actionInfo = new HashMap<>();
-        actionInfo.put("user", user);
+        actionInfo.put("user", ObjectUtils.copyFieldsIntoMap(user, null, "id", "username", "email"));
         actionInfo.put("lending_logs", lendingLogRepository.findAllByUser(user).stream().map((LendingLogItem item) -> ObjectUtils.copyFieldsIntoMap(item, null, "id", "startTime", "endTime", "book")).collect(Collectors.toList()));
         actionLogRepository.save(new ActionLogItem(sessionHelper.getCurrentUser(), "DeleteUser", actionInfo));
+        lendingLogRepository.findAllByUser(user).stream().forEach(item -> lendingLogRepository.delete(item));
+        userRepository.delete(user);
     }
 
     @Transactional(isolation = Isolation.REPEATABLE_READ)

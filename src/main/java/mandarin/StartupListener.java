@@ -3,6 +3,7 @@ package mandarin;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
+import mandarin.auth.UserType;
 import mandarin.entities.*;
 import mandarin.services.ConfigurationService;
 import mandarin.utils.PollingThread;
@@ -101,6 +102,9 @@ public class StartupListener {
                 LendingLogItem item = new LendingLogItem(session.get(Book.class, i), reader);
                 item.setStartTime(item.getStartTime().minus(Duration.ofDays(15 * (4 - i))));
                 session.save(item);
+            }
+            for (int i = 2; i <= 5; i++) {
+                session.save(new User(String.format("reader%s", i), String.format("reader%s", i), UserType.Reader));
             }
             Reservation reservation = new Reservation(session.get(Book.class, 4), reader);
             reservation.setTime(reservation.getTime().minus(Duration.ofHours(1)));

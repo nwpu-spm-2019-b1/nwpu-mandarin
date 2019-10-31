@@ -11,6 +11,7 @@ import mandarin.entities.*;
 import mandarin.exceptions.APIException;
 import mandarin.services.BookService;
 import mandarin.services.ConfigurationService;
+import mandarin.services.UserService;
 import mandarin.utils.BasicResponse;
 import mandarin.utils.CryptoUtils;
 import mandarin.utils.FormatUtils;
@@ -68,6 +69,9 @@ public class LibrarianAPIController {
 
     @Resource
     ConfigurationService configurationService;
+
+    @Resource
+    UserService userService;
 
     @Resource
     SessionHelper sessionHelper;
@@ -209,7 +213,7 @@ public class LibrarianAPIController {
     public ResponseEntity viewHistory(@RequestParam("id") Integer userId,
                                       @RequestParam(defaultValue = "1") Integer page,
                                       @RequestParam(defaultValue = "10") Integer size) {
-        Pageable pageable = PageRequest.of(page - 1, size, Sort.by(Sort.Direction.DESC,"id"));
+        Pageable pageable = PageRequest.of(page - 1, size, Sort.by(Sort.Direction.DESC, "id"));
         List<?> items = lendingLogRepository.findByUserId(userId, pageable).getContent().stream().map((LendingLogItem item) -> {
             Map<String, Object> map = new HashMap<>();
             map.put("id", item.getId());
@@ -412,7 +416,7 @@ public class LibrarianAPIController {
             throw new APIException("There are still outstanding books");
         }
         //TODO: 罚金
-        userRepository.deleteById(id);
+        userService.deleteUser(user);
         return ResponseEntity.ok(BasicResponse.ok());
     }
 
@@ -460,6 +464,11 @@ public class LibrarianAPIController {
         }
         categoryRepository.save(category);
         return ResponseEntity.ok(BasicResponse.ok().data(category.getId()));
+    }
+
+    @GetMapping("/history/deletes")
+    public ResponseEntity getDeleteHistory() {
+        return ResponseEntity.ok().body(BasicResponse.ok().data(actionLogRepository.findAllByTypeInOrderByTimeDesc(Collections.singleton("DeleteBook"))));
     }
 
     //删除种类

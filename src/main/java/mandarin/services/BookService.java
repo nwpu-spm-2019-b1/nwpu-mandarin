@@ -152,6 +152,7 @@ public class BookService {
             return map;
         }).collect(Collectors.toList()));
         actionInfo.put("book", bookInfo);
+        actionInfo.put("user", ObjectUtils.copyFieldsIntoMap(sessionHelper.getCurrentUser(), null, "id", "username"));
         actionLogRepository.save(new ActionLogItem(sessionHelper.getCurrentUser(), "DeleteBook", actionInfo));
         return bookRepository.deleteBookById(bookId);
     }

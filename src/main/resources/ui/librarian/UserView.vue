@@ -289,12 +289,12 @@
                         }
                     );
                     if (resp.ok) {
+                        $("#delete-warning-modal").modal("hide");
                         this.loadUsers();
                     } else {
-                        let resp = JSON.parse(xhr.responseText);
-                        this.deletion.error = resp.message;
+                        let body = await resp.json();
+                        this.deletion.error = body.message;
                     }
-                    $("#delete-warning-modal").modal("hide");
                 }
             },
             viewUserHistory(event) {
