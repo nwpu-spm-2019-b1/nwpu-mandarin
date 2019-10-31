@@ -19,13 +19,7 @@
 
 </head>
 <body>
-<nav class="navbar bg-dark" style="height:7%">
-    <div class="container-fluid">
-        <div class="navbar-header">
-            <img alt="Brand" src="/static/images/logo.png" style="height: 3em;">
-        </div>
-    </div>
-</nav>
+<th:block th:replace="admin/common :: navbar"></th:block>
 <!--
 <div class="modal" tabindex="-1" role="dialog" id="edit-fineRate-model">
     <div class="modal-dialog" role="document">
@@ -75,8 +69,6 @@
         </div>
     </div>
 </div>
-
-
 -->
 <div class="container-fluid" style="height:93%">
     <div class="row">
@@ -120,7 +112,8 @@
                 <form id="settings-form" action="#" method="post">
                     <div class="form-group">
                         <label for="return-period-input">Return period</label>
-                        <input id="return-period-input" th:value="${configurationService.returnPeriod}" class="form-control">
+                        <input id="return-period-input" th:value="${configurationService.returnPeriod}"
+                               class="form-control">
                     </div>
                     <div class="form-group">
                         <label for="fine-rate-input">Fine rate</label>

@@ -14,6 +14,13 @@
     </th:block>
 </head>
 <body>
+<th:block th:fragment="navbar">
+    <nav class="navbar bg-dark">
+        <div class="container-fluid">
+            <img alt="Brand" src="/static/images/logo.png" class="logo" style="height: 80px;">
+        </div>
+    </nav>
+</th:block>
 <th:block th:fragment="scripts">
     <script th:src="@{/static/admin/js/jquery.nicescroll.js}"></script>
     <script th:src="@{/static/admin/js/scripts.js}"></script>

@@ -12,24 +12,14 @@
 	<link href="/static/css/bootstrap-reboot.css.map" rel="stylesheet"/>
 
 	<link href="/static/css/bootstrap.min.css" rel="stylesheet"/>
-	<link href="/static/admin/main.css" rel="stylesheet"/>
+	<link href="/static/admin/css/main.css" rel="stylesheet"/>
 	<script src="/static/js/jquery-3.4.1.min.js"></script>
 	<script src="/static/js/bootstrap.min.js"></script>
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.10.2/css/all.min.css">
-
 </head>
 <body>
-<nav class="navbar bg-dark" style="height:7%">
-	<div class="container-fluid">
-		<div class="navbar-header">
-			<img alt="Brand" src="/static/images/logo.png" style="height: 3em;">
-		</div>
-	</div>
-</nav>
-
-
-
-<div class="container-fluid" style="height:93%">
+<th:block th:replace="admin/common :: navbar"></th:block>
+<div class="container-fluid">
 	<div class="row">
 		<div class="col-2 col-xl-1 sidebar">
 			<nav class="sidebar-nav">
@@ -39,21 +29,18 @@
 						<span>[[${session.username}]]</span>
 					</a>
 				</div>
-
 				<div class="sidebar-item">
 					<a href="/admin">
 						<i class="fas fa-home"></i>
 						<span>Home</span>
 					</a>
 				</div>
-
 				<div class="sidebar-item">
 					<a href="/admin/settings">
 						<i class="fas fa-edit"></i>
 						<span>Settings</span>
 					</a>
 				</div>
-
 				<div class="sidebar-item">
 					<a href="/admin/logout">
 						<i class="fas fa-sign-out-alt"></i>
@@ -62,15 +49,11 @@
 				</div>
 			</nav>
 		</div>
-
-
-
 		<div class="col-10 col-xl-11 main" style="background-color: rgb(238, 245, 249);">
 			<div class="content">
-				<h2 class="mb-3">Hello [[${session.username}]] !</h2>
-				<h3>You can change password here.</h3><br>
-				<!--                //修改的列表-->
-				<form action="#" style="width: 60%">
+				<h2 class="mb-3">Hello, [[${session.username}]]</h2>
+				<h3>You can change your personal details here.</h3><br>
+				<form action="#" style="width: 60%;">
 				<div class="input-group">
 					<label style="width: 8em" for="oldPassword">Old Password</label>
 					<div class="col-sm-4">
@@ -101,8 +84,6 @@
 				Group B1
 			</div>
 		</div>
-
-
 		</div>
 	</div>
 </div>
