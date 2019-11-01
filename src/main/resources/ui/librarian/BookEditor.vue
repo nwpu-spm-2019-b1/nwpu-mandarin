@@ -251,7 +251,7 @@
                                 context.font = '12pt monospace';
                                 context.textAlign = 'center';
                                 context.fillStyle = 'black';
-                                context.fillText("Location: " + book.location, out.width / 2, out.height - 10);
+                                context.fillText("" + book.location, out.width / 2, out.height - 10);
                             });
                             $(".add-book-success")[0].scrollIntoView(true);
                         });
