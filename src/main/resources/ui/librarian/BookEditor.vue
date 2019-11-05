@@ -37,6 +37,17 @@
             </div>
             <div class="form-group">
                 <label for="location-input">Location</label>
+                <div style="display: flex; flex-direction: row; display: none;">
+                    Floor
+                    <select id="floor-select" class="form-control">
+                        <option v-for="i in 8" v-bind:value="i">{{i}}</option>
+                    </select>
+                    &nbsp;
+                    Shelf
+                    <select id="shelf-select" class="form-control">
+                        <option v-for="i in 16" v-bind:value="i">{{i}}</option>
+                    </select>
+                </div>
                 <input class="form-control" id="location-input" name="location" v-model="book.location"/>
             </div>
             <div class="form-group">

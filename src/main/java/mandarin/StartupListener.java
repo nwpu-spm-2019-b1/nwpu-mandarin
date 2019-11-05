@@ -55,13 +55,6 @@ public class StartupListener {
             firstTime = false;
             Session session = entityManagerFactory.unwrap(SessionFactory.class).openSession();
             Transaction tx = session.beginTransaction();
-            Category c1 = new Category("Programming", null);
-            session.save(c1);
-            session.flush();
-            Category c2 = new Category("Algorithms", null);
-            session.save(c2);
-            Category c3 = new Category("Cryptography", null);
-            session.save(c3);
             /*
             session.save(new Book("9781617294945", "Spring in Action", "Craig Walls", "Shelf 1", BigDecimal.ONE, Collections.singletonList(c1)));
             session.save(new Book("9780262033848", "Introduction to Algorithms", "Thomas H. Cormen, Charles E. Leiserson, Ronald L. Rivest, Clifford Stein", "Shelf 1", BigDecimal.ONE, Arrays.asList(c1, c2)));

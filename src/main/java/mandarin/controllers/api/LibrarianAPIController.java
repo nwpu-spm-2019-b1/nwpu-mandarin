@@ -16,6 +16,7 @@ import mandarin.utils.BasicResponse;
 import mandarin.utils.CryptoUtils;
 import mandarin.utils.FormatUtils;
 import mandarin.utils.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -35,7 +36,14 @@ import javax.validation.Validator;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import java.math.BigDecimal;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.temporal.TemporalAccessor;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -159,6 +167,8 @@ public class LibrarianAPIController {
         data.put("books", books.getContent().stream().map((Book book) -> {
             Map<String, Object> result = new HashMap<>();
             ObjectUtils.copyFieldsIntoMap(book, result, "id", "isbn", "title", "description", "author", "location", "price");
+            List<String> categories = book.getCategories().stream().map(Category::getName).collect(Collectors.toList());
+            result.put("categories", categories);
             return result;
         }).collect(Collectors.toList()));
         data.put("total", books.getTotalPages());
@@ -172,6 +182,9 @@ public class LibrarianAPIController {
                                      @RequestParam(defaultValue = "1") Integer page,
                                      @RequestParam(defaultValue = "20") Integer size) {
         Map<String, Object> data = new HashMap<>();
+        if (type.equals("")) {
+            type = "username";
+        }
         switch (type) {
             case "username":
                 Page<User> userPage = userRepository.findAllByUsernameContainingAndType(query, UserType.Reader, PageRequest.of(page - 1, size, Sort.by(Sort.Direction.DESC, "id")));
@@ -294,8 +307,12 @@ public class LibrarianAPIController {
         }
         List<LendOrReturnResultItem> results = books.stream().map(book -> {
             try {
-                bookService.returnBook(user, book);
-                return new LendOrReturnResultItem(book.getId(), true, "Returned successfully");
+                Optional<BigDecimal> fine = bookService.returnBook(user, book);
+                String message = "Returned successfully";
+                if (fine.isPresent()) {
+                    message += String.format(" with fine of ¥%s", fine.get().toString());
+                }
+                return new LendOrReturnResultItem(book.getId(), true, message);
             } catch (RuntimeException e) {
                 return new LendOrReturnResultItem(book.getId(), false, e.getMessage());
             }
@@ -365,7 +382,7 @@ public class LibrarianAPIController {
     }
 
     @GetMapping("/income/history")
-    public ResponseEntity incomeHistory() {
+    public ResponseEntity incomeHistory(@RequestParam(required = false) String date) {
         Set<String> types = Stream.of("PaidFine", "PaidDeposit").collect(Collectors.toSet());
         List<Map<String, Object>> list = actionLogRepository.findAllByTypeInOrderByTimeDesc(types).stream().map(item -> {
             Map<String, Object> map = new HashMap<>();
@@ -383,6 +400,19 @@ public class LibrarianAPIController {
             }
             return map;
         }).collect(Collectors.toList());
+        /*
+        if (StringUtils.isNotBlank(date)) {
+            try {
+                Instant startTime = Instant.from((TemporalAccessor) new SimpleDateFormat("yyyy-MM-dd").parse(date));
+                Instant endTime = startTime.plus(Duration.ofDays(1));
+                list.stream().filter(item -> {
+
+                });
+            } catch (ParseException e) {
+                throw new APIException("Invalid date");
+            }
+        }
+        */
         return ResponseEntity.ok(BasicResponse.ok().data(list));
     }
 
@@ -446,7 +476,7 @@ public class LibrarianAPIController {
     }
 
     static class AddCategoryRequest {
-        @NotBlank
+        @NotBlank(message = "Category name cannot be empty")
         public String name;
         public Integer parentId;
     }
@@ -488,6 +518,14 @@ public class LibrarianAPIController {
             categoryRepository.flush();
             return ResponseEntity.ok(BasicResponse.ok());
         }
+    }
+
+    @GetMapping("/config")
+    public ResponseEntity getConfig() {
+        Map<String, Object> result = new HashMap<>();
+        result.put("return_period", configurationService.getReturnPeriod());
+        result.put("fine_rate", configurationService.getFineRate());
+        return ResponseEntity.ok(BasicResponse.ok().data(result));
     }
 
 }

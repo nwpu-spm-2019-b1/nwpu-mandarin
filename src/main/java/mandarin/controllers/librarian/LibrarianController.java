@@ -47,11 +47,11 @@ public class LibrarianController {
     HistoryResult historyResult;
 
     @ExceptionHandler(UnauthorizedException.class)
-    public String loginRedirect(){
+    public String loginRedirect() {
         return "redirect:/librarian/login";
     }
 
-    @GetMapping({"","/","/**"})
+    @GetMapping({"", "/", "/**"})
     public String index() {
         return "librarian-new/main";
     }
@@ -61,7 +61,11 @@ public class LibrarianController {
     @NoAuthentication
     public String loginPage(HttpServletRequest request) throws RuntimeException {
         User user = sessionHelper.getCurrentUser();
-        if (user == null) {
+        if (user == null || !user.getType().equals(UserType.Librarian)) {
+            HttpSession session = request.getSession(false);
+            if (session != null) {
+                session.invalidate();
+            }
             return "librarian-new/login";
         }
         return "redirect:/librarian";

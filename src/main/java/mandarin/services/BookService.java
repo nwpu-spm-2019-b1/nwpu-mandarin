@@ -23,6 +23,7 @@ import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Transactional
@@ -108,7 +109,7 @@ public class BookService {
     }
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
-    public void returnBook(User user, Book book) {
+    public Optional<BigDecimal> returnBook(User user, Book book) {
         LendingLogItem lendingLogItem = lendingLogRepository.findOutstandingByUserAndBook(user, book).orElse(null);
         if (lendingLogItem == null) {
             throw new RuntimeException("No matching lending record");
@@ -119,14 +120,20 @@ public class BookService {
         lendingLogItem.setEndTime(Instant.now());
         Duration duration = Duration.between(lendingLogItem.getStartTime(), lendingLogItem.getEndTime());
         long daysOverdue = duration.toDays() - configurationService.getAsInt("return_period");
+        BigDecimal fine = configurationService.getAsBigDecimal("fine_rate").multiply(BigDecimal.valueOf(daysOverdue));
         if (daysOverdue > 0) {
             Map<String, Object> info = new HashMap<>();
             info.put("duration", duration.toDays());
-            info.put("fine", configurationService.getAsBigDecimal("fine_rate").multiply(BigDecimal.valueOf(daysOverdue)));
+            info.put("fine", fine);
             ActionLogItem actionLogItem = new ActionLogItem(user, "PaidFine", info);
             actionLogRepository.save(actionLogItem);
         }
         lendingLogRepository.save(lendingLogItem);
+        if (daysOverdue > 0) {
+            return Optional.of(fine);
+        } else {
+            return Optional.empty();
+        }
     }
 
     @Transactional(isolation = Isolation.SERIALIZABLE)

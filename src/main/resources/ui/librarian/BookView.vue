@@ -91,6 +91,10 @@
                                 <label>Price:</label>
                                 {{book.price}}
                             </div>
+                            <div class="info-item">
+                                <label>Categories</label>
+                                {{book.categories.join(', ')}}
+                            </div>
                         </td>
                     </tr>
                 </template>

@@ -5,6 +5,9 @@
             <button class="btn btn-success" data-toggle="modal" data-target="#add-user-modal">Add</button>
             <button class="btn btn-danger" @click="warnDeletingUsers">Delete selected users</button>
         </div>
+        <div>
+            <span style="font-weight: bold;">New reader deposit:</span>&nbsp;¥300
+        </div>
         <div class="modal fade" tabIndex="-1" role="dialog" id="add-user-modal">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
@@ -98,6 +101,12 @@
         <div class="search-box">
             <form action="#" @submit="(e)=>{e.preventDefault();this.loadUsers();}">
                 <div style="display: flex; flex-direction: row;">
+                    <div class="input-container input-group" style="min-width: 100px;">
+                        <select class="form-control" v-model="query_type">
+                            <option value="id">ID</option>
+                            <option value="username" selected>Username</option>
+                        </select>
+                    </div>
                     <div style="width: 90%;" class="input-container input-group">
                         <input type="text" name="query" class="form-control" v-model="query"/>
                     </div>
@@ -176,13 +185,20 @@
         methods: {
             loadUsers() {
                 let vm = this;
+                $.ajax("/api/librarian/config", {
+                    type: "GET",
+                    dataType: "json",
+                    success: function (resp) {
+                        vm.config = resp.data;
+                    }
+                });
                 $.ajax(
                     {
                         url: "/api/librarian/user/search",
                         type: "GET",
                         dataType: "json",
                         data: {
-                            type: "username",
+                            type: vm.query_type,
                             query: vm.query,
                             page: vm.pager.current
                         },
@@ -307,7 +323,9 @@
         data: function () {
             return {
                 query: '',
+                query_type: 'username',
                 users: [],
+                config: null,
                 add_user: {
                     error: null,
                     username: '',

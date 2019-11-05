@@ -6,6 +6,7 @@ import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.dao.CannotAcquireLockException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -35,6 +36,8 @@ public class APIControllerAdvice {
             message = ((MethodArgumentNotValidException) e).getBindingResult().getFieldErrors().stream().map(DefaultMessageSourceResolvable::getDefaultMessage).collect(Collectors.joining("; "));
         } else if (e instanceof CannotAcquireLockException) {
             message = "The system is busy. Please try again later.";
+        } else if (e instanceof DataIntegrityViolationException) {
+            message = "The same entity already exists in the system";
         }
         return ResponseEntity.status(status).body(BasicResponse.fail().message(message));
     }
