@@ -82,17 +82,14 @@ public class AdminController {
     }
 
     @GetMapping("/logout")
-    public String logout(HttpSession session) {
+    public String logout() {
         sessionHelper.logout(UserType.Admin);
         return "redirect:/admin/login";
     }
 
     @GetMapping(value = "/profile")
-    public String showProfile(HttpSession session, Model model) {
-        User user = userRepository.findById((Integer) session.getAttribute("userId")).orElse(null);
-        if (user == null) {
-            throw new ForbiddenException();
-        }
+    public String showProfile(Model model) {
+        User user = sessionHelper.getCurrentUser();
         model.addAttribute("user", user);
         return "admin/profile";
     }

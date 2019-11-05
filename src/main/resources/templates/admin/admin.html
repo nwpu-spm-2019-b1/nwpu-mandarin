@@ -1,5 +1,5 @@
-<!doctype html>
-<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:v-bind="http://www.vuejs.org" lang="zh-hans en">
 <head>
     <meta charset="utf-8">
     <title>Mandarin Admin</title>
@@ -21,15 +21,21 @@
                 </button>
             </div>
             <div class="modal-body">
-                <div>
+                <form id="add-user-form" action="#" method="post">
                     <div class="form-group">
                         <label for="add-user-username">Username</label>
                         <input type="text" name="username" id="add-user-username" class="form-control">
                     </div>
-                </div>
+                    <div class="form-group">
+                        <label for="add-user-email">E-mail</label>
+                        <input type="email" name="email" id="add-user-email" class="form-control">
+                    </div>
+                    <button style="display: none;" type="submit"></button>
+                </form>
             </div>
+            <div class="alert alert-danger" id="add-user-alert" style="display: none;"></div>
             <div class="modal-footer">
-                <button class="btn btn-success" onclick="add_user()">Create account</button>
+                <button class="btn btn-success" onclick="$('#add-user-form').submit()">Create account</button>
                 <button class="btn btn-secondary" data-dismiss="modal">Cancel</button>
             </div>
         </div>
@@ -45,15 +51,21 @@
                 </button>
             </div>
             <div class="modal-body">
-                <div>
+                <form id="edit-user-form" action="#" method="post">
                     <div class="form-group">
-                        <label for="edit-user-username">New username</label>
+                        <label for="edit-user-username">Username</label>
                         <input type="text" name="username" class="form-control" id="edit-user-username">
                     </div>
-                </div>
+                    <div class="form-group">
+                        <label for="edit-user-email">E-mail address</label>
+                        <input type="email" name="email" class="form-control" id="edit-user-email">
+                    </div>
+                    <button style="display: none;" type="submit"></button>
+                </form>
             </div>
+            <div class="alert alert-danger" style="display: none;" id="edit-user-alert"></div>
             <div class="modal-footer">
-                <button class="btn btn-success" onclick="edit_user()">Save</button>
+                <button class="btn btn-success" onclick="$('#edit-user-form').submit()">Save</button>
                 <button class="btn btn-secondary" data-dismiss="modal">Cancel</button>
             </div>
         </div>
@@ -90,47 +102,46 @@
                 </div>
             </nav>
         </div>
-        <div class="col-10 col-xl-11 main" style="background-color: rgb(238, 245, 249);">
+        <div class="col-10 col-xl-11 main" style="background-color: rgb(238, 245, 249);" id="app">
             <div class="content">
                 <h2 class="mb-3">List of librarian accounts</h2>
                 <button class="btn btn-success mb-3" data-toggle="modal" data-target="#add-user-modal">
                     Add new librarian
                 </button>
-                <form class="form-inline" id="form" action="/admin/search">
-                    <select class="form-control" id="type" name="type">
-                        <option value="name">Admin Name</option>
-                        <option value="id">Admin Id</option>
+                <form class="form-inline" id="form" action="#" method="post" @submit.prevent="load">
+                    <select class="form-control" id="type" name="type" v-model="query.type">
+                        <option value="username" selected>Username</option>
+                        <option value="id">ID</option>
                     </select>
-                    <input type="text" class="form-control" id="keyWord" name="keyword" onfocus="restore()"
-                           onblur="checkId()" placeholder="Type search KeyWord">
-                    <button style="margin-right: 3em" type="submit" class="btn btn-primary">Search</button>
-                    <div class="my-alert-warning" id="error" role="alert" style="display: none"><span
-                            class="error"></span></div>
+                    <input type="text" class="form-control" id="keyword" name="keyword"
+                           placeholder="Type search Keyword" v-model="query.keyword">
+                    <button style="margin-right: 3em;" type="submit" class="btn btn-primary">Search</button>
                 </form>
-                <br>
                 <table class="table">
                     <thead>
                     <tr>
                         <th>Librarian ID</th>
-                        <th>Librarian Name</th>
+                        <th>Username</th>
+                        <th>E-mail</th>
                         <th>Actions</th>
                     </tr>
                     </thead>
                     <tbody>
-                    <tr class="lineItem" th:each="librarian : ${librarianList}">
-                        <td th:text="${librarian.id}">Librarian ID</td>
-                        <td th:text="${librarian.username}">Librarian name</td>
+                    <tr class="lineItem" v-for="librarian in list">
+                        <td>{{librarian.id}}</td>
+                        <td>{{librarian.username}}</td>
+                        <td>{{librarian.email}}</td>
                         <td>
                             <ul class="actions-list" style="display: flex; list-style: none; padding: 0;">
                                 <li>
-                                    <a href="javascript:void(0);" th:data-id="${librarian.id}"
-                                       onclick="delete_user(this)">
+                                    <a href="javascript:void(0);" v-bind:data-id="librarian.id"
+                                       @click="delete_user">
                                         Delete
                                     </a>
                                 </li>
                                 <li>
-                                    <a href="javascript:void(0);" th:data-id="${librarian.id}"
-                                       onclick="start_edit_user(this)">
+                                    <a href="javascript:void(0);" v-bind:data-id="librarian.id"
+                                       @click="start_edit_user">
                                         Edit
                                     </a>
                                 </li>
@@ -148,7 +159,66 @@
         </div>
     </div>
 </div>
+<script src="https://cdn.staticfile.org/vue/2.6.10/vue.min.js"></script>
 <script>
+    let data = {
+        list: [],
+        query: {
+            type: "username",
+            keyword: ""
+        },
+        editing: {
+            user_id: null
+        }
+    };
+    var vm = new Vue({
+        el: "#app",
+        data: data,
+        mounted: function () {
+            this.load();
+        },
+        methods: {
+            load: function () {
+                var vm = this;
+                $.ajax("/api/admin/users/search", {
+                    method: "GET",
+                    dataType: "json",
+                    data: vm.query,
+                    success: function (resp) {
+                        vm.list = resp.data;
+                    },
+                    error: function (xhr) {
+                        alert(JSON.parse(xhr.responseText).message);
+                    }
+                });
+            },
+            start_edit_user: function (event) {
+                this.editing.user_id = event.target.dataset.id;
+                let user = this.list.filter(item => {
+                    return item.id === Number.parseInt(this.editing.user_id)
+                })[0];
+                $("#edit-user-username").val(user.username);
+                $("#edit-user-email").val(user.email);
+                $("#edit-user-modal").modal();
+            },
+            delete_user(event) {
+                let vm = this;
+                $.ajax({
+                    url: "/api/admin/user/" + event.target.dataset.id,
+                    type: "DELETE",
+                    dataType: "json",
+                    success: function (resp) {
+                        vm.load();
+                    },
+                    error: function (xhr) {
+                        var resp = JSON.parse(xhr.responseText);
+                        alert(resp.message);
+                    }
+                });
+            }
+        }
+    });
+
     function add_user() {
         $.ajax({
             url: "/api/admin/register",
@@ -156,171 +226,53 @@
             dataType: "json",
             data: {
                 username: $("#add-user-username").val(),
-                password: "12345678"
+                password: "00010001",
+                email: $("#add-user-email").val()
             },
             success: function (resp) {
-                window.location.reload();
+                $("#add-user-modal").modal("hide");
+                $("#add-user-alert").text("").hide();
+                vm.load();
             },
             error: function (xhr) {
                 var resp = JSON.parse(xhr.responseText);
-                alert(resp.message);
+                $("#add-user-alert").text(resp.message).show();
             }
         });
-    }
-
-    $("#form").submit(function (e) {
-        if (!checkId())
-            return false;
-    });
-
-    function delete_user(e) {
-        $.ajax({
-            url: "/api/admin/user/" + e.dataset.id,
-            type: "DELETE",
-            dataType: "json",
-            success: function (resp) {
-                window.location.reload();
-            },
-            error: function (xhr) {
-                var resp = JSON.parse(xhr.responseText);
-                alert(resp.message);
-            }
-        });
-    }
-
-    function checkId() {
-        if ($("#type").val() == "name")
-            return true;
-        var flag;
-        var reg1 = new RegExp("^\\d{0,5}$");
-        var reg2 = new RegExp("^[0-9]*$");
-        var keyWord = $("#keyWord").val();
-        if (!reg2.test(keyWord)) {
-            setError("Id must be a non-negative integer!");
-            return false;
-        }
-        if (!reg1.test(keyWord)) {
-            setError("Id exceeds the range!");
-            flag = false;
-        } else {
-            flag = true;
-        }
-        return flag;
-    }
-
-    var userId = null;
-
-    function start_edit_user(e) {
-        userId = e.dataset.id;
-        $("#edit-user-modal").modal();
     }
 
     function edit_user() {
         $.ajax({
-            url: "/api/admin/user/" + userId,
+            url: "/api/admin/user/" + vm.editing.user_id,
             type: "PUT",
             dataType: "json",
             contentType: "application/json",
             data: JSON.stringify({
-                username: $("#edit-user-username").val()
+                username: $("#edit-user-username").val(),
+                email: $("#edit-user-email").val()
             }),
             success: function (resp) {
-                window.location.reload();
+                data.editing.user_id = null;
+                $("#edit-user-modal").modal("hide");
+                $("#edit-user-alert").text("").hide();
+                vm.load();
             },
             error: function (xhr) {
-                var resp = JSON.parse(xhr.responseText);
-                alert(resp.message);
+                let resp = JSON.parse(xhr.responseText);
+                $("#edit-user-alert").text(resp.message).show();
             }
         });
     }
 
-    //clear error info
-    function restore() {
-        $(".error").text("123");
-        $("#error").attr("style", "display:none;");
+    $("#add-user-form").bind("submit", function (event) {
+        event.preventDefault();
+        add_user();
+    });
 
-    }
-
-    //set error info
-    function setError(info) {
-        $(".error").text(info);
-        $("#error").attr("style", "display:block;");
-    }
-
+    $("#edit-user-form").bind("submit", function (event) {
+        event.preventDefault();
+        edit_user();
+    })
 </script>
-<!--
-<div class="page-container">
-    <div class="left-content" style="background-color: rgb(238, 245, 249); min-height: 800px;">
-        <div class="header-section">
-            <div class="top_menu">
-                <div class="profile_details_left">
-                    <ul class="nofitications-dropdown">
-                        <li class="dropdown note">
-                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false"></a>
-                        </li>
-                    </ul>
-                </div>
-                <div class="clearfix"></div>
-            </div>
-        </div>
-        <div name="info">
-            <div class="modal-title" style="background-color: rgb(255, 255, 255);">
-                <div style="padding-left: 3em;padding-top:2em;margin-bottom: 2em; border: 1px solid #E7E7E8;">
-                    <h2 class="inner-tittle" style="margin:0 auto;">Librarian</h2>
-
-                    <div style="padding-left: 1em">
-                        <ul class="breadcrumb">
-                            <li class="breadcrumb-item"><a th:href="@{/admin}">Home</a></li>
-                            <li class="breadcrumb-item active">Librarian Edit</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-
-            <div class="graph" style="width:90%;margin:0 auto;margin-left: 5%;">
-
-
-            </div>
-            <footer>
-                <p></p>
-            </footer>
-        </div>
-        <div class="sidebar-menu">
-            <header class="logo">
-                <a href="#" class="sidebar-icon">
-                    <span class="fa fa-bars">
-                    </span>
-                </a>
-                <h1>Mandarin</h1>
-            </header>
-            <div style="border-top:1px solid rgba(69, 74, 84, 0.7)"></div>
-            <div class="down"><a th:href="/admin/profile"><img th:src="@{/static/admin/images/admin.jpg}"></a><a><span
-                    class="name-caret">[[${username}]]</span></a>
-                <p>Mandarin admin</p>
-                <ul>
-                    <li><a class="tooltips" th:href="'/admin/'+${username}"><span>Profile</span><i
-                            class="lnr lnr-user"></i></a></li>
-                    <li><a class="tooltips" th:href="@{/admin/logout}"><span>Log out</span><i
-                            class="lnr lnr-power-switch"></i></a></li>
-                </ul>
-            </div>
-            <div class="menu">
-                <ul id="menu">
-                    <li id="menu-academico"><a href="#"><i class="fa fa-users"></i> <span>manage librarians</span> <span
-                            class="fa fa-angle-right" style="float: right"></span></a>
-                        <ul id="menu-academico-sub">
-                            <li id="menu-academico-boletim"><a th:href="@{/admin}">all librarians</a></li>
-                            <li id="menu-academico-avaliacoes"><a th:href="@{/admin/register}">add librarian</a></li>
-                        </ul>
-                    </li>
-                    <li><a th:href="'/admin/'+${username}"><i class="fa fa-key"></i> <span>change password</span> </a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-        <div class="clearfix"></div>
-    </div>
-</div>
--->
 </body>
 </html>

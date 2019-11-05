@@ -20,56 +20,6 @@
 </head>
 <body>
 <th:block th:replace="admin/common :: navbar"></th:block>
-<!--
-<div class="modal" tabindex="-1" role="dialog" id="edit-fineRate-model">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Edit book fineRate</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div>
-                    <div class="form-group">
-                        <label for="newFineRate">fineRate</label>
-                        <input type="text" name="fineRate" id="newFineRate" class="form-control">
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-success" onclick="save_fineRate()">Save</button>
-                <button class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-            </div>
-        </div>
-    </div>
-</div>
-<div class="modal" tabindex="-1" role="dialog" id="edit-lendingPeriod-model">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Edit book lendingPeriod</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div>
-                    <div class="form-group">
-                        <label for="newLendingPeirod">lendingPeriod</label>
-                        <input type="text" name="lendingPeirod" id="newLendingPeirod" class="form-control">
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-success" onclick="save_lendingPeriod()">Save</button>
-                <button class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-            </div>
-        </div>
-    </div>
-</div>
--->
 <div class="container-fluid" style="height:93%">
     <div class="row">
         <div class="col-2 col-xl-1 sidebar">
@@ -103,8 +53,6 @@
                 </div>
             </nav>
         </div>
-
-
         <div class="col-10 col-xl-11 main" style="background-color: rgb(238, 245, 249);">
             <div class="content">
                 <h2 class="mb-3">Settings</h2>
@@ -119,35 +67,13 @@
                         <label for="fine-rate-input">Fine rate</label>
                         <input id="fine-rate-input" th:value="${configurationService.fineRate}" class="form-control">
                     </div>
+                    <div class="form-group">
+                        <label for="reader-deposit-input">Reader deposit</label>
+                        <input id="reader-deposit-input" th:value="${configurationService.readerDeposit}"
+                               class="form-control">
+                    </div>
                     <button type="submit" class="btn btn-success">Save</button>
                 </form>
-                <!--
-                <div class="grid-1 graph-2 general">
-                    <div>
-                        <label class="col-2 control-label">Current fine rate</label>
-                        <div class="row">
-                            <div class="input-group">
-                                <input disabled="" type="text" class="form-control col-2" id="OldFine" th:value="${fineRate}">
-                                <span class="input-group-text" style="padding-left: 25px; width: 60px">¥</span>
-                                <button class="btn btn-success col-1" onclick="start_edit_fineRate()">Reset</button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <br>
-                    <br>
-                    <div >
-                        <label class="col-2 control-label">Current lending period</label>
-                        <div class="row ">
-                            <input disabled="" type="text" class="form-control col-2"  id="OldLendingPeriod" th:value="${lendingPeriod}">
-                            <span class="input-group-text" style="width: 60px; text-align: center">Days</span>
-                            <button class="btn btn-success col-1" onclick="start_edit_lendingPeriod()">Reset</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            -->
-
                 <div class="footer">
                     Mandarin Library Automation<br>
                     NWPU SPM 2019<br>
@@ -167,7 +93,8 @@
             contentType: "application/json",
             data: JSON.stringify({
                 fine_rate: $("#fine-rate-input").val(),
-                return_period: $("#return-period-input").val()
+                return_period: $("#return-period-input").val(),
+                reader_deposit: $("#reader-deposit-input").val()
             }),
             success: function (resp) {
                 window.location.reload();

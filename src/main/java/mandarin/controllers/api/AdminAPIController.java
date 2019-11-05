@@ -10,12 +10,18 @@ import mandarin.services.ConfigurationService;
 import mandarin.utils.BasicResponse;
 import mandarin.utils.CryptoUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpSession;
+import javax.validation.Valid;
+import java.math.BigDecimal;
+import java.util.Comparator;
 import java.util.Map;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/admin")
@@ -48,12 +54,14 @@ public class AdminAPIController {
     @ResponseBody
     @PostMapping(value = "/register")
     public ResponseEntity register(@RequestParam("username") String username,
-                                   @RequestParam("password") String password) {
+                                   @RequestParam("password") String password,
+                                   @RequestParam("email") String email) {
         User user = userRepository.findByUsername(username).orElse(null);
         if (user != null) {
             throw new APIException("Username already existed");
         }
         User newUser = new User(username, password, UserType.Librarian);
+        newUser.setEmail(email);
         userRepository.save(newUser);
         return ResponseEntity.ok(BasicResponse.ok().message("Registered librarian successfully"));
     }
@@ -80,25 +88,47 @@ public class AdminAPIController {
             throw new APIException("No such user");
         }
         user.setUsername((String) body.get("username"));
+        user.setEmail((String) body.get("email"));
         userRepository.save(user);
-        return ResponseEntity.ok(BasicResponse.ok().message("Changed username successfully"));
+        return ResponseEntity.ok(BasicResponse.ok().message("Changed user info successfully"));
     }
 
     static class SettingsUpdateRequest {
         @JsonProperty("return_period")
-        public String returnPeriod;
+        public Integer returnPeriod;
         @JsonProperty("fine_rate")
-        public String fineRate;
+        public BigDecimal fineRate;
+        @JsonProperty("reader_deposit")
+        public BigDecimal readerDeposit;
     }
 
     @PutMapping(value = "/settings", consumes = "application/json")
     public ResponseEntity updateSettings(@RequestBody SettingsUpdateRequest request) {
-        if(StringUtils.isNotBlank(request.returnPeriod)) {
-            configurationService.set("return_period",request.returnPeriod);
-        }
-        if(StringUtils.isNotBlank(request.fineRate)){
-            configurationService.set("fine_rate",request.fineRate);
-        }
+        configurationService.setReturnPeriod(request.returnPeriod);
+        configurationService.setFineRate(request.fineRate);
+        configurationService.setReaderDeposit(request.readerDeposit);
         return ResponseEntity.ok(BasicResponse.ok().message("Changed settings successfully"));
+    }
+
+    @GetMapping(value = "/users/search")
+    public ResponseEntity searchUsers(@RequestParam String type, @RequestParam String keyword) {
+        Predicate<User> predicate = null;
+        switch (type) {
+            case "id":
+                int id;
+                try {
+                    id = Integer.parseInt(keyword);
+                } catch (NumberFormatException e) {
+                    return ResponseEntity.badRequest().body(BasicResponse.fail().message("Invalid ID"));
+                }
+                predicate = user -> user.getId().equals(id);
+                break;
+            case "username":
+                predicate = user -> user.getUsername().contains(keyword);
+                break;
+            default:
+                throw new APIException("Invalid search type");
+        }
+        return ResponseEntity.ok(BasicResponse.ok().data(userRepository.findAllByType(UserType.Librarian).stream().sorted(Comparator.comparing(User::getId)).filter(predicate).collect(Collectors.toList())));
     }
 }

@@ -69,11 +69,27 @@ public class ConfigurationService {
         }
     }
 
-    public BigDecimal getFineRate(){
+    public BigDecimal getFineRate() {
         return this.getAsBigDecimal("fine_rate");
     }
 
-    public Integer getReturnPeriod(){
+    public void setFineRate(BigDecimal value) {
+        this.set("fine_rate", value);
+    }
+
+    public Integer getReturnPeriod() {
         return this.getAsInt("return_period");
+    }
+
+    public void setReturnPeriod(Integer value) {
+        this.set("return_period", value);
+    }
+
+    public BigDecimal getReaderDeposit() {
+        return this.getAsBigDecimal("reader_deposit");
+    }
+
+    public void setReaderDeposit(BigDecimal value) {
+        this.set("reader_deposit", value);
     }
 }
